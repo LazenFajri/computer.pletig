@@ -207,7 +207,7 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
           </p>
 
           <Link
-            href={`/absen?grade=${selectedItem.grade}`}
+            href={`/absen/kelas/${selectedItem.grade}`}
             className={`w-full py-2.5 px-3 rounded-xl font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-white shadow-xs ${selectedItem.btnBg}`}
           >
             <span>Buka Presensi Kelas {selectedItem.grade}</span>
@@ -268,7 +268,7 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
                 {item.time}
               </span>
               <Link
-                href={`/absen?grade=${item.grade}`}
+                href={`/absen/kelas/${item.grade}`}
                 className={`font-bold flex items-center gap-1 ${item.btnText}`}
               >
                 <span>Buka Absen</span>
