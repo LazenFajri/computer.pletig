@@ -49,12 +49,11 @@ jobs:
         run: |
           npm ci || npm install
 
-      # 5. Build Next.js Static Export (Menghasilkan folder out/)
-      - name: Build Next.js Static Web
+      # 5. Build Next.js Web Application
+      - name: Build Next.js Web
         run: |
           npm run build
         env:
-          CAPACITOR_BUILD: "true"
           NEXT_TELEMETRY_DISABLED: 1
           NODE_ENV: production
 

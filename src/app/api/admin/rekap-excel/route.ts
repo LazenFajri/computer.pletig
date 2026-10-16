@@ -5,6 +5,8 @@ import { eq, and, desc, asc, inArray } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 import { generateStyledRekapExcel, type AttendanceRecordForExcel } from '@/lib/excel-rekap';
 
+export const dynamic = 'force-static';
+
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser();
