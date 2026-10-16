@@ -7,6 +7,9 @@ import {
   getStudentsByGrade,
   getWIBInfo,
 } from '@/lib/attendance';
+import { db } from '@/db';
+import { meetings } from '@/db/schema';
+import { desc } from 'drizzle-orm';
 import type { GradeLevel } from '@/lib/auth-types';
 import {
   ArrowLeft,
@@ -26,6 +29,67 @@ interface PageProps {
   params: Promise<{
     grade: string;
   }>;
+}
+
+function getIndonesianDateDetails(dateStr?: string | null) {
+  if (!dateStr) return null;
+  try {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (!y || !m || !d) return null;
+    const dateObj = new Date(Date.UTC(y, m - 1, d, 5, 0, 0));
+    const dayName = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      weekday: 'long',
+    }).format(dateObj);
+    const formattedDate = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(dateObj);
+    return { dayName, formattedDate };
+  } catch {
+    return null;
+  }
+}
+
+function findRelevantMeeting(
+  meetingsList: any[],
+  grade: number,
+  todayStr: string,
+  activeSessionMeeting: any
+) {
+  if (activeSessionMeeting) return activeSessionMeeting;
+
+  const applicable = meetingsList.filter(
+    (m) => m.grade_level === grade || m.grade_level === null
+  );
+
+  if (applicable.length === 0) return null;
+
+  const openMeeting = applicable.find((m) => m.is_open);
+  if (openMeeting) return openMeeting;
+
+  const todayMeeting = applicable.find((m) => m.date === todayStr);
+  if (todayMeeting) return todayMeeting;
+
+  const upcomingMeetings = applicable
+    .filter((m) => m.date > todayStr)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (upcomingMeetings.length > 0) {
+    const specificUpcoming = upcomingMeetings.find((m) => m.grade_level === grade);
+    return specificUpcoming || upcomingMeetings[0];
+  }
+
+  const pastMeetings = applicable
+    .filter((m) => m.date <= todayStr)
+    .sort((a, b) => b.date.localeCompare(a.date) || (b.meeting_number || 0) - (a.meeting_number || 0));
+  if (pastMeetings.length > 0) {
+    const specificPast = pastMeetings.find((m) => m.grade_level === grade);
+    return specificPast || pastMeetings[0];
+  }
+
+  return applicable[0];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -51,16 +115,21 @@ export default async function GradeRombelPickerPage({ params }: PageProps) {
   let distinctRombels: string[] = [];
   let allStudents: any[] = [];
   let sessionStatus: any = { isOpen: false, message: '', meeting: null };
+  let allDbMeetings: any[] = [];
 
   try {
-    const [rombelList, studs, sess] = await Promise.all([
+    const [rombelList, studs, sess, dbMeetings] = await Promise.all([
       getDistinctClassesForGrade(grade),
       getStudentsByGrade(grade),
       checkActiveSession(grade),
+      db.query.meetings.findMany({
+        orderBy: [desc(meetings.date), desc(meetings.meeting_number)],
+      }),
     ]);
     distinctRombels = rombelList;
     allStudents = studs;
     sessionStatus = sess;
+    allDbMeetings = dbMeetings || [];
   } catch (err) {
     console.warn(`Warning: Could not fetch rombel data for Grade ${grade}:`, err);
   }
@@ -70,12 +139,17 @@ export default async function GradeRombelPickerPage({ params }: PageProps) {
     distinctRombels = [`${grade}A`, `${grade}B`];
   }
 
-  const gradeScheduleInfo =
-    grade === 4
-      ? { day: 'Kamis', time: '12.30 - 14.00 WIB', color: 'sky' }
-      : grade === 5
-      ? { day: 'Selasa', time: '12.30 - 14.00 WIB', color: 'emerald' }
-      : { day: 'Senin', time: '12.30 - 14.00 WIB', color: 'amber' };
+  const relevantMeeting = findRelevantMeeting(allDbMeetings, grade, wib.dateStr, sessionStatus.meeting);
+  const dateDetails = relevantMeeting ? getIndonesianDateDetails(relevantMeeting.date) : null;
+
+  const defaultScheduleDay =
+    grade === 4 ? 'Kamis' : grade === 5 ? 'Selasa' : 'Senin';
+
+  const scheduleDay = dateDetails ? dateDetails.dayName : defaultScheduleDay;
+  const scheduleTime = relevantMeeting
+    ? `${relevantMeeting.start_time || '12:30'} - ${relevantMeeting.end_time || '14:00'} WIB`
+    : '12.30 - 14.00 WIB';
+  const scheduleDateStr = dateDetails ? `${dateDetails.dayName}, ${dateDetails.formattedDate}` : defaultScheduleDay;
 
   return (
     <div className="min-h-screen bg-playful-grid flex flex-col justify-between p-3 sm:p-6 md:p-8 pb-24 sm:pb-8 overflow-x-hidden">
@@ -113,15 +187,15 @@ export default async function GradeRombelPickerPage({ params }: PageProps) {
       </div>
 
       <main className="max-w-4xl mx-auto w-full flex-1 mb-8 space-y-6">
-        {/* Status Sesi Pertemuan Kelas Ini */}
+        {/* Status Sesi Pertemuan Kelas Ini (Dinamis dari Pertemuan di Dashboard Admin) */}
         <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
               <Clock className="w-4 h-4 text-blue-600" />
               <span>Status Jam Presensi Kelas {grade}</span>
             </div>
             <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
-              Jadwal: {gradeScheduleInfo.day} ({gradeScheduleInfo.time})
+              Jadwal: {scheduleDateStr} ({scheduleTime})
             </span>
           </div>
 
@@ -137,7 +211,7 @@ export default async function GradeRombelPickerPage({ params }: PageProps) {
                     Sesi Buka
                   </div>
                   <h4 className="font-heading font-bold text-sm text-emerald-950">
-                    {sessionStatus.meeting?.title || 'Ekstrakurikuler Komputer SDN Pleburan 03'}
+                    {relevantMeeting?.title || sessionStatus.meeting?.title || 'Ekstrakurikuler Komputer SDN Pleburan 03'}
                   </h4>
                   <p className="text-xs text-emerald-700 mt-0.5">
                     {sessionStatus.message || 'Silakan pilih rombelmu di bawah untuk melakukan presensi.'}
@@ -151,11 +225,13 @@ export default async function GradeRombelPickerPage({ params }: PageProps) {
                 </div>
                 <div>
                   <h4 className="font-heading font-bold text-sm text-amber-950">
-                    Sesi Presensi Ditutup / Belum Dibuka
+                    {relevantMeeting ? relevantMeeting.title : 'Sesi Presensi Ditutup / Belum Dibuka'}
                   </h4>
                   <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
                     {sessionStatus?.message ||
-                      `Presensi dibuka saat jam praktikum berlangsung (12.30 - 14.00 WIB) pada hari ${gradeScheduleInfo.day}.`}
+                      (relevantMeeting
+                        ? `Sesi ini dijadwalkan pada hari ${scheduleDateStr} pukul ${scheduleTime}. Presensi akan dibuka oleh Pembina saat jam praktikum.`
+                        : `Presensi dibuka saat jam praktikum berlangsung (12.30 - 14.00 WIB) pada hari ${scheduleDay}.`)}
                   </p>
                 </div>
               </div>

@@ -92,6 +92,28 @@ const DEFAULT_CONFIG: Record<number, ConfigItem> = {
   },
 };
 
+function getIndonesianDateDetails(dateStr?: string | null) {
+  if (!dateStr) return null;
+  try {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (!y || !m || !d) return null;
+    const dateObj = new Date(Date.UTC(y, m - 1, d, 5, 0, 0));
+    const dayName = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      weekday: 'long',
+    }).format(dateObj);
+    const formattedDate = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(dateObj);
+    return { dayName, formattedDate };
+  } catch {
+    return null;
+  }
+}
+
 export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleTabsProps) {
   const [activeGrade, setActiveGrade] = useState<number>(4);
 
@@ -99,17 +121,32 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
   const schedules = [4, 5, 6].map((grade) => {
     const base = DEFAULT_CONFIG[grade];
 
-    // Prioritas 1: Sesi khusus kelas ini (misal gradeLevel === 4)
-    // Prioritas 2: Sesi untuk semua kelas (gradeLevel === null)
+    // Filter pertemuan yang berlaku untuk jenjang kelas ini atau semua kelas
+    const applicable = initialMeetings.filter(
+      (m) => m.gradeLevel === grade || m.gradeLevel === null
+    );
+
+    // Prioritas:
+    // 1. Sesi yang sedang dibuka (isOpen / isActive)
+    // 2. Pertemuan yang berlaku (spesifik kelas > semua kelas)
     const matching =
-      initialMeetings.find((m) => m.gradeLevel === grade) ||
-      initialMeetings.find((m) => m.gradeLevel === null);
+      applicable.find((m) => (m.isOpen || m.isActive) && m.gradeLevel === grade) ||
+      applicable.find((m) => m.isOpen || m.isActive) ||
+      applicable.find((m) => m.gradeLevel === grade) ||
+      applicable[0];
 
     if (matching) {
+      const dateDetails = getIndonesianDateDetails(matching.date);
+      const dayName = dateDetails ? `Hari ${dateDetails.dayName}` : base.day;
+      const dateDisplay = dateDetails ? dateDetails.formattedDate : null;
+
       return {
         ...base,
         title: matching.title || base.title,
         meetingNumber: matching.meetingNumber,
+        day: dayName,
+        dayName: dateDetails ? dateDetails.dayName : base.day.replace('Hari ', ''),
+        dateDisplay,
         time: `${matching.startTime} - ${matching.endTime} WIB`,
         description: matching.description?.trim() ? matching.description : base.description,
         isOpen: Boolean(matching.isOpen || matching.isActive),
@@ -120,6 +157,8 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
     return {
       ...base,
       meetingNumber: null,
+      dayName: base.day.replace('Hari ', ''),
+      dateDisplay: null,
       isOpen: false,
       hasDynamicSession: false,
     };
@@ -263,9 +302,11 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
             </div>
 
             <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-              <span className="flex items-center gap-1.5 font-semibold text-slate-800">
-                <Clock className="w-4 h-4 text-blue-600" />
-                {item.time}
+              <span className="flex items-center gap-1.5 font-semibold text-slate-800 text-xs">
+                <Clock className="w-4 h-4 text-blue-600 shrink-0" />
+                <span className="truncate">
+                  {item.day}{item.dateDisplay ? `, ${item.dateDisplay}` : ''} • {item.time}
+                </span>
               </span>
               <Link
                 href={`/absen/kelas/${item.grade}`}

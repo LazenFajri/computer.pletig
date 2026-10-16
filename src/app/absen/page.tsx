@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/session';
 import { checkActiveSession, getWIBInfo } from '@/lib/attendance';
+import { db } from '@/db';
+import { meetings } from '@/db/schema';
+import { desc } from 'drizzle-orm';
 import {
   GraduationCap,
   ArrowLeft,
@@ -27,6 +30,75 @@ interface AbsenPageProps {
   }>;
 }
 
+function getIndonesianDateDetails(dateStr?: string | null) {
+  if (!dateStr) return null;
+  try {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (!y || !m || !d) return null;
+    const dateObj = new Date(Date.UTC(y, m - 1, d, 5, 0, 0));
+    const dayName = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      weekday: 'long',
+    }).format(dateObj);
+    const formattedDate = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(dateObj);
+    return { dayName, formattedDate };
+  } catch {
+    return null;
+  }
+}
+
+function findRelevantMeeting(
+  meetingsList: any[],
+  grade: number,
+  todayStr: string,
+  activeSessionMeeting: any
+) {
+  // 1. Jika ada sesi aktif dari checkActiveSession, gunakan itu sebagai prioritas utama
+  if (activeSessionMeeting) {
+    return activeSessionMeeting;
+  }
+
+  // Filter pertemuan yang berlaku untuk jenjang kelas ini atau semua kelas
+  const applicable = meetingsList.filter(
+    (m) => m.grade_level === grade || m.grade_level === null
+  );
+
+  if (applicable.length === 0) return null;
+
+  // 2. Sesi yang sedang dibuka manual oleh Admin
+  const openMeeting = applicable.find((m) => m.is_open);
+  if (openMeeting) return openMeeting;
+
+  // 3. Pertemuan yang terjadwal untuk HARI INI
+  const todayMeeting = applicable.find((m) => m.date === todayStr);
+  if (todayMeeting) return todayMeeting;
+
+  // 4. Pertemuan terjadwal di masa depan (terdekat dari hari ini)
+  const upcomingMeetings = applicable
+    .filter((m) => m.date > todayStr)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (upcomingMeetings.length > 0) {
+    const specificUpcoming = upcomingMeetings.find((m) => m.grade_level === grade);
+    return specificUpcoming || upcomingMeetings[0];
+  }
+
+  // 5. Pertemuan terakhir yang dibuat / terlaksana
+  const pastMeetings = applicable
+    .filter((m) => m.date <= todayStr)
+    .sort((a, b) => b.date.localeCompare(a.date) || (b.meeting_number || 0) - (a.meeting_number || 0));
+  if (pastMeetings.length > 0) {
+    const specificPast = pastMeetings.find((m) => m.grade_level === grade);
+    return specificPast || pastMeetings[0];
+  }
+
+  return applicable[0];
+}
+
 export default async function AbsenPage({ searchParams }: AbsenPageProps) {
   // Dukungan redirect jika ada query ?grade=4/5/6
   if (searchParams) {
@@ -42,64 +114,106 @@ export default async function AbsenPage({ searchParams }: AbsenPageProps) {
   let sess4: any = { isOpen: false, meeting: null };
   let sess5: any = { isOpen: false, meeting: null };
   let sess6: any = { isOpen: false, meeting: null };
+  let allDbMeetings: any[] = [];
 
   try {
-    const [s4, s5, s6] = await Promise.all([
+    const [s4, s5, s6, dbMeetings] = await Promise.all([
       checkActiveSession(4),
       checkActiveSession(5),
       checkActiveSession(6),
+      db.query.meetings.findMany({
+        orderBy: [desc(meetings.date), desc(meetings.meeting_number)],
+      }),
     ]);
     sess4 = s4;
     sess5 = s5;
     sess6 = s6;
+    allDbMeetings = dbMeetings || [];
   } catch (err) {
-    console.warn('Warning: Could not fetch active sessions for grade cards:', err);
+    console.warn('Warning: Could not fetch active sessions or meetings for grade cards:', err);
   }
 
-  const gradeCards = [
-    {
-      grade: 4,
-      title: 'Kelas 4 SD',
-      day: 'Kamis',
-      time: '12.30 - 14.00 WIB',
-      href: '/absen/kelas/4',
-      isOpen: Boolean(sess4.isOpen),
-      meetingTitle: sess4.meeting?.title || 'Ekstrakurikuler Komputer',
+  const DEFAULT_CONFIGS: Record<number, any> = {
+    4: {
+      defaultDay: 'Kamis',
+      defaultTime: '12.30 - 14.00 WIB',
+      defaultTitle: 'Pengenalan Komputer & Mouse',
+      defaultDesc: 'Pengenalan perangkat keras, mengetik 10 jari, dan dasar aplikasi komputer.',
       accentBorder: 'border-sky-300 hover:border-sky-500',
       badgeBg: 'bg-sky-100 text-sky-800',
       numBg: 'bg-sky-500 text-white',
       btnBg: 'bg-sky-600 hover:bg-sky-700 shadow-sky-600/20',
-      description: 'Pengenalan perangkat keras, mengetik 10 jari, dan dasar aplikasi komputer.',
     },
-    {
-      grade: 5,
-      title: 'Kelas 5 SD',
-      day: 'Selasa',
-      time: '12.30 - 14.00 WIB',
-      href: '/absen/kelas/5',
-      isOpen: Boolean(sess5.isOpen),
-      meetingTitle: sess5.meeting?.title || 'Ekstrakurikuler Komputer',
+    5: {
+      defaultDay: 'Selasa',
+      defaultTime: '12.30 - 14.00 WIB',
+      defaultTitle: 'Latihan Mengetik 10 Jari & Word',
+      defaultDesc: 'Pengolah kata (Word), pengolah angka (Excel), dan internet sehat.',
       accentBorder: 'border-emerald-300 hover:border-emerald-500',
       badgeBg: 'bg-emerald-100 text-emerald-800',
       numBg: 'bg-emerald-500 text-white',
       btnBg: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20',
-      description: 'Pengolah kata (Word), pengolah angka (Excel), dan internet sehat.',
     },
-    {
-      grade: 6,
-      title: 'Kelas 6 SD',
-      day: 'Senin',
-      time: '12.30 - 14.00 WIB',
-      href: '/absen/kelas/6',
-      isOpen: Boolean(sess6.isOpen),
-      meetingTitle: sess6.meeting?.title || 'Ekstrakurikuler Komputer',
+    6: {
+      defaultDay: 'Senin',
+      defaultTime: '12.30 - 14.00 WIB',
+      defaultTitle: 'Presentasi Kreatif & Logika Komputer',
+      defaultDesc: 'Presentasi kreatif (PowerPoint), Canva grafis, dan persiapan ujian praktik.',
       accentBorder: 'border-amber-300 hover:border-amber-500',
       badgeBg: 'bg-amber-100 text-amber-800',
       numBg: 'bg-amber-500 text-white',
       btnBg: 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20',
-      description: 'Presentasi kreatif (PowerPoint), Canva grafis, dan persiapan ujian praktik.',
     },
-  ];
+  };
+
+  const gradeCards = ([4, 5, 6] as const).map((grade) => {
+    const base = DEFAULT_CONFIGS[grade];
+    const sess = grade === 4 ? sess4 : grade === 5 ? sess5 : sess6;
+    const meeting = findRelevantMeeting(allDbMeetings, grade, wib.dateStr, sess.meeting);
+
+    const isOpen = Boolean(sess.isOpen || (meeting && meeting.is_open));
+    const dateDetails = meeting ? getIndonesianDateDetails(meeting.date) : null;
+
+    const dayName = dateDetails ? dateDetails.dayName : base.defaultDay;
+    const timeDisplay = meeting
+      ? `${meeting.start_time || '12:30'} - ${meeting.end_time || '14:00'} WIB`
+      : base.defaultTime;
+    const dateDisplay = dateDetails ? dateDetails.formattedDate : null;
+
+    let badgeLabel = dayName.toUpperCase();
+    let isToday = false;
+
+    if (meeting && meeting.date === wib.dateStr) {
+      isToday = true;
+      badgeLabel = isOpen ? 'SESI DIBUKA' : 'HARI INI';
+    } else if (isOpen) {
+      badgeLabel = 'SESI DIBUKA';
+    }
+
+    const meetingNumber = meeting ? meeting.meeting_number : null;
+    const isSemuaKelas = meeting ? meeting.grade_level === null : false;
+    const title = meeting?.title ? meeting.title : base.defaultTitle;
+    const description = meeting?.description?.trim() ? meeting.description : base.defaultDesc;
+
+    return {
+      grade,
+      title,
+      meetingNumber,
+      isSemuaKelas,
+      dayName,
+      dateDisplay,
+      timeDisplay,
+      href: `/absen/kelas/${grade}`,
+      isOpen,
+      isToday,
+      badgeLabel,
+      accentBorder: base.accentBorder,
+      badgeBg: base.badgeBg,
+      numBg: base.numBg,
+      btnBg: base.btnBg,
+      description,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-playful-grid flex flex-col justify-between p-3 sm:p-6 md:p-8 pb-24 sm:pb-8 overflow-x-hidden">
@@ -145,7 +259,7 @@ export default async function AbsenPage({ searchParams }: AbsenPageProps) {
         </p>
       </div>
 
-      {/* Main Grid: 3 Large Class Cards */}
+      {/* Main Grid: 3 Large Class Cards (Dinamis dari Dashboard Admin) */}
       <main className="max-w-4xl mx-auto w-full flex-1 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {gradeCards.map((card) => (
@@ -159,42 +273,64 @@ export default async function AbsenPage({ searchParams }: AbsenPageProps) {
 
               <div className="relative z-10">
                 {/* Header Card: Angka Kelas & Status Badge */}
-                <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex items-center justify-between gap-2 mb-3">
                   <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center font-heading font-bold text-2xl shadow-sm ${card.numBg}`}
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center font-heading font-bold text-2xl shadow-sm shrink-0 ${card.numBg}`}
                   >
                     {card.grade}
                   </div>
 
                   {card.isOpen ? (
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs shrink-0">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Sesi Buka
+                      Sesi Dibuka
+                    </span>
+                  ) : card.isToday ? (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-300 shadow-2xs shrink-0">
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                      Hari Ini ({card.dayName})
                     </span>
                   ) : (
-                    <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${card.badgeBg}`}>
-                      {card.day}
+                    <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0 ${card.badgeBg}`}>
+                      {card.badgeLabel}
                     </span>
                   )}
                 </div>
 
-                {/* Judul & Jadwal */}
-                <h2 className="font-heading font-bold text-xl text-slate-900 group-hover:text-blue-600 transition-colors">
+                {/* Subtitle / Pertemuan Number & Kelas Label */}
+                <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                  <span className="font-heading font-bold text-xs uppercase tracking-wider text-slate-500">
+                    Kelas {card.grade} SD
+                  </span>
+                  {card.meetingNumber && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                      Pertemuan {card.meetingNumber}
+                    </span>
+                  )}
+                  {card.isSemuaKelas && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+                      Semua Kelas
+                    </span>
+                  )}
+                </div>
+
+                {/* Judul Materi / Sesi Pertemuan Dinamis */}
+                <h2 className="font-heading font-bold text-base sm:text-lg text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-1.5 leading-snug">
                   {card.title}
                 </h2>
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-1 mb-3">
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Hari {card.day} • {card.time}</span>
+
+                {/* Jadwal Dinamis: Hari, Tanggal & Jam */}
+                <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium mb-3 flex-wrap">
+                  <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  <span>
+                    Hari {card.dayName}
+                    {card.dateDisplay ? `, ${card.dateDisplay}` : ''} • {card.timeDisplay}
+                  </span>
                 </div>
 
-                <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-2">
-                  {card.isOpen ? (
-                    <span className="font-bold text-emerald-700">
-                      Sesi Pertemuan: {card.meetingTitle}
-                    </span>
-                  ) : (
-                    card.description
-                  )}
+                {/* Deskripsi Materi Sesi Dinamis */}
+                <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-2 bg-slate-50/80 p-2.5 rounded-2xl border border-slate-100">
+                  {card.description}
                 </p>
               </div>
 

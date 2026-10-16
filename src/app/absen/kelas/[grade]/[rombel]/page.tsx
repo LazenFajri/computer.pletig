@@ -7,6 +7,9 @@ import {
   getStudentsByGradeAndClass,
   getMeetingAttendances,
 } from '@/lib/attendance';
+import { db } from '@/db';
+import { meetings } from '@/db/schema';
+import { desc } from 'drizzle-orm';
 import type { GradeLevel } from '@/lib/auth-types';
 import { ArrowLeft, GraduationCap } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -18,6 +21,28 @@ interface PageProps {
     grade: string;
     rombel: string;
   }>;
+}
+
+function getIndonesianDateDetails(dateStr?: string | null) {
+  if (!dateStr) return null;
+  try {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (!y || !m || !d) return null;
+    const dateObj = new Date(Date.UTC(y, m - 1, d, 5, 0, 0));
+    const dayName = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      weekday: 'long',
+    }).format(dateObj);
+    const formattedDate = new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(dateObj);
+    return { dayName, formattedDate };
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -50,14 +75,19 @@ export default async function RombelAttendancePage({ params }: PageProps) {
   };
   let initialStudents: any[] = [];
   let initialAttendances: any[] = [];
+  let allDbMeetings: any[] = [];
 
   try {
-    const [sess, studs] = await Promise.all([
+    const [sess, studs, dbMeetings] = await Promise.all([
       checkActiveSession(grade),
       getStudentsByGradeAndClass(grade, rombel === 'all' ? null : rombel),
+      db.query.meetings.findMany({
+        orderBy: [desc(meetings.date), desc(meetings.meeting_number)],
+      }),
     ]);
     initialSession = sess;
     initialStudents = studs;
+    allDbMeetings = dbMeetings || [];
 
     if (initialSession.meeting) {
       initialAttendances = await getMeetingAttendances(initialSession.meeting.id);
@@ -66,12 +96,17 @@ export default async function RombelAttendancePage({ params }: PageProps) {
     console.warn(`Warning: Could not fetch attendance data for Grade ${grade} Rombel ${rombel}:`, err);
   }
 
-  const gradeScheduleInfo =
-    grade === 4
-      ? { day: 'Kamis', time: '12.30 - 14.00 WIB' }
-      : grade === 5
-      ? { day: 'Selasa', time: '12.30 - 14.00 WIB' }
-      : { day: 'Senin', time: '12.30 - 14.00 WIB' };
+  // Cari meeting yang relevan jika initialSession.meeting belum ada
+  const relevantMeeting =
+    initialSession.meeting ||
+    allDbMeetings.find((m) => m.grade_level === grade || m.grade_level === null);
+
+  const dateDetails = relevantMeeting ? getIndonesianDateDetails(relevantMeeting.date) : null;
+  const defaultDay = grade === 4 ? 'Kamis' : grade === 5 ? 'Selasa' : 'Senin';
+  const scheduleDay = dateDetails ? `${dateDetails.dayName}, ${dateDetails.formattedDate}` : defaultDay;
+  const scheduleTime = relevantMeeting
+    ? `${relevantMeeting.start_time || '12:30'} - ${relevantMeeting.end_time || '14:00'} WIB`
+    : '12.30 - 14.00 WIB';
 
   return (
     <div className="min-h-screen bg-playful-grid flex flex-col justify-between p-3 sm:p-6 md:p-8 pb-24 sm:pb-8 overflow-x-hidden">
@@ -101,7 +136,7 @@ export default async function RombelAttendancePage({ params }: PageProps) {
           <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 max-w-lg mx-auto">
-          Kelas {grade} SD SDN Pleburan 03 Semarang • Jadwal Hari <strong>{gradeScheduleInfo.day} ({gradeScheduleInfo.time})</strong>. Cari namamu & klik hadir!
+          Kelas {grade} SD SDN Pleburan 03 Semarang • Jadwal Hari <strong>{scheduleDay} ({scheduleTime})</strong>. Cari namamu & klik hadir!
         </p>
       </div>
 
