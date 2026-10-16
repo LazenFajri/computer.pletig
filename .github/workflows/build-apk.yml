@@ -29,11 +29,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 2. Setup Node.js (v20) dengan Cache NPM
-      - name: Setup Node.js v20
+      # 2. Setup Node.js (v22) dengan Cache NPM
+      - name: Setup Node.js v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       # 3. Setup Java JDK 17 dengan Cache Gradle
