@@ -195,10 +195,10 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
         <div
           className={`bg-white rounded-3xl p-4 sm:p-5 border-2 ${selectedItem.accentBorder} shadow-sm animate-in fade-in zoom-in-95 duration-150`}
         >
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <div className="flex items-start gap-2.5">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-2.5">
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center font-heading font-bold text-base shrink-0 ${selectedItem.iconBg}`}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center font-heading font-bold text-lg shrink-0 ${selectedItem.iconBg}`}
               >
                 {selectedItem.grade}
               </div>
@@ -212,33 +212,33 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
                       Pertemuan {selectedItem.meetingNumber}
                     </span>
                   )}
-                  {selectedItem.isOpen ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      Sesi Dibuka
-                    </span>
-                  ) : (
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${selectedItem.badgeBg}`}>
-                      {selectedItem.day}
-                    </span>
-                  )}
                 </div>
-
-                {selectedItem.title && (
-                  <div className="font-heading font-bold text-xs sm:text-sm text-slate-800 mt-1">
-                    {selectedItem.title}
-                  </div>
-                )}
               </div>
             </div>
 
-            <div className="text-right shrink-0">
-              <span className="text-[11px] font-bold text-slate-800 flex items-center gap-1 justify-end">
-                <Clock className="w-3.5 h-3.5 text-blue-600" />
-                {selectedItem.time.replace(' WIB', '')}
+            {selectedItem.isOpen ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Sesi Dibuka
               </span>
-              <span className="text-[10px] text-slate-500">WIB</span>
+            ) : (
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${selectedItem.badgeBg}`}>
+                {selectedItem.day}
+              </span>
+            )}
+          </div>
+
+          {selectedItem.title && (
+            <div className="font-heading font-bold text-sm text-slate-800 mb-2">
+              {selectedItem.title}
             </div>
+          )}
+
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium mb-3">
+            <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span className="truncate">
+              {selectedItem.day}{selectedItem.dateDisplay ? `, ${selectedItem.dateDisplay}` : ''} • {selectedItem.time}
+            </span>
           </div>
 
           <p className="text-xs text-slate-600 leading-relaxed mb-3.5 bg-slate-50/70 p-3 rounded-2xl border border-slate-100">
@@ -263,12 +263,13 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
             className={`bg-white rounded-3xl p-6 border-2 ${item.borderCard} shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between`}
           >
             <div>
-              <div className="flex items-center justify-between mb-3">
+              {/* Header: Grade number & Status Badge */}
+              <div className="flex items-center justify-between mb-3.5">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-heading font-bold text-xl ${item.iconBg}`}>
                   {item.grade}
                 </div>
                 {item.isOpen ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 shadow-xs">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 shadow-xs">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     Sesi Dibuka
                   </span>
@@ -279,6 +280,7 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
                 )}
               </div>
 
+              {/* Title & Meeting Badge */}
               <div className="flex items-center gap-2 mb-1">
                 <h4 className="font-heading text-lg font-bold text-slate-900">
                   Kelas {item.grade} SD
@@ -291,28 +293,30 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
               </div>
 
               {item.title && (
-                <div className="font-heading font-bold text-sm text-slate-800 mb-2">
+                <div className="font-heading font-bold text-sm text-slate-800 mb-2.5 line-clamp-1">
                   {item.title}
                 </div>
               )}
 
-              <p className="text-xs text-slate-600 leading-relaxed bg-slate-50/60 p-3 rounded-2xl border border-slate-100">
+              <p className="text-xs text-slate-600 leading-relaxed bg-slate-50/70 p-3 rounded-2xl border border-slate-100 mb-4 line-clamp-2">
                 {item.description}
               </p>
             </div>
 
-            <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-              <span className="flex items-center gap-1.5 font-semibold text-slate-800 text-xs">
+            {/* Bottom Row: Jadwal & Tombol Aksi */}
+            <div className="space-y-3 pt-3.5 border-t border-slate-100">
+              <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
                 <Clock className="w-4 h-4 text-blue-600 shrink-0" />
                 <span className="truncate">
                   {item.day}{item.dateDisplay ? `, ${item.dateDisplay}` : ''} • {item.time}
                 </span>
-              </span>
+              </div>
+
               <Link
                 href={`/absen/kelas/${item.grade}`}
-                className={`font-bold flex items-center gap-1 ${item.btnText}`}
+                className={`w-full py-2.5 px-4 rounded-2xl text-white font-heading font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all hover:opacity-95 hover:shadow-md cursor-pointer ${item.btnBg}`}
               >
-                <span>Buka Absen</span>
+                <span>Buka Presensi Kelas {item.grade}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
