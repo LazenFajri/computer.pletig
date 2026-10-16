@@ -46,10 +46,14 @@ export async function verifyRequestOrigin(): Promise<{ valid: boolean; reason?: 
     if (origin) {
       const cleanOrigin = origin.toLowerCase().trim();
 
-      // Izinkan WebView / Capacitor Android App
+      // Izinkan WebView / Capacitor Android App & Localhost Dev Server
       if (
         cleanOrigin === 'https://localhost' ||
         cleanOrigin === 'http://localhost' ||
+        cleanOrigin.startsWith('http://localhost:') ||
+        cleanOrigin.startsWith('https://localhost:') ||
+        cleanOrigin.startsWith('http://127.0.0.1:') ||
+        cleanOrigin.startsWith('https://127.0.0.1:') ||
         cleanOrigin === 'capacitor://localhost' ||
         cleanOrigin.startsWith('ionic://')
       ) {

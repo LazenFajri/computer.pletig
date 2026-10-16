@@ -43,13 +43,15 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set('X-XSS-Protection', '1; mode=block');
 
   // Strict CSP: larang embedding iframe (frame-ancestors 'none'), blokir object-src
+  // PENTING: connect-src HARUS mengizinkan 'ws:' dan 'http:' agar WebSocket HMR Next.js (Fast Refresh di localhost)
+  // tidak diblokir browser yang memicu loop auto-refresh terus-menerus.
   const cspDirectives = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: blob: https:",
-    "connect-src 'self' https: wss:",
+    "connect-src 'self' https: http: wss: ws:",
     "frame-ancestors 'none'",
     "object-src 'none'",
     "base-uri 'self'",
@@ -62,6 +64,11 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Lewati semua aset dan internal WebSocket Next.js (HMR, chunks, Turbopack)
+  if (pathname.startsWith('/_next')) {
+    return NextResponse.next();
+  }
 
   // 1. Blokir Akses Otomatis Bot / Vulnerability Scanner ke path umum
   if (isScannerProbePath(pathname)) {
@@ -122,8 +129,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for static assets and images
+     * Match all request paths except for _next internal assets/HMR and static files
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xlsx)$).*)',
+    '/((?!_next|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xlsx)$).*)',
   ],
 };
