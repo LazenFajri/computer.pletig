@@ -31,6 +31,7 @@ import {
   getMeetingAttendancesAction,
   deleteAttendanceAction,
 } from '@/app/actions/attendance-actions';
+import { saveOfflineData, getOfflineData, OFFLINE_KEYS } from '@/lib/offline-storage';
 import {
   getRekapDataAction,
   cleanupStaleAttendanceAction,
@@ -96,17 +97,35 @@ export default function AdminDashboardClient({
   const [assignmentsList, setAssignmentsList] = useState(initialAssignments);
   const [submissionsList, setSubmissionsList] = useState(initialSubmissions);
 
-  // Sync state saat initial props dari server ter-update
+  // Sync state saat initial props dari server ter-update & simpan ke offline storage
   useEffect(() => {
-    setMeetingsList(initialMeetings);
+    if (initialMeetings && initialMeetings.length > 0) {
+      setMeetingsList(initialMeetings);
+      saveOfflineData(OFFLINE_KEYS.ALL_MEETINGS, initialMeetings);
+    } else {
+      const cached = getOfflineData<typeof initialMeetings>(OFFLINE_KEYS.ALL_MEETINGS);
+      if (cached && cached.length > 0) setMeetingsList(cached);
+    }
   }, [initialMeetings]);
 
   useEffect(() => {
-    setMaterialsList(initialMaterials);
+    if (initialMaterials && initialMaterials.length > 0) {
+      setMaterialsList(initialMaterials);
+      saveOfflineData(OFFLINE_KEYS.MATERIALS, initialMaterials);
+    } else {
+      const cached = getOfflineData<typeof initialMaterials>(OFFLINE_KEYS.MATERIALS);
+      if (cached && cached.length > 0) setMaterialsList(cached);
+    }
   }, [initialMaterials]);
 
   useEffect(() => {
-    setAssignmentsList(initialAssignments);
+    if (initialAssignments && initialAssignments.length > 0) {
+      setAssignmentsList(initialAssignments);
+      saveOfflineData(OFFLINE_KEYS.ASSIGNMENTS, initialAssignments);
+    } else {
+      const cached = getOfflineData<typeof initialAssignments>(OFFLINE_KEYS.ASSIGNMENTS);
+      if (cached && cached.length > 0) setAssignmentsList(cached);
+    }
   }, [initialAssignments]);
 
   useEffect(() => {
@@ -123,7 +142,8 @@ export default function AdminDashboardClient({
         getSubmissionsAction(),
       ]);
 
-      if (refreshedM) {
+      if (refreshedM && refreshedM.length > 0) {
+        saveOfflineData(OFFLINE_KEYS.ALL_MEETINGS, refreshedM);
         setMeetingsList((prev) => {
           if (JSON.stringify(prev) !== JSON.stringify(refreshedM)) {
             return refreshedM;
@@ -131,7 +151,8 @@ export default function AdminDashboardClient({
           return prev;
         });
       }
-      if (refreshedMat) {
+      if (refreshedMat && refreshedMat.length > 0) {
+        saveOfflineData(OFFLINE_KEYS.MATERIALS, refreshedMat);
         setMaterialsList((prev) => {
           if (JSON.stringify(prev) !== JSON.stringify(refreshedMat)) {
             return refreshedMat;

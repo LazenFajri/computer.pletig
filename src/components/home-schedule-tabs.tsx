@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Clock, ArrowRight } from 'lucide-react';
 import { getAllMeetingsAction } from '@/app/actions/meeting-actions';
+import { saveOfflineData, getOfflineData, OFFLINE_KEYS } from '@/lib/offline-storage';
 
 export interface DynamicMeetingData {
   id: string;
@@ -120,7 +121,16 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
   const [meetings, setMeetings] = useState(initialMeetings);
 
   useEffect(() => {
-    setMeetings(initialMeetings);
+    if (initialMeetings && initialMeetings.length > 0) {
+      setMeetings(initialMeetings);
+      saveOfflineData(OFFLINE_KEYS.HOME_MEETINGS, initialMeetings);
+    } else {
+      // Pulihkan dari cache offline jika tersedia
+      const cached = getOfflineData<DynamicMeetingData[]>(OFFLINE_KEYS.HOME_MEETINGS);
+      if (cached && cached.length > 0) {
+        setMeetings(cached);
+      }
+    }
   }, [initialMeetings]);
 
   // Real-time synchronization saat pull-to-refresh atau berkala tiap 6 detik jika tab aktif
@@ -128,7 +138,8 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
     const handleRefresh = async () => {
       try {
         const refreshed = await getAllMeetingsAction();
-        if (refreshed) {
+        if (refreshed && refreshed.length > 0) {
+          saveOfflineData(OFFLINE_KEYS.HOME_MEETINGS, refreshed);
           setMeetings((prev) => {
             if (JSON.stringify(prev) !== JSON.stringify(refreshed)) {
               return refreshed as any;
@@ -137,7 +148,11 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
           });
         }
       } catch {
-        // silent
+        // Jika offline, ambil dari penyimpanan lokal perangkat
+        const cached = getOfflineData<DynamicMeetingData[]>(OFFLINE_KEYS.HOME_MEETINGS);
+        if (cached && cached.length > 0) {
+          setMeetings(cached);
+        }
       }
     };
 

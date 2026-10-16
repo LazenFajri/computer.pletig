@@ -40,7 +40,7 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()');
-  res.headers.set('X-XSS-Protection', '1; mode=block');
+  res.headers.set('Service-Worker-Allowed', '/');
 
   // Hanya terapkan CSP ketat pada mode production / deployment.
   // Pada mode development (localhost:3000), lewati CSP agar Fast Refresh / Turbopack dev tools tidak memicu auto-refresh berulang.
@@ -133,8 +133,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for _next internal assets/HMR and static files
+     * Match all request paths except for _next internal assets/HMR and static files, sw.js, manifest.json
      */
-    '/((?!_next|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xlsx)$).*)',
+    '/((?!_next|favicon.ico|sw\\.js|manifest\\.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|xlsx)$).*)',
   ],
 };

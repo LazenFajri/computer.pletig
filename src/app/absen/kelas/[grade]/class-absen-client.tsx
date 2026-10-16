@@ -13,6 +13,7 @@ import type { GradeLevel, SessionUser } from '@/lib/auth-types';
 import type { ActiveSessionResult } from '@/lib/attendance';
 import { playSuccessChime } from '@/components/audio-feedback';
 import ConfettiCelebration from '@/components/confetti';
+import { saveOfflineData, getOfflineData, OFFLINE_KEYS } from '@/lib/offline-storage';
 import {
   CheckCircle2,
   Clock,
@@ -99,20 +100,36 @@ export default function ClassAbsenClient({
       if (session.meeting) {
         setSelectedMeetingId(session.meeting.id);
         const atts = await getMeetingAttendancesAction(session.meeting.id);
-        setAttendancesList(atts as AttendanceItem[]);
+        if (atts) {
+          setAttendancesList(atts as AttendanceItem[]);
+          saveOfflineData(OFFLINE_KEYS.ATTENDANCE(session.meeting.id), atts);
+        }
       } else {
         setSelectedMeetingId(null);
         setAttendancesList([]);
       }
     } catch (err) {
-      console.error(err);
-      setErrorMsg('Gagal memperbarui status presensi.');
+      console.warn('[ClassAbsen] Offline status check:', err);
+      // Pulihkan daftar presensi sesi jika ada di cache
+      if (selectedMeetingId) {
+        const cachedAtts = getOfflineData<AttendanceItem[]>(OFFLINE_KEYS.ATTENDANCE(selectedMeetingId));
+        if (cachedAtts) setAttendancesList(cachedAtts);
+      }
     } finally {
       setLoadingSession(false);
     }
   };
 
   useEffect(() => {
+    if (initialStudents && initialStudents.length > 0) {
+      saveOfflineData(OFFLINE_KEYS.STUDENTS(grade), initialStudents);
+    } else {
+      const cachedStus = getOfflineData<StudentItem[]>(OFFLINE_KEYS.STUDENTS(grade));
+      if (cachedStus && cachedStus.length > 0) {
+        setStudentsList(cachedStus);
+      }
+    }
+
     const handlePullRefresh = () => {
       refreshGradeData();
     };

@@ -19,6 +19,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: 'computer.pletig - Ekstrakurikuler Komputer SDN Pleburan 03',
   description: 'Portal Ekstrakurikuler Komputer SDN Pleburan 03 Semarang: Presensi Siswa, Manajemen Laptop, Materi Mengetik, Desain, dan Penugasan.',
+  manifest: '/manifest.json',
   icons: {
     icon: '/logo.jpg',
     apple: '/logo.jpg',
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
 
 import BottomNav from '@/components/bottom-nav';
 import PullToRefresh from '@/components/pull-to-refresh';
+import PwaRegister from '@/components/pwa-register';
 
 export default function RootLayout({
   children,
@@ -37,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${fredoka.variable} ${plusJakarta.variable}`}>
       <body className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-amber-300 selection:text-slate-900 overflow-x-hidden">
+        <PwaRegister />
         <PullToRefresh />
         {children}
         <BottomNav />

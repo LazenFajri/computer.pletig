@@ -14,6 +14,7 @@ import type { GradeLevel, SessionUser } from '@/lib/auth-types';
 import type { ActiveSessionResult } from '@/lib/attendance';
 import { playSuccessChime } from '@/components/audio-feedback';
 import ConfettiCelebration from '@/components/confetti';
+import { saveOfflineData, getOfflineData, OFFLINE_KEYS } from '@/lib/offline-storage';
 import {
   CheckCircle2,
   CalendarCheck,
@@ -104,7 +105,10 @@ export default function AbsenClient({
       ]);
 
       setSessionStatus(session);
-      setStudentsList(students as StudentItem[]);
+      if (students && students.length > 0) {
+        setStudentsList(students as StudentItem[]);
+        saveOfflineData(OFFLINE_KEYS.STUDENTS(grade), students);
+      }
 
       if (session.meeting) {
         setSelectedMeetingId(session.meeting.id);
@@ -115,8 +119,15 @@ export default function AbsenClient({
         setAttendancesList([]);
       }
     } catch (err) {
-      console.error(err);
-      setErrorMsg('Gagal memuat status jadwal presensi.');
+      console.warn('[Absen] Network error, recovering offline cache:', err);
+      // Pulihkan daftar siswa dari penyimpanan lokal perangkat jika sedang offline
+      const cached = getOfflineData<StudentItem[]>(OFFLINE_KEYS.STUDENTS(grade));
+      if (cached && cached.length > 0) {
+        setStudentsList(cached);
+        setErrorMsg(null);
+      } else {
+        setErrorMsg('Perangkat offline. Belum ada data siswa tersimpan di cache.');
+      }
     } finally {
       setLoadingSession(false);
     }
@@ -125,10 +136,14 @@ export default function AbsenClient({
   const isFirstMount = useRef(true);
 
   useEffect(() => {
+    if (initialStudents && initialStudents.length > 0) {
+      saveOfflineData(OFFLINE_KEYS.STUDENTS(initialGrade), initialStudents);
+    }
+
     if (isFirstMount.current) {
       isFirstMount.current = false;
       if (initialStudents.length > 0 && selectedGrade === initialGrade) {
-        // Jangan fetch ulang di mount pertama jika data SSR sudah ada
+        // Data SSR sudah ada
       } else {
         loadGradeData(selectedGrade);
       }

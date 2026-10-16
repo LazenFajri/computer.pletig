@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { MaterialWithMeeting } from '@/app/actions/material-actions';
 import type { GradeLevel } from '@/lib/auth-types';
+import { saveOfflineData, getOfflineData, OFFLINE_KEYS } from '@/lib/offline-storage';
 import {
   BookOpen,
   FileText,
@@ -20,11 +21,24 @@ interface MateriClientProps {
 }
 
 export default function MateriClient({ initialMaterials }: MateriClientProps) {
+  const [materials, setMaterials] = useState<MaterialWithMeeting[]>(initialMaterials);
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeModalMaterial, setActiveModalMaterial] = useState<MaterialWithMeeting | null>(null);
 
-  const filteredMaterials = initialMaterials.filter((mat) => {
+  useEffect(() => {
+    if (initialMaterials && initialMaterials.length > 0) {
+      setMaterials(initialMaterials);
+      saveOfflineData(OFFLINE_KEYS.MATERIALS, initialMaterials);
+    } else {
+      const cached = getOfflineData<MaterialWithMeeting[]>(OFFLINE_KEYS.MATERIALS);
+      if (cached && cached.length > 0) {
+        setMaterials(cached);
+      }
+    }
+  }, [initialMaterials]);
+
+  const filteredMaterials = materials.filter((mat) => {
     // Filter grade
     if (selectedGrade !== 'all') {
       if (mat.meeting && mat.meeting.gradeLevel !== null && mat.meeting.gradeLevel !== selectedGrade) {
