@@ -17,13 +17,24 @@ import {
   Calendar,
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
-  const [currentUser, allMeetings] = await Promise.all([
-    getCurrentUser(),
-    db.query.meetings.findMany({
-      orderBy: [desc(meetings.date), desc(meetings.meeting_number)],
-    }),
-  ]);
+  let currentUser = null;
+  let allMeetings: any[] = [];
+
+  try {
+    const [user, dbMeetings] = await Promise.all([
+      getCurrentUser(),
+      db.query.meetings.findMany({
+        orderBy: [desc(meetings.date), desc(meetings.meeting_number)],
+      }),
+    ]);
+    currentUser = user;
+    allMeetings = dbMeetings;
+  } catch (err) {
+    console.warn('Warning: Could not fetch meetings during render:', err);
+  }
 
   const serializedMeetings = allMeetings.map((m) => ({
     id: m.id,

@@ -22,6 +22,8 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Dashboard Siswa - computer.pletig SDN Pleburan 03',
   description: 'Portal kegiatan praktikum dan presensi siswa ekstrakurikuler komputer SDN Pleburan 03.',

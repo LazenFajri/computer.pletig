@@ -5,17 +5,30 @@ import TugasClient from './tugas-client';
 import { FileText, Laptop, ArrowLeft, CalendarCheck, BookOpen } from 'lucide-react';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Tugas Praktikum Komputer - computer.pletig SDN Pleburan 03',
   description: 'Pengumpulan tugas praktikum ekstrakurikuler komputer siswa SDN Pleburan 03 Semarang.',
 };
 
 export default async function TugasPage() {
-  const currentUser = await getCurrentUser();
-  const [allAssignments, allSubmissions] = await Promise.all([
-    getAssignmentsAction(),
-    getSubmissionsAction(),
-  ]);
+  let currentUser = null;
+  let allAssignments: any[] = [];
+  let allSubmissions: any[] = [];
+
+  try {
+    const [user, assignments, submissions] = await Promise.all([
+      getCurrentUser(),
+      getAssignmentsAction(),
+      getSubmissionsAction(),
+    ]);
+    currentUser = user;
+    allAssignments = assignments;
+    allSubmissions = submissions;
+  } catch (err) {
+    console.warn('Warning: Could not fetch assignments during render:', err);
+  }
 
   return (
     <div className="min-h-screen bg-playful-grid flex flex-col justify-between pb-24 sm:pb-0 overflow-x-hidden">

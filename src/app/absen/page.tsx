@@ -6,6 +6,8 @@ import type { GradeLevel } from '@/lib/auth-types';
 import { Laptop, ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Presensi Mandiri Siswa - computer.pletig SDN Pleburan 03',
   description: 'Halaman absen praktikum ekstrakurikuler komputer siswa SDN Pleburan 03 Semarang.',
@@ -15,14 +17,31 @@ export default async function AbsenPage() {
   const currentUser = await getCurrentUser();
   const initialGrade: GradeLevel = (currentUser?.grade_level as GradeLevel) || 4;
 
-  const [initialSession, initialStudents] = await Promise.all([
-    checkActiveSession(initialGrade),
-    getStudentsByGrade(initialGrade),
-  ]);
-
+  let initialSession: any = {
+    isOpen: false,
+    reason: 'closed',
+    message: '',
+    meeting: null,
+    openMeetings: [],
+    allMeetingsForGrade: [],
+    wibInfo: null,
+  };
+  let initialStudents: any[] = [];
   let initialAttendances: any[] = [];
-  if (initialSession.meeting) {
-    initialAttendances = await getMeetingAttendances(initialSession.meeting.id);
+
+  try {
+    const [sess, studs] = await Promise.all([
+      checkActiveSession(initialGrade),
+      getStudentsByGrade(initialGrade),
+    ]);
+    initialSession = sess;
+    initialStudents = studs;
+
+    if (initialSession.meeting) {
+      initialAttendances = await getMeetingAttendances(initialSession.meeting.id);
+    }
+  } catch (err) {
+    console.warn('Warning: Could not fetch initial attendance data during render:', err);
   }
 
   return (

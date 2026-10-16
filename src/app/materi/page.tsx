@@ -5,14 +5,27 @@ import MateriClient from './materi-client';
 import { BookOpen, Laptop, ArrowLeft, CalendarCheck, FileText } from 'lucide-react';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Materi Pembelajaran Komputer - computer.pletig SDN Pleburan 03',
   description: 'Modul praktikum, tutorial mengetik 10 jari, trik shortcut, dan panduan belajar komputer siswa SDN Pleburan 03 Semarang.',
 };
 
 export default async function MateriPage() {
-  const currentUser = await getCurrentUser();
-  const allMaterials = await getMaterialsAction();
+  let currentUser = null;
+  let allMaterials: any[] = [];
+
+  try {
+    const [user, materials] = await Promise.all([
+      getCurrentUser(),
+      getMaterialsAction(),
+    ]);
+    currentUser = user;
+    allMaterials = materials;
+  } catch (err) {
+    console.warn('Warning: Could not fetch materials during render:', err);
+  }
 
   return (
     <div className="min-h-screen bg-playful-grid flex flex-col justify-between pb-24 sm:pb-0 overflow-x-hidden">
