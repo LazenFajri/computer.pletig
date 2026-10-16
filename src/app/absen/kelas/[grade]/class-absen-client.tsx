@@ -48,6 +48,7 @@ interface AttendanceItem {
 
 interface ClassAbsenClientProps {
   grade: GradeLevel;
+  rombel?: string;
   currentUser: SessionUser | null;
   initialSession?: ActiveSessionResult | null;
   initialStudents?: StudentItem[];
@@ -56,6 +57,7 @@ interface ClassAbsenClientProps {
 
 export default function ClassAbsenClient({
   grade,
+  rombel,
   currentUser,
   initialSession = null,
   initialStudents = [],
@@ -70,7 +72,7 @@ export default function ClassAbsenClient({
   const [loadingSession, setLoadingSession] = useState(false);
 
   // Form input
-  const [selectedRombel, setSelectedRombel] = useState<string>('all');
+  const [selectedRombel, setSelectedRombel] = useState<string>(rombel || 'all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<StudentItem | null>(null);
 
@@ -246,22 +248,22 @@ export default function ClassAbsenClient({
     <div className="w-full max-w-4xl mx-auto space-y-6">
       <ConfettiCelebration active={showConfetti} onFinish={() => setShowConfetti(false)} />
 
-      {/* Navigasi Balik ke Pemilihan Kelas */}
+      {/* Navigasi Balik ke Pemilihan Kelas / Rombel */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs">
         <Link
-          href="/absen"
+          href={rombel && rombel !== 'all' ? `/absen/kelas/${grade}` : '/absen'}
           className="inline-flex items-center gap-2 text-xs sm:text-sm font-heading font-bold text-slate-700 hover:text-blue-600 transition-colors w-fit group"
         >
           <div className="w-7 h-7 rounded-xl bg-slate-100 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
             <ArrowLeft className="w-4 h-4" />
           </div>
-          <span>Ganti Pilihan Kelas</span>
+          <span>{rombel && rombel !== 'all' ? 'Ganti Rombel' : 'Ganti Jenjang Kelas'}</span>
         </Link>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 flex-wrap">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-blue-700 font-heading font-bold border border-blue-200/60">
             <GraduationCap className="w-4 h-4 text-blue-600" />
-            <span>Kelas {grade} SD</span>
+            <span>Kelas {grade} SD {rombel && rombel !== 'all' ? `• Rombel ${rombel}` : ''}</span>
           </span>
           <span className="hidden sm:inline text-slate-300">•</span>
           <span className="text-slate-500 font-medium">

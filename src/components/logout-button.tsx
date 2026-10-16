@@ -19,7 +19,7 @@ export default function LogoutButton({ className = '', variant = 'pill' }: Logou
   };
 
   const baseStyles =
-    'inline-flex items-center gap-1.5 font-medium transition-all text-xs cursor-pointer';
+    'inline-flex items-center gap-1.5 font-medium transition-all text-xs cursor-pointer shrink-0 whitespace-nowrap';
 
   let variantStyles =
     'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl shadow-xs';

@@ -78,38 +78,38 @@ export default async function SiswaDashboardPage() {
   return (
     <div className="min-h-screen bg-playful-grid flex flex-col pb-24 sm:pb-8">
       {/* Top Navbar Ceria Siswa */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-emerald-100 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="bg-white/90 backdrop-blur-md border-b border-emerald-100 sticky top-0 z-40 w-full max-w-full overflow-hidden">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4 w-full">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <Link
               href="/"
-              className="w-10 h-10 rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-md shadow-emerald-500/20 flex items-center justify-center shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm flex items-center justify-center shrink-0"
             >
               <img src="/logo.jpg" alt="Logo computer.pletig" className="w-full h-full object-cover" />
             </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-heading text-lg font-bold text-slate-900">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap">
+                <span className="font-heading text-sm sm:text-lg font-bold text-slate-900 truncate">
                   computer<span className="text-emerald-600">.pletig</span>
                 </span>
-                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="bg-emerald-100 text-emerald-800 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
                   Siswa
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate hidden sm:block">
                 SDN Pleburan 03 Semarang
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="text-right hidden sm:block">
-              <div className="text-xs font-bold text-slate-800">{user.name}</div>
-              <div className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
-                Kelas {user.grade_level || 'SD'} ({user.class_name || '4A'}) • NISN {user.username}
+              <div className="text-xs font-bold text-slate-800 truncate max-w-[140px]">{user.name}</div>
+              <div className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full inline-block truncate max-w-[180px]">
+                Kelas {user.grade_level || 'SD'} ({user.class_name || '4A'})
               </div>
             </div>
-            <LogoutButton variant="pill" />
+            <LogoutButton variant="pill" className="shrink-0" />
           </div>
         </div>
       </header>

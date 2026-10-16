@@ -26,38 +26,38 @@ export default async function GuruDashboardPage() {
   return (
     <div className="min-h-screen bg-playful-grid flex flex-col">
       {/* Top Navbar */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-blue-100 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="bg-white/90 backdrop-blur-md border-b border-blue-100 sticky top-0 z-40 w-full max-w-full overflow-hidden">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4 w-full">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <Link
               href="/"
-              className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20 shrink-0"
             >
               <Laptop className="w-5 h-5" />
             </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-heading text-lg font-bold text-slate-900">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap">
+                <span className="font-heading text-sm sm:text-lg font-bold text-slate-900 truncate">
                   computer<span className="text-blue-600">.pletig</span>
                 </span>
-                <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="bg-blue-100 text-blue-700 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">
                   Portal Guru
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate hidden sm:block">
                 Pengawas & Laporan • SDN Pleburan 03
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <div className="text-right hidden sm:block">
-              <div className="text-xs font-bold text-slate-800">{user.name}</div>
-              <div className="text-[10px] text-blue-600 font-medium">
+              <div className="text-xs font-bold text-slate-800 truncate max-w-[140px]">{user.name}</div>
+              <div className="text-[10px] text-blue-600 font-medium truncate">
                 {user.class_name || 'Guru Pembimbing'}
               </div>
             </div>
-            <LogoutButton variant="pill" />
+            <LogoutButton variant="pill" className="shrink-0" />
           </div>
         </div>
       </header>
