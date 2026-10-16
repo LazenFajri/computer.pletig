@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">computer.pletig</string>
+    <string name="title_activity_main">computer.pletig</string>
+    <string name="package_name">id.sch.sdnpleburan03.pletig</string>
+    <string name="custom_url_scheme">id.sch.sdnpleburan03.pletig</string>
+</resources>

@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --font-fredoka: var(--font-fredoka), 'Fredoka', cursive, sans-serif;
+  --font-sans: var(--font-plus-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --color-pletig-blue-50: #eff6ff;
+  --color-pletig-blue-100: #dbeafe;
+  --color-pletig-blue-500: #3b82f6;
+  --color-pletig-blue-600: #2563eb;
+  --color-pletig-blue-700: #1d4ed8;
+
+  --color-pletig-amber-50: #fffbeb;
+  --color-pletig-amber-100: #fef3c7;
+  --color-pletig-amber-500: #f59e0b;
+  --color-pletig-amber-600: #d97706;
+
+  --color-pletig-emerald-50: #ecfdf5;
+  --color-pletig-emerald-100: #d1fae5;
+  --color-pletig-emerald-500: #10b981;
+  --color-pletig-emerald-600: #059669;
+
+  --color-pletig-purple-50: #f5f3ff;
+  --color-pletig-purple-500: #8b5cf6;
+  --color-pletig-purple-600: #7c3aed;
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: var(--font-fredoka), cursive, sans-serif;
+  }
+}
+
+/* Background playful dots pattern for elementary school atmosphere */
+.bg-playful-grid {
+  background-color: #f8fafc;
+  background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px), radial-gradient(#cbd5e1 1.2px, #f8fafc 1.2px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+}
+
+/* Fun bubbly card shadow */
+.card-bubbly {
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.08), 0 8px 10px -6px rgba(59, 130, 246, 0.04);
+}
+
+.card-bubbly-hover {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.card-bubbly-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 30px -10px rgba(59, 130, 246, 0.15);
+}
+
+/* Mobile responsive safeguards */
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
