@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appName: 'computer.pletig',
   webDir: 'public',
   server: {
-    // Saat deploy ke Vercel, isi URL Vercel di sini agar APK terhubung langsung ke Server Action & Database Turso:
-    // url: 'https://computer-pletig.vercel.app',
+    // URL Vercel produksi agar APK memuat aplikasi Next.js lengkap beserta Server Actions & Database Turso:
+    url: 'https://computer-pletig.vercel.app',
     androidScheme: 'https',
     cleartext: true,
   },

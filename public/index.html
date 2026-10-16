@@ -65,7 +65,19 @@
     <img src="logo.jpg" alt="Logo computer.pletig" class="logo">
     <h1>computer.pletig</h1>
     <p>Portal Ekstrakurikuler Komputer SDN Pleburan 03 Semarang.</p>
-    <button class="btn" onclick="window.location.reload()">Muat Ulang Halaman</button>
+    <p style="font-size: 0.8rem; color: #64748b; margin-top: -0.75rem; margin-bottom: 1.25rem;">
+      Menghubungkan ke server... Pastikan perangkat Anda terhubung ke internet.
+    </p>
+    <button class="btn" onclick="retryConnection()">Buka Aplikasi / Coba Lagi</button>
   </div>
+  <script>
+    function retryConnection() {
+      window.location.href = 'https://computer-pletig.vercel.app';
+    }
+    // Jika perangkat online, otomatis arahkan langsung ke aplikasi Vercel
+    if (navigator.onLine) {
+      setTimeout(retryConnection, 300);
+    }
+  </script>
 </body>
 </html>
