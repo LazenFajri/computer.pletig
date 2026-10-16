@@ -6,6 +6,7 @@ import { eq, and, desc, asc, lt, inArray } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 import type { ActionState, GradeLevel } from '@/lib/auth-types';
 import { revalidatePath } from 'next/cache';
+import { generateStyledRekapExcel, type AttendanceRecordForExcel } from '@/lib/excel-rekap';
 
 export interface RekapItemPreview {
   id: string;
@@ -254,5 +255,212 @@ export async function clearMeetingAttendanceAction(meetingId: string): Promise<A
   } catch (error) {
     console.error('Error clearing meeting attendance:', error);
     return { success: false, error: 'Gagal mengosongkan data presensi.' };
+  }
+}
+
+/**
+ * Server Action: Ekspor Rekap Presensi ke file Excel (.xlsx) dengan proteksi superadmin
+ * Mengembalikan data file dalam bentuk base64 agar aman dan 100% kompatibel di mobile Android/iOS
+ */
+export async function exportRekapExcelAction(
+  meetingIdFilter?: string,
+  gradeFilter?: GradeLevel | 'all',
+  cleanup?: boolean
+): Promise<ActionState<{ base64: string; filename: string; recordsCount: number }>> {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== 'superadmin') {
+      return {
+        success: false,
+        error: 'Unauthorized: Hanya Pembina yang berhak mengunduh rekap presensi.',
+      };
+    }
+
+    // 1. Dapatkan info nama sesi & target meeting
+    let sessionTitle = 'Semua Sesi Pertemuan';
+    let targetM: typeof meetings.$inferSelect | null = null;
+    if (meetingIdFilter && meetingIdFilter !== 'all') {
+      const found = await db.query.meetings.findFirst({
+        where: eq(meetings.id, meetingIdFilter),
+      });
+      if (found) {
+        targetM = found;
+        sessionTitle = `Pertemuan ${found.meeting_number}: ${found.title}`;
+      }
+    }
+
+    // Tentukan filter tingkat kelas
+    let targetGradeFilter: number | null = null;
+    if (gradeFilter && gradeFilter !== 'all') {
+      targetGradeFilter = typeof gradeFilter === 'string' ? parseInt(gradeFilter, 10) : gradeFilter;
+    } else if (targetM && targetM.grade_level) {
+      targetGradeFilter = targetM.grade_level;
+    }
+
+    const gradeLabel = targetGradeFilter
+      ? `Kelas ${targetGradeFilter} SD`
+      : 'Semua Kelas (4, 5, 6)';
+
+    // 2. Ambil semua siswa terdaftar yang aktif
+    const allStudents = await db.query.users.findMany({
+      where: and(
+        eq(users.role, 'siswa'),
+        eq(users.is_active, true),
+        targetGradeFilter ? eq(users.grade_level, targetGradeFilter) : undefined
+      ),
+      orderBy: [asc(users.grade_level), asc(users.class_name), asc(users.name)],
+    });
+
+    // 3. Ambil data presensi yang sudah tercatat
+    const allAtt = await db.query.attendance.findMany({
+      orderBy: [desc(attendance.checked_in_at)],
+      with: {
+        meeting: true,
+        user: true,
+      },
+    });
+
+    const filteredAtt = allAtt.filter((a) => {
+      if (meetingIdFilter && meetingIdFilter !== 'all' && a.meeting_id !== meetingIdFilter) {
+        return false;
+      }
+      if (targetGradeFilter && a.grade_level !== targetGradeFilter) {
+        return false;
+      }
+      return true;
+    });
+
+    // 4. Map presensi berdasarkan ID user atau nama
+    const attByUserId = new Map<string, (typeof allAtt)[0]>();
+    const attByName = new Map<string, (typeof allAtt)[0]>();
+
+    for (const a of filteredAtt) {
+      if (a.user_id) attByUserId.set(a.user_id, a);
+      attByName.set(a.student_name.toLowerCase().trim(), a);
+    }
+
+    const usedAttendanceIds = new Set<string>();
+    const excelRecords: AttendanceRecordForExcel[] = [];
+    let counter = 1;
+
+    // Siswa terdaftar resmi (HADIR / TIDAK HADIR)
+    for (const s of allStudents) {
+      const matched = attByUserId.get(s.id) || attByName.get(s.name.toLowerCase().trim());
+      if (matched) {
+        usedAttendanceIds.add(matched.id);
+        const checkInDate = new Date(matched.checked_in_at);
+        const dateStr = new Intl.DateTimeFormat('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        }).format(checkInDate);
+
+        const timeStr = new Intl.DateTimeFormat('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(checkInDate);
+
+        excelRecords.push({
+          no: counter++,
+          studentName: s.name,
+          gradeLevel: s.grade_level || 4,
+          className: s.class_name || `Kelas ${s.grade_level}`,
+          meetingTitle: matched.meeting?.title || targetM?.title || 'Ekstrakurikuler Komputer',
+          meetingNumber: matched.meeting?.meeting_number || targetM?.meeting_number || 1,
+          dateStr,
+          timeStr,
+          status: 'HADIR',
+        });
+      } else {
+        excelRecords.push({
+          no: counter++,
+          studentName: s.name,
+          gradeLevel: s.grade_level || 4,
+          className: s.class_name || `Kelas ${s.grade_level}`,
+          meetingTitle: targetM?.title || 'Ekstrakurikuler Komputer',
+          meetingNumber: targetM?.meeting_number || 1,
+          dateStr: targetM?.date || '-',
+          timeStr: '-',
+          status: 'TIDAK HADIR',
+        });
+      }
+    }
+
+    // Siswa yang hadir di presensi tetapi tidak terdaftar di users
+    for (const a of filteredAtt) {
+      if (!usedAttendanceIds.has(a.id)) {
+        const checkInDate = new Date(a.checked_in_at);
+        const dateStr = new Intl.DateTimeFormat('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        }).format(checkInDate);
+
+        const timeStr = new Intl.DateTimeFormat('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(checkInDate);
+
+        excelRecords.push({
+          no: counter++,
+          studentName: a.student_name,
+          gradeLevel: a.grade_level,
+          className: a.user?.class_name || `Kelas ${a.grade_level}`,
+          meetingTitle: a.meeting?.title || `Pertemuan ${a.meeting?.meeting_number || 1}`,
+          meetingNumber: a.meeting?.meeting_number || 1,
+          dateStr,
+          timeStr,
+          status: 'HADIR',
+        });
+      }
+    }
+
+    const totalPresent = excelRecords.filter((r) => r.status === 'HADIR').length;
+    const totalAbsent = excelRecords.filter((r) => r.status === 'TIDAK HADIR').length;
+
+    // 5. Generate file Excel berdesain warna & profesional
+    const excelBuffer = await generateStyledRekapExcel(excelRecords, {
+      sessionTitle,
+      gradeFilter: gradeLabel,
+      totalRecords: excelRecords.length,
+      totalRegistered: excelRecords.length,
+      totalPresent,
+      totalAbsent,
+    });
+
+    // 6. Jika opsi "cleanup" aktif: Hapus data yang sudah diekspor
+    if (cleanup && filteredAtt.length > 0) {
+      const idsToDelete = filteredAtt.map((a) => a.id);
+      await db.delete(attendance).where(inArray(attendance.id, idsToDelete));
+      try {
+        revalidatePath('/admin/dashboard');
+        revalidatePath('/absen');
+      } catch {
+        // ignore
+      }
+    }
+
+    // Nama file dinamis & rapi
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const cleanFileName = `Rekap_Presensi_Komputer_${gradeFilter && gradeFilter !== 'all' ? `Kls${gradeFilter}_` : ''}${timestamp}.xlsx`;
+
+    return {
+      success: true,
+      data: {
+        base64: Buffer.from(excelBuffer).toString('base64'),
+        filename: cleanFileName,
+        recordsCount: excelRecords.length,
+      },
+    };
+  } catch (error) {
+    console.error('Error generating Excel in action:', error);
+    return {
+      success: false,
+      error: 'Gagal membuat file Excel rekap presensi.',
+    };
   }
 }

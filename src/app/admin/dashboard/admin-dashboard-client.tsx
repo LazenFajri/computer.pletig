@@ -31,6 +31,7 @@ import {
   getRekapDataAction,
   cleanupStaleAttendanceAction,
   clearMeetingAttendanceAction,
+  exportRekapExcelAction,
   type RekapItemPreview,
   type RekapSummaryData,
 } from '@/app/actions/rekap-actions';
@@ -99,6 +100,7 @@ export default function AdminDashboardClient({
   const [rekapData, setRekapData] = useState<RekapSummaryData | null>(null);
   const [loadingRekap, setLoadingRekap] = useState<boolean>(false);
   const [isCleaningStale, setIsCleaningStale] = useState<boolean>(false);
+  const [isExportingExcel, setIsExportingExcel] = useState<boolean>(false);
 
   // Filter grade
   const [filterGrade, setFilterGrade] = useState<GradeLevel | 'all'>('all');
@@ -262,43 +264,88 @@ export default function AdminDashboardClient({
     }
   }, [activeTab, rekapMeetingFilter, rekapGradeFilter, loadRekap]);
 
-  const handleDownloadRekapExcel = (
+  const handleDownloadRekapExcel = async (
     meetingId?: string,
     grade?: GradeLevel | 'all',
     cleanup?: boolean
   ) => {
+    if (isExportingExcel) return;
     const mId = meetingId ?? rekapMeetingFilter;
     const grd = grade ?? rekapGradeFilter;
     const clean = cleanup ?? cleanupAfterDownload;
 
-    const url = `/api/admin/rekap-excel?meetingId=${encodeURIComponent(mId)}&grade=${encodeURIComponent(grd)}&cleanup=${clean ? 'true' : 'false'}`;
+    setIsExportingExcel(true);
+    showNotification('success', 'Sedang menyiapkan berkas Excel...');
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = '';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // 1. Ekspor melalui Server Action (100% aman session & kompatibel di mobile browser / Android WebView)
+      const res = await exportRekapExcelAction(mId, grd, clean);
+      if (!res.success || !res.data?.base64) {
+        showNotification('error', res.error || 'Gagal membuat file Excel rekap presensi.');
+        setIsExportingExcel(false);
+        return;
+      }
 
-    if (clean) {
-      showNotification(
-        'success',
-        'File Excel berhasil diunduh dan data presensi telah dibersihkan untuk menghemat database Turso!'
-      );
-      setTimeout(() => {
-        loadRekap(mId, grd);
-        if (mId !== 'all') {
-          setMeetingsList((prev) =>
-            prev.map((m) => (m.id === mId ? { ...m, attendanceCount: 0 } : m))
-          );
-        } else {
-          setMeetingsList((prev) =>
-            prev.map((m) => ({ ...m, attendanceCount: 0 }))
-          );
-        }
-      }, 1500);
-    } else {
-      showNotification('success', 'File Excel Rekap Presensi sedang diunduh...');
+      // 2. Buat Blob Excel (.xlsx) dengan MIME type resmi agar tidak tersimpan sebagai file .json
+      const binaryString = window.atob(res.data.base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+
+      const fileName = res.data.filename || `Rekap_Presensi_Komputer_${Date.now()}.xlsx`;
+
+      // 3. Unduh berkas melalui Object URL
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+
+      if (clean) {
+        showNotification(
+          'success',
+          'File Excel berhasil diunduh dan data presensi telah dibersihkan untuk menghemat database Turso!'
+        );
+        setTimeout(() => {
+          loadRekap(mId, grd);
+          if (mId !== 'all') {
+            setMeetingsList((prev) =>
+              prev.map((m) => (m.id === mId ? { ...m, attendanceCount: 0 } : m))
+            );
+          } else {
+            setMeetingsList((prev) =>
+              prev.map((m) => ({ ...m, attendanceCount: 0 }))
+            );
+          }
+        }, 1500);
+      } else {
+        showNotification('success', `File Excel (${fileName}) berhasil diunduh!`);
+      }
+    } catch (err) {
+      console.error('Error downloading excel:', err);
+      // Fallback: Direct endpoint URL dengan filename eksplisit jika blob browser dibatasi
+      try {
+        const url = `/api/admin/rekap-excel?meetingId=${encodeURIComponent(mId)}&grade=${encodeURIComponent(grd)}&cleanup=${clean ? 'true' : 'false'}`;
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Rekap_Presensi_Komputer.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch {
+        showNotification('error', 'Terjadi kesalahan saat mengunduh file Excel.');
+      }
+    } finally {
+      setIsExportingExcel(false);
     }
   };
 
@@ -868,107 +915,112 @@ export default function AdminDashboardClient({
       </div>
 
       {/* Main Tab Bar Navigation */}
-      <div className="bg-white rounded-3xl p-2 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none shrink-0">
+      <div className="bg-white rounded-3xl p-2 sm:p-2.5 border border-slate-200 shadow-sm flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5 sm:gap-3 overflow-hidden">
+        {/* Scrollable Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 xl:pb-0 scrollbar-none min-w-0 flex-1">
           <button
             type="button"
             onClick={() => setActiveTab('meetings')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
               activeTab === 'meetings'
                 ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <CalendarCheck className="w-4 h-4" />
+            <CalendarCheck className="w-4 h-4 shrink-0" />
             <span>
-              <span className="sm:hidden">Sesi ({meetingsList.length})</span>
-              <span className="hidden sm:inline">Kelola Sesi Pertemuan ({meetingsList.length})</span>
+              <span className="2xl:hidden">Sesi ({meetingsList.length})</span>
+              <span className="hidden 2xl:inline">Kelola Sesi Pertemuan ({meetingsList.length})</span>
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('materials')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
               activeTab === 'materials'
                 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
+            <BookOpen className="w-4 h-4 shrink-0" />
             <span>
-              <span className="sm:hidden">Materi ({materialsList.length})</span>
-              <span className="hidden sm:inline">Materi Pembelajaran ({materialsList.length})</span>
+              <span className="2xl:hidden">Materi ({materialsList.length})</span>
+              <span className="hidden 2xl:inline">Materi Pembelajaran ({materialsList.length})</span>
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('assignments')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
               activeTab === 'assignments'
                 ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4 shrink-0" />
             <span>
-              <span className="sm:hidden">Tugas ({assignmentsList.length})</span>
-              <span className="hidden sm:inline">Tugas Siswa ({assignmentsList.length})</span>
+              <span className="2xl:hidden">Tugas ({assignmentsList.length})</span>
+              <span className="hidden 2xl:inline">Tugas Siswa ({assignmentsList.length})</span>
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('submissions')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
               activeTab === 'submissions'
                 ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <Award className="w-4 h-4" />
+            <Award className="w-4 h-4 shrink-0" />
             <span>
-              <span className="sm:hidden">Nilai ({submissionsList.length})</span>
-              <span className="hidden sm:inline">Nilai & Masukan ({submissionsList.length})</span>
+              <span className="2xl:hidden">Nilai ({submissionsList.length})</span>
+              <span className="hidden 2xl:inline">Nilai & Masukan ({submissionsList.length})</span>
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('rekap')}
-            className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
               activeTab === 'rekap'
                 ? 'bg-teal-700 text-white shadow-md shadow-teal-700/25 ring-2 ring-teal-500/30'
                 : 'text-teal-700 bg-teal-50/70 hover:bg-teal-100/70'
             }`}
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+            <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>
-              <span className="sm:hidden">Rekap Excel</span>
-              <span className="hidden sm:inline">Rekap & Unduh Excel</span>
+              <span className="2xl:hidden">Rekap Excel</span>
+              <span className="hidden 2xl:inline">Rekap & Unduh Excel</span>
             </span>
           </button>
         </div>
 
         {/* Filter Kelas */}
-        <div className="flex items-center gap-1.5 self-end sm:self-auto pr-2">
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-xs text-slate-500 font-medium">Filter Kelas:</span>
-          {(['all', 4, 5, 6] as const).map((grade) => (
-            <button
-              key={grade}
-              type="button"
-              onClick={() => setFilterGrade(grade as any)}
-              className={`text-xs px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer ${
-                filterGrade === grade
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {grade === 'all' ? 'Semua' : `Kls ${grade}`}
-            </button>
-          ))}
+        <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-between sm:justify-end px-1 pt-1.5 xl:pt-0 border-t xl:border-t-0 border-slate-100">
+          <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
+            <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>Filter Kelas:</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {(['all', 4, 5, 6] as const).map((grade) => (
+              <button
+                key={grade}
+                type="button"
+                onClick={() => setFilterGrade(grade as any)}
+                className={`text-xs px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
+                  filterGrade === grade
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {grade === 'all' ? 'Semua' : `Kls ${grade}`}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -1111,11 +1163,12 @@ export default function AdminDashboardClient({
                       <button
                         type="button"
                         onClick={() => handleDownloadRekapExcel(m.id, 'all', false)}
-                        className="bg-teal-50 hover:bg-teal-100 text-teal-800 px-2 py-1 rounded-xl font-bold flex items-center gap-1 transition-colors cursor-pointer border border-teal-200/60 shadow-xs shrink-0"
+                        disabled={isExportingExcel}
+                        className="bg-teal-50 hover:bg-teal-100 text-teal-800 px-2 py-1 rounded-xl font-bold flex items-center gap-1 transition-colors cursor-pointer border border-teal-200/60 shadow-xs shrink-0 disabled:opacity-50"
                         title="Unduh Rekap Excel Sesi Ini"
                       >
                         <FileSpreadsheet className="w-3.5 h-3.5 text-teal-600" />
-                        <span>Excel</span>
+                        <span>{isExportingExcel ? 'Unduh...' : 'Excel'}</span>
                       </button>
                       <span className="bg-blue-50 text-blue-800 px-2 py-1 rounded-xl font-semibold flex items-center gap-1 shrink-0">
                         <BookOpen className="w-3 h-3 text-blue-600" />
@@ -1644,11 +1697,11 @@ export default function AdminDashboardClient({
               <button
                 type="button"
                 onClick={() => handleDownloadRekapExcel()}
-                disabled={loadingRekap || !rekapData || rekapData.records.length === 0}
+                disabled={isExportingExcel || loadingRekap || !rekapData || rekapData.records.length === 0}
                 className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-heading font-bold text-sm py-3 px-5 rounded-2xl shadow-lg shadow-teal-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5"
               >
                 <Download className="w-4 h-4" />
-                <span>Unduh File Excel Berwarna (.xlsx)</span>
+                <span>{isExportingExcel ? 'Sedang Menyiapkan Excel...' : 'Unduh File Excel Berwarna (.xlsx)'}</span>
                 {rekapData && (
                   <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-normal">
                     {rekapData.records.length} Siswa
