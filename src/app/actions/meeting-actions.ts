@@ -6,6 +6,7 @@ import { eq, desc, asc, and, count } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 import type { ActionState, GradeLevel } from '@/lib/auth-types';
 import { revalidatePath } from 'next/cache';
+import { verifyRequestOrigin, sanitizeText } from '@/lib/security';
 
 export interface CreateMeetingParams {
   title: string;
@@ -87,6 +88,13 @@ export async function createMeetingAction(
   params: CreateMeetingParams
 ): Promise<ActionState<typeof meetings.$inferSelect>> {
   try {
+    // 1. Validasi CSRF / Origin Header
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: originCheck.reason || 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
+    // 2. Validasi Otoritas Ganda (Ambil langsung dari Session Server)
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat membuat sesi pertemuan.' };
@@ -103,7 +111,8 @@ export async function createMeetingAction(
       isOpen = true,
     } = params;
 
-    const cleanTitle = title.trim();
+    const cleanTitle = sanitizeText(title.trim(), 120);
+    const cleanDesc = sanitizeText(description.trim(), 500);
     if (!cleanTitle) {
       return { success: false, error: 'Judul pertemuan wajib diisi.' };
     }
@@ -131,7 +140,7 @@ export async function createMeetingAction(
         meeting_number: finalMeetingNum,
         grade_level: gradeLevel || null,
         title: cleanTitle,
-        description: description.trim() || `Sesi pertemuan ${finalMeetingNum} ekstrakurikuler komputer.`,
+        description: cleanDesc || `Sesi pertemuan ${finalMeetingNum} ekstrakurikuler komputer.`,
         date: todayStr,
         start_time: startTime.trim() || '12:30',
         end_time: endTime.trim() || '14:00',
@@ -180,6 +189,11 @@ export async function updateMeetingAction(
   params: UpdateMeetingParams
 ): Promise<ActionState<typeof meetings.$inferSelect>> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat mengubah sesi pertemuan.' };
@@ -197,7 +211,8 @@ export async function updateMeetingAction(
       isOpen = false,
     } = params;
 
-    const cleanTitle = title.trim();
+    const cleanTitle = sanitizeText(title.trim(), 120);
+    const cleanDesc = sanitizeText(description.trim(), 500);
     if (!cleanTitle) {
       return { success: false, error: 'Judul pertemuan wajib diisi.' };
     }
@@ -211,7 +226,7 @@ export async function updateMeetingAction(
         date: date || new Date().toISOString().split('T')[0],
         start_time: startTime.trim() || '12:30',
         end_time: endTime.trim() || '14:00',
-        description: description.trim() || null,
+        description: cleanDesc || null,
         is_open: isOpen,
         is_active: isOpen,
         updated_at: new Date(),
@@ -249,6 +264,11 @@ export async function updateMeetingAction(
  */
 export async function deleteMeetingAction(meetingId: string): Promise<ActionState> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat menghapus sesi pertemuan.' };
@@ -296,6 +316,11 @@ export async function toggleMeetingStatusAction(
   isOpen: boolean
 ): Promise<ActionState> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina yang berhak mengubah status sesi.' };

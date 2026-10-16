@@ -6,6 +6,7 @@ import { eq, desc, asc } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 import type { ActionState, GradeLevel } from '@/lib/auth-types';
 import { revalidatePath } from 'next/cache';
+import { verifyRequestOrigin, sanitizeText, sanitizeUrl } from '@/lib/security';
 
 export interface CreateMaterialParams {
   meetingId: string;
@@ -86,6 +87,11 @@ export async function createMaterialAction(
   params: CreateMaterialParams
 ): Promise<ActionState<typeof materials.$inferSelect>> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat menambahkan materi.' };
@@ -100,7 +106,10 @@ export async function createMaterialAction(
       orderIndex = 1,
     } = params;
 
-    const cleanTitle = title.trim();
+    const cleanTitle = sanitizeText(title.trim(), 120);
+    const cleanContent = sanitizeText(contentMarkdown.trim(), 10000);
+    const cleanUrl = fileUrl ? (sanitizeUrl(fileUrl) || sanitizeText(fileUrl.trim(), 500)) : null;
+
     if (!cleanTitle) {
       return { success: false, error: 'Judul materi wajib diisi.' };
     }
@@ -114,8 +123,8 @@ export async function createMaterialAction(
       .values({
         meeting_id: meetingId,
         title: cleanTitle,
-        content_markdown: contentMarkdown.trim() || null,
-        file_url: fileUrl.trim() || null,
+        content_markdown: cleanContent || null,
+        file_url: cleanUrl || null,
         file_type: fileType,
         order_index: orderIndex,
       })
@@ -158,6 +167,11 @@ export async function updateMaterialAction(
   params: UpdateMaterialParams
 ): Promise<ActionState<typeof materials.$inferSelect>> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina yang berhak mengubah materi.' };
@@ -173,7 +187,10 @@ export async function updateMaterialAction(
       orderIndex = 1,
     } = params;
 
-    const cleanTitle = title.trim();
+    const cleanTitle = sanitizeText(title.trim(), 120);
+    const cleanContent = sanitizeText(contentMarkdown.trim(), 10000);
+    const cleanUrl = fileUrl ? (sanitizeUrl(fileUrl) || sanitizeText(fileUrl.trim(), 500)) : null;
+
     if (!cleanTitle) {
       return { success: false, error: 'Judul materi wajib diisi.' };
     }
@@ -183,8 +200,8 @@ export async function updateMaterialAction(
       .set({
         meeting_id: meetingId,
         title: cleanTitle,
-        content_markdown: contentMarkdown.trim() || null,
-        file_url: fileUrl.trim() || null,
+        content_markdown: cleanContent || null,
+        file_url: cleanUrl || null,
         file_type: fileType,
         order_index: orderIndex,
       })
@@ -220,6 +237,11 @@ export async function updateMaterialAction(
  */
 export async function deleteMaterialAction(materialId: string): Promise<ActionState> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina yang berhak menghapus materi.' };

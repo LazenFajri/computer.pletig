@@ -6,6 +6,7 @@ import { eq, desc, and, sql } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 import type { ActionState, GradeLevel } from '@/lib/auth-types';
 import { revalidatePath } from 'next/cache';
+import { verifyRequestOrigin, sanitizeStudentName, sanitizeText, sanitizeUrl } from '@/lib/security';
 
 export interface CreateAssignmentParams {
   meetingId: string;
@@ -116,6 +117,11 @@ export async function createAssignmentAction(
   params: CreateAssignmentParams
 ): Promise<ActionState<typeof assignments.$inferSelect>> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat membuat tugas.' };
@@ -123,7 +129,9 @@ export async function createAssignmentAction(
 
     const { meetingId, title, instructions = '', dueDate, maxScore = 100 } = params;
 
-    const cleanTitle = title.trim();
+    const cleanTitle = sanitizeText(title.trim(), 120);
+    const cleanInstructions = sanitizeText(instructions.trim(), 5000);
+
     if (!cleanTitle) {
       return { success: false, error: 'Judul tugas wajib diisi.' };
     }
@@ -137,7 +145,7 @@ export async function createAssignmentAction(
       .values({
         meeting_id: meetingId,
         title: cleanTitle,
-        instructions: instructions.trim() || null,
+        instructions: cleanInstructions || null,
         due_date: dueDate?.trim() || null,
         max_score: maxScore || 100,
         is_group_work: false,
@@ -180,6 +188,11 @@ export async function updateAssignmentAction(
   params: UpdateAssignmentParams
 ): Promise<ActionState<typeof assignments.$inferSelect>> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina yang berhak mengubah tugas.' };
@@ -187,7 +200,9 @@ export async function updateAssignmentAction(
 
     const { assignmentId, meetingId, title, instructions = '', dueDate, maxScore = 100 } = params;
 
-    const cleanTitle = title.trim();
+    const cleanTitle = sanitizeText(title.trim(), 120);
+    const cleanInstructions = sanitizeText(instructions.trim(), 5000);
+
     if (!cleanTitle) {
       return { success: false, error: 'Judul tugas wajib diisi.' };
     }
@@ -197,7 +212,7 @@ export async function updateAssignmentAction(
       .set({
         meeting_id: meetingId,
         title: cleanTitle,
-        instructions: instructions.trim() || null,
+        instructions: cleanInstructions || null,
         due_date: dueDate?.trim() || null,
         max_score: maxScore || 100,
       })
@@ -233,6 +248,11 @@ export async function updateAssignmentAction(
  */
 export async function deleteAssignmentAction(assignmentId: string): Promise<ActionState> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina yang berhak menghapus tugas.' };
@@ -275,15 +295,20 @@ export async function submitAssignmentAction(
   params: SubmitAssignmentParams
 ): Promise<ActionState<typeof submissions.$inferSelect>> {
   try {
-    const { assignmentId, studentName, gradeLevel, submissionUrl = '', submissionText = '' } = params;
-
-    const cleanName = studentName.trim();
-    if (!cleanName || cleanName.length < 2) {
-      return { success: false, error: 'Silakan ketik atau pilih namamu terlebih dahulu.' };
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
     }
 
-    const cleanUrl = submissionUrl.trim();
-    const cleanText = submissionText.trim();
+    const { assignmentId, studentName, gradeLevel, submissionUrl = '', submissionText = '' } = params;
+
+    const cleanName = sanitizeStudentName(studentName);
+    if (!cleanName || cleanName.length < 2) {
+      return { success: false, error: 'Silakan ketik atau pilih nama yang valid terlebih dahulu.' };
+    }
+
+    const cleanUrl = submissionUrl ? (sanitizeUrl(submissionUrl) || sanitizeText(submissionUrl.trim(), 500)) : '';
+    const cleanText = sanitizeText(submissionText.trim(), 2000);
 
     if (!cleanUrl && !cleanText) {
       return {
@@ -405,18 +430,24 @@ export async function gradeSubmissionAction(
   params: GradeSubmissionParams
 ): Promise<ActionState> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || (user.role !== 'superadmin' && user.role !== 'guru')) {
       return { success: false, error: 'Hanya Pembina atau Guru yang dapat menilai tugas.' };
     }
 
     const { submissionId, score, feedback } = params;
+    const cleanFeedback = feedback ? sanitizeText(feedback.trim(), 1000) : null;
 
     await db
       .update(submissions)
       .set({
         score: Math.min(100, Math.max(0, score)),
-        feedback: feedback?.trim() || null,
+        feedback: cleanFeedback,
         status: 'graded',
         graded_by: user.name,
         graded_at: new Date(),

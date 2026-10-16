@@ -16,6 +16,13 @@ import {
 import type { GradeLevel, ActionState } from '@/lib/auth-types';
 import { getCurrentUser } from '@/lib/session';
 import { revalidatePath } from 'next/cache';
+import {
+  verifyRequestOrigin,
+  getClientIp,
+  checkAttendanceRateLimit,
+  sanitizeStudentName,
+  sanitizeText,
+} from '@/lib/security';
 
 /**
  * Server Action: Cek Sesi Aktif untuk Kelas Tertentu
@@ -69,13 +76,34 @@ export async function submitAttendanceAction(
   params: SubmitAttendanceParams
 ): Promise<ActionState<typeof attendance.$inferSelect>> {
   try {
+    // 1. Verifikasi CSRF / Origin Header (Anti Script Kiddie / Cross-Site Injection)
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return {
+        success: false,
+        error: originCheck.reason || 'Permintaan ditolak: Mismatched Origin (CSRF Protection).',
+      };
+    }
+
+    // 2. IP Rate Limiting (Mencegah spam looping script / automated flood dari lab komputer)
+    const clientIp = await getClientIp();
+    const rateCheck = checkAttendanceRateLimit(clientIp);
+    if (!rateCheck.allowed) {
+      return {
+        success: false,
+        error: rateCheck.message,
+      };
+    }
+
     const { gradeLevel, studentName, studentUserId, meetingId: requestedMeetingId } = params;
-    const cleanName = studentName.trim();
+
+    // 3. Sanitasi Ketat Input Nama Siswa (Hapus XSS, script payload, HTML injection)
+    const cleanName = sanitizeStudentName(studentName);
 
     if (!cleanName || cleanName.length < 2) {
       return {
         success: false,
-        error: 'Silakan pilih atau ketik nama lengkap kamu terlebih dahulu ya!',
+        error: 'Silakan pilih atau ketik nama lengkap yang valid terlebih dahulu ya!',
       };
     }
 
@@ -210,6 +238,11 @@ export async function toggleMeetingOpenAction(
   meetingId: string,
   isOpen: boolean
 ): Promise<ActionState> {
+  const originCheck = await verifyRequestOrigin();
+  if (!originCheck.valid) {
+    return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== 'superadmin') {
     return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat mengubah status sesi.' };
@@ -258,10 +291,17 @@ export async function openQuickSessionForGradeAction(
   gradeLevel: GradeLevel,
   title?: string
 ): Promise<ActionState> {
+  const originCheck = await verifyRequestOrigin();
+  if (!originCheck.valid) {
+    return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== 'superadmin') {
     return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat membuka sesi.' };
   }
+
+  const safeTitle = title ? sanitizeText(title, 100) : undefined;
 
   const allM = await db.query.meetings.findMany();
   const nextNum = allM.length + 1;
@@ -280,7 +320,7 @@ export async function openQuickSessionForGradeAction(
   await db.insert(meetings).values({
     meeting_number: nextNum,
     grade_level: gradeLevel,
-    title: title || `Pertemuan ${nextNum} - Praktikum Komputer Kelas ${gradeLevel}`,
+    title: safeTitle || `Pertemuan ${nextNum} - Praktikum Komputer Kelas ${gradeLevel}`,
     description: `Sesi dibuka manual oleh Pembina pada ${wib.dayName}, ${wib.dateStr}.`,
     date: wib.dateStr,
     start_time: startTime,
@@ -301,6 +341,11 @@ export async function openQuickSessionForGradeAction(
  * Server Action (Admin): Hapus Catatan Presensi Siswa
  */
 export async function deleteAttendanceAction(attendanceId: string): Promise<ActionState> {
+  const originCheck = await verifyRequestOrigin();
+  if (!originCheck.valid) {
+    return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+  }
+
   const user = await getCurrentUser();
   if (!user || user.role !== 'superadmin') {
     return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat menghapus data presensi.' };

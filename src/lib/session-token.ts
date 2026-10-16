@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import type { SessionUser, SessionJWTPayload } from './auth-types';
 
 export const SESSION_COOKIE_NAME = 'pletig_session';
-export const SESSION_DURATION_SECONDS = 7 * 24 * 60 * 60; // 7 hari
+export const SESSION_DURATION_SECONDS = 24 * 60 * 60; // 24 jam (otomatis logout setelah 24 jam)
 
 function getSecretKey(): Uint8Array {
   const secret = process.env.AUTH_SECRET || 'pletig-sdn03-super-secret-auth-key-2026-min-32-chars';

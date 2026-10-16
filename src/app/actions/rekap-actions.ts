@@ -7,6 +7,7 @@ import { getCurrentUser } from '@/lib/session';
 import type { ActionState, GradeLevel } from '@/lib/auth-types';
 import { revalidatePath } from 'next/cache';
 import { generateStyledRekapExcel, type AttendanceRecordForExcel } from '@/lib/excel-rekap';
+import { verifyRequestOrigin } from '@/lib/security';
 
 export interface RekapItemPreview {
   id: string;
@@ -188,6 +189,11 @@ export async function getRekapDataAction(
  */
 export async function cleanupStaleAttendanceAction(): Promise<ActionState<{ deletedCount: number }>> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina yang berhak melakukan pembersihan database.' };
@@ -234,6 +240,11 @@ export async function cleanupStaleAttendanceAction(): Promise<ActionState<{ dele
  */
 export async function clearMeetingAttendanceAction(meetingId: string): Promise<ActionState> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return { success: false, error: 'Hanya Pembina yang berhak mengosongkan data presensi.' };
@@ -268,6 +279,14 @@ export async function exportRekapExcelAction(
   cleanup?: boolean
 ): Promise<ActionState<{ base64: string; filename: string; recordsCount: number }>> {
   try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return {
+        success: false,
+        error: 'Permintaan ditolak: Mismatched Origin.',
+      };
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return {

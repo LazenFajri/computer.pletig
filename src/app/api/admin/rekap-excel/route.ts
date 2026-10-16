@@ -9,6 +9,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    const origin = req.headers.get('origin');
+    const host = req.headers.get('host');
+    if (origin && host && !origin.includes(host) && !origin.includes('localhost')) {
+      return NextResponse.json({ error: 'Forbidden: Origin mismatch.' }, { status: 403 });
+    }
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'superadmin') {
       return NextResponse.json(
