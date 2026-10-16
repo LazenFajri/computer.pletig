@@ -7,12 +7,14 @@ import {
   deleteMeetingAction,
   toggleMeetingStatusAction,
   updateMeetingAction,
+  getAllMeetingsAction,
   type MeetingItemWithCounts,
 } from '@/app/actions/meeting-actions';
 import {
   createMaterialAction,
   deleteMaterialAction,
   updateMaterialAction,
+  getMaterialsAction,
   type MaterialWithMeeting,
 } from '@/app/actions/material-actions';
 import {
@@ -20,6 +22,8 @@ import {
   deleteAssignmentAction,
   gradeSubmissionAction,
   updateAssignmentAction,
+  getAssignmentsAction,
+  getSubmissionsAction,
   type AssignmentWithDetails,
   type SubmissionWithDetails,
 } from '@/app/actions/assignment-actions';
@@ -91,6 +95,89 @@ export default function AdminDashboardClient({
   const [materialsList, setMaterialsList] = useState(initialMaterials);
   const [assignmentsList, setAssignmentsList] = useState(initialAssignments);
   const [submissionsList, setSubmissionsList] = useState(initialSubmissions);
+
+  // Sync state saat initial props dari server ter-update
+  useEffect(() => {
+    setMeetingsList(initialMeetings);
+  }, [initialMeetings]);
+
+  useEffect(() => {
+    setMaterialsList(initialMaterials);
+  }, [initialMaterials]);
+
+  useEffect(() => {
+    setAssignmentsList(initialAssignments);
+  }, [initialAssignments]);
+
+  useEffect(() => {
+    setSubmissionsList(initialSubmissions);
+  }, [initialSubmissions]);
+
+  // Real-time synchronization: Saat pull-to-refresh ditarik atau berkala tiap 5 detik jika tab aktif
+  const refetchAllData = useCallback(async () => {
+    try {
+      const [refreshedM, refreshedMat, refreshedAss, refreshedSub] = await Promise.all([
+        getAllMeetingsAction(),
+        getMaterialsAction(),
+        getAssignmentsAction(),
+        getSubmissionsAction(),
+      ]);
+
+      if (refreshedM) {
+        setMeetingsList((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(refreshedM)) {
+            return refreshedM;
+          }
+          return prev;
+        });
+      }
+      if (refreshedMat) {
+        setMaterialsList((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(refreshedMat)) {
+            return refreshedMat;
+          }
+          return prev;
+        });
+      }
+      if (refreshedAss) {
+        setAssignmentsList((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(refreshedAss)) {
+            return refreshedAss;
+          }
+          return prev;
+        });
+      }
+      if (refreshedSub) {
+        setSubmissionsList((prev) => {
+          if (JSON.stringify(prev) !== JSON.stringify(refreshedSub)) {
+            return refreshedSub;
+          }
+          return prev;
+        });
+      }
+    } catch {
+      // silent fallback
+    }
+  }, []);
+
+  useEffect(() => {
+    // 1. Respon event pull-to-refresh seketika
+    const handlePullRefresh = () => {
+      refetchAllData();
+    };
+    window.addEventListener('app:pull-to-refresh', handlePullRefresh);
+
+    // 2. Auto-sync realtime tiap 5 detik (hanya jika tab/layar sedang aktif)
+    const timer = setInterval(() => {
+      if (document.hidden) return;
+      refetchAllData();
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('app:pull-to-refresh', handlePullRefresh);
+      clearInterval(timer);
+    };
+  }, [refetchAllData]);
 
   // Rekap Presensi State
   const [rekapMeetingFilter, setRekapMeetingFilter] = useState<string>('all');

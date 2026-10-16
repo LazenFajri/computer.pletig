@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import {
   checkActiveSessionAction,
@@ -111,6 +111,23 @@ export default function ClassAbsenClient({
       setLoadingSession(false);
     }
   };
+
+  useEffect(() => {
+    const handlePullRefresh = () => {
+      refreshGradeData();
+    };
+    window.addEventListener('app:pull-to-refresh', handlePullRefresh);
+
+    const timer = setInterval(() => {
+      if (document.hidden) return;
+      refreshGradeData();
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('app:pull-to-refresh', handlePullRefresh);
+      clearInterval(timer);
+    };
+  }, [grade]);
 
   // Ambil daftar rombel yang tersedia untuk kelas ini (misal: ['4A', '4B'])
   const availableRombels = Array.from(

@@ -42,9 +42,13 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
   res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()');
   res.headers.set('X-XSS-Protection', '1; mode=block');
 
+  // Hanya terapkan CSP ketat pada mode production / deployment.
+  // Pada mode development (localhost:3000), lewati CSP agar Fast Refresh / Turbopack dev tools tidak memicu auto-refresh berulang.
+  if (process.env.NODE_ENV === 'development') {
+    return res;
+  }
+
   // Strict CSP: larang embedding iframe (frame-ancestors 'none'), blokir object-src
-  // PENTING: connect-src HARUS mengizinkan 'ws:' dan 'http:' agar WebSocket HMR Next.js (Fast Refresh di localhost)
-  // tidak diblokir browser yang memicu loop auto-refresh terus-menerus.
   const cspDirectives = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'",

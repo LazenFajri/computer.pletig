@@ -4,8 +4,13 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { RefreshCw } from 'lucide-react';
 
-const PULL_THRESHOLD = 65; // Jarak tarik dalam pixel untuk memicu refresh
-const MAX_PULL = 110; // Batas maksimal visual tarikan
+const PULL_THRESHOLD = 48; // Ambang batas yang ramah & responsif di mobile
+const MAX_PULL = 90; // Batas tarikan visual
+
+function getScrollTop(): number {
+  if (typeof window === 'undefined') return 0;
+  return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+}
 
 export default function PullToRefresh() {
   const router = useRouter();
@@ -20,26 +25,29 @@ export default function PullToRefresh() {
 
   const triggerRefresh = useCallback(() => {
     setIsRefreshing(true);
-    setPullY(55); // Tahan indikator di posisi visual yang nyaman
+    setPullY(50); // Tahan indikator di posisi visual yang nyaman
 
     // Getaran haptic ringan jika didukung browser / HP
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {
-        navigator.vibrate(25);
+        navigator.vibrate([20, 30, 20]);
       } catch {
         // Abaikan
       }
     }
 
-    // Jalankan reload data server Next.js App Router
+    // 1. Dispatch event global agar Client Components (Admin, Absen, Jadwal) langsung refresh data seketika
+    window.dispatchEvent(new CustomEvent('app:pull-to-refresh'));
+
+    // 2. Jalankan reload server Next.js App Router
     router.refresh();
 
-    // Selesaikan animasi
+    // Selesaikan animasi visual
     setTimeout(() => {
       setIsRefreshing(false);
       setPullY(0);
       wheelAccumulatorRef.current = 0;
-    }, 850);
+    }, 750);
   }, [router]);
 
   useEffect(() => {
@@ -49,23 +57,23 @@ export default function PullToRefresh() {
     // 1. TOUCH EVENT (HP, Tablet, WebView APK Android)
     // ==========================================
     const handleTouchStart = (e: TouchEvent) => {
-      if (window.scrollY <= 0 && !isRefreshing) {
+      if (getScrollTop() <= 5 && !isRefreshing && e.touches.length === 1) {
         startYRef.current = e.touches[0].clientY;
         isDraggingTouchRef.current = true;
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isDraggingTouchRef.current || isRefreshing) return;
+      if (!isDraggingTouchRef.current || isRefreshing || e.touches.length === 0) return;
 
       const currentY = e.touches[0].clientY;
       const diff = currentY - startYRef.current;
 
-      if (diff > 0 && window.scrollY <= 0) {
-        const boundedY = Math.min(diff * 0.45, MAX_PULL);
+      if (diff > 0 && getScrollTop() <= 5) {
+        const boundedY = Math.min(diff * 0.55, MAX_PULL);
         setPullY(boundedY);
 
-        if (diff > 15 && e.cancelable) {
+        if (diff > 12 && e.cancelable) {
           e.preventDefault();
         }
       } else {
@@ -85,14 +93,13 @@ export default function PullToRefresh() {
     };
 
     // ==========================================
-    // 2. WHEEL EVENT (Touchpad Laptop 2 Jari & Mouse Wheel di atas)
+    // 2. WHEEL EVENT (Touchpad Laptop 2 Jari / Scroll di bagian atas)
     // ==========================================
     const handleWheel = (e: WheelEvent) => {
       if (isRefreshing) return;
 
-      // Saat posisi scroll berada di paling atas dan user swipe 2 jari ke bawah (scroll up / pull down: deltaY < 0)
-      if (window.scrollY <= 0 && e.deltaY < 0) {
-        const added = Math.abs(e.deltaY) * 0.4;
+      if (getScrollTop() <= 5 && e.deltaY < 0) {
+        const added = Math.abs(e.deltaY) * 0.45;
         wheelAccumulatorRef.current = Math.min(wheelAccumulatorRef.current + added, MAX_PULL);
         setPullY(wheelAccumulatorRef.current);
 
@@ -100,30 +107,27 @@ export default function PullToRefresh() {
           clearTimeout(wheelResetTimerRef.current);
         }
 
-        // Jika tarikan sudah melewati ambang batas
         if (wheelAccumulatorRef.current >= PULL_THRESHOLD) {
           wheelResetTimerRef.current = setTimeout(() => {
             triggerRefresh();
-          }, 180);
+          }, 150);
         } else {
-          // Jika berhenti sebelum batas, kembalikan ke atas
           wheelResetTimerRef.current = setTimeout(() => {
             wheelAccumulatorRef.current = 0;
             setPullY(0);
-          }, 350);
+          }, 300);
         }
       } else if (e.deltaY > 0 && !isRefreshing) {
-        // Jika user scroll ke bawah normal, sembunyikan indikator
         wheelAccumulatorRef.current = 0;
         setPullY(0);
       }
     };
 
     // ==========================================
-    // 3. MOUSE DRAG EVENT (Klik & Tarik dari Atas di Desktop)
+    // 3. MOUSE DRAG EVENT (Klik & Tarik di Desktop)
     // ==========================================
     const handleMouseDown = (e: MouseEvent) => {
-      if (window.scrollY <= 0 && e.clientY <= 70 && !isRefreshing && e.button === 0) {
+      if (getScrollTop() <= 5 && e.clientY <= 80 && !isRefreshing && e.button === 0) {
         startYRef.current = e.clientY;
         isDraggingMouseRef.current = true;
       }
@@ -132,8 +136,8 @@ export default function PullToRefresh() {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingMouseRef.current || isRefreshing) return;
       const diff = e.clientY - startYRef.current;
-      if (diff > 0 && window.scrollY <= 0) {
-        setPullY(Math.min(diff * 0.45, MAX_PULL));
+      if (diff > 0 && getScrollTop() <= 5) {
+        setPullY(Math.min(diff * 0.55, MAX_PULL));
       } else {
         setPullY(0);
       }
@@ -176,7 +180,6 @@ export default function PullToRefresh() {
     };
   }, [isRefreshing, pullY, triggerRefresh]);
 
-  // Jika tidak sedang ditarik dan tidak refreshing, jangan render apa-apa
   if (pullY === 0 && !isRefreshing) return null;
 
   const isTriggered = pullY >= PULL_THRESHOLD;
@@ -184,9 +187,9 @@ export default function PullToRefresh() {
 
   return (
     <div
-      className="fixed left-0 right-0 z-50 flex justify-center pointer-events-none transition-transform duration-100 ease-out"
+      className="fixed left-0 right-0 z-50 flex justify-center pointer-events-none transition-transform duration-150 ease-out"
       style={{
-        top: 0,
+        top: 10,
         transform: `translateY(${pullY}px)`,
       }}
     >
@@ -212,7 +215,7 @@ export default function PullToRefresh() {
             ? 'Memperbarui data...'
             : isTriggered
             ? 'Lepas untuk refresh'
-            : 'Tarik untuk refresh'}
+            : 'Tarik ke bawah untuk refresh'}
         </span>
       </div>
     </div>

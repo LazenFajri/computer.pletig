@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Clock, ArrowRight } from 'lucide-react';
+import { getAllMeetingsAction } from '@/app/actions/meeting-actions';
 
 export interface DynamicMeetingData {
   id: string;
@@ -116,13 +117,49 @@ function getIndonesianDateDetails(dateStr?: string | null) {
 
 export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleTabsProps) {
   const [activeGrade, setActiveGrade] = useState<number>(4);
+  const [meetings, setMeetings] = useState(initialMeetings);
+
+  useEffect(() => {
+    setMeetings(initialMeetings);
+  }, [initialMeetings]);
+
+  // Real-time synchronization saat pull-to-refresh atau berkala tiap 6 detik jika tab aktif
+  useEffect(() => {
+    const handleRefresh = async () => {
+      try {
+        const refreshed = await getAllMeetingsAction();
+        if (refreshed) {
+          setMeetings((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(refreshed)) {
+              return refreshed as any;
+            }
+            return prev;
+          });
+        }
+      } catch {
+        // silent
+      }
+    };
+
+    window.addEventListener('app:pull-to-refresh', handleRefresh);
+
+    const timer = setInterval(() => {
+      if (document.hidden) return;
+      handleRefresh();
+    }, 6000);
+
+    return () => {
+      window.removeEventListener('app:pull-to-refresh', handleRefresh);
+      clearInterval(timer);
+    };
+  }, []);
 
   // Bangun jadwal dinamis berdasarkan data sesi yang dibuat oleh Admin/Pembina
   const schedules = [4, 5, 6].map((grade) => {
     const base = DEFAULT_CONFIG[grade];
 
     // Filter pertemuan yang berlaku untuk jenjang kelas ini atau semua kelas
-    const applicable = initialMeetings.filter(
+    const applicable = meetings.filter(
       (m) => m.gradeLevel === grade || m.gradeLevel === null
     );
 

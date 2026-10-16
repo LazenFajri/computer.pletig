@@ -128,10 +128,30 @@ export default function AbsenClient({
     if (isFirstMount.current) {
       isFirstMount.current = false;
       if (initialStudents.length > 0 && selectedGrade === initialGrade) {
-        return;
+        // Jangan fetch ulang di mount pertama jika data SSR sudah ada
+      } else {
+        loadGradeData(selectedGrade);
       }
+    } else {
+      loadGradeData(selectedGrade);
     }
-    loadGradeData(selectedGrade);
+
+    // Tangkap event pull-to-refresh
+    const handlePullRefresh = () => {
+      loadGradeData(selectedGrade);
+    };
+    window.addEventListener('app:pull-to-refresh', handlePullRefresh);
+
+    // Auto-sync realtime tiap 5 detik saat tab aktif
+    const timer = setInterval(() => {
+      if (document.hidden) return;
+      loadGradeData(selectedGrade);
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('app:pull-to-refresh', handlePullRefresh);
+      clearInterval(timer);
+    };
   }, [selectedGrade]);
 
   const handleGradeChange = (grade: GradeLevel) => {
