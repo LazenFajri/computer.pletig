@@ -97,42 +97,35 @@ export default function AdminDashboardClient({
   const [assignmentsList, setAssignmentsList] = useState(initialAssignments);
   const [submissionsList, setSubmissionsList] = useState(initialSubmissions);
 
-  // Sync state saat initial props dari server ter-update & simpan ke offline storage
+  // Sync state saat initial props dari server ter-update
   useEffect(() => {
-    if (initialMeetings && initialMeetings.length > 0) {
+    if (Array.isArray(initialMeetings)) {
       setMeetingsList(initialMeetings);
       saveOfflineData(OFFLINE_KEYS.ALL_MEETINGS, initialMeetings);
-    } else {
-      const cached = getOfflineData<typeof initialMeetings>(OFFLINE_KEYS.ALL_MEETINGS);
-      if (cached && cached.length > 0) setMeetingsList(cached);
     }
   }, [initialMeetings]);
 
   useEffect(() => {
-    if (initialMaterials && initialMaterials.length > 0) {
+    if (Array.isArray(initialMaterials)) {
       setMaterialsList(initialMaterials);
       saveOfflineData(OFFLINE_KEYS.MATERIALS, initialMaterials);
-    } else {
-      const cached = getOfflineData<typeof initialMaterials>(OFFLINE_KEYS.MATERIALS);
-      if (cached && cached.length > 0) setMaterialsList(cached);
     }
   }, [initialMaterials]);
 
   useEffect(() => {
-    if (initialAssignments && initialAssignments.length > 0) {
+    if (Array.isArray(initialAssignments)) {
       setAssignmentsList(initialAssignments);
       saveOfflineData(OFFLINE_KEYS.ASSIGNMENTS, initialAssignments);
-    } else {
-      const cached = getOfflineData<typeof initialAssignments>(OFFLINE_KEYS.ASSIGNMENTS);
-      if (cached && cached.length > 0) setAssignmentsList(cached);
     }
   }, [initialAssignments]);
 
   useEffect(() => {
-    setSubmissionsList(initialSubmissions);
+    if (Array.isArray(initialSubmissions)) {
+      setSubmissionsList(initialSubmissions);
+    }
   }, [initialSubmissions]);
 
-  // Real-time synchronization: Saat pull-to-refresh ditarik atau berkala tiap 5 detik jika tab aktif
+  // Real-time synchronization: Saat pull-to-refresh ditarik atau berkala tiap 4 detik jika tab aktif
   const refetchAllData = useCallback(async () => {
     try {
       const [refreshedM, refreshedMat, refreshedAss, refreshedSub] = await Promise.all([
@@ -142,7 +135,7 @@ export default function AdminDashboardClient({
         getSubmissionsAction(),
       ]);
 
-      if (refreshedM && refreshedM.length > 0) {
+      if (Array.isArray(refreshedM)) {
         saveOfflineData(OFFLINE_KEYS.ALL_MEETINGS, refreshedM);
         setMeetingsList((prev) => {
           if (JSON.stringify(prev) !== JSON.stringify(refreshedM)) {
@@ -151,7 +144,7 @@ export default function AdminDashboardClient({
           return prev;
         });
       }
-      if (refreshedMat && refreshedMat.length > 0) {
+      if (Array.isArray(refreshedMat)) {
         saveOfflineData(OFFLINE_KEYS.MATERIALS, refreshedMat);
         setMaterialsList((prev) => {
           if (JSON.stringify(prev) !== JSON.stringify(refreshedMat)) {
@@ -160,7 +153,8 @@ export default function AdminDashboardClient({
           return prev;
         });
       }
-      if (refreshedAss) {
+      if (Array.isArray(refreshedAss)) {
+        saveOfflineData(OFFLINE_KEYS.ASSIGNMENTS, refreshedAss);
         setAssignmentsList((prev) => {
           if (JSON.stringify(prev) !== JSON.stringify(refreshedAss)) {
             return refreshedAss;
@@ -168,7 +162,7 @@ export default function AdminDashboardClient({
           return prev;
         });
       }
-      if (refreshedSub) {
+      if (Array.isArray(refreshedSub)) {
         setSubmissionsList((prev) => {
           if (JSON.stringify(prev) !== JSON.stringify(refreshedSub)) {
             return refreshedSub;
@@ -859,35 +853,63 @@ export default function AdminDashboardClient({
   // --- HANDLER: CONFIRM DELETE (EXECUTOR) ---
   const handleConfirmDelete = () => {
     if (!deleteModal.id) return;
+    const targetId = deleteModal.id;
+    const targetType = deleteModal.type;
+
+    // Tutup modal konfirmasi seketika
+    setDeleteModal({ isOpen: false, type: 'meeting', id: '', title: '' });
 
     startTransition(async () => {
-      if (deleteModal.type === 'meeting') {
-        const res = await deleteMeetingAction(deleteModal.id);
+      if (targetType === 'meeting') {
+        // 1. Optimistic UI update: hilangkan langsung dari tampilan layar
+        setMeetingsList((prev) => {
+          const next = prev.filter((m) => m.id !== targetId);
+          saveOfflineData(OFFLINE_KEYS.ALL_MEETINGS, next);
+          return next;
+        });
+        try {
+          const homeCached = getOfflineData<any[]>(OFFLINE_KEYS.HOME_MEETINGS);
+          if (homeCached) {
+            saveOfflineData(OFFLINE_KEYS.HOME_MEETINGS, homeCached.filter((m) => m.id !== targetId));
+          }
+        } catch {}
+
+        const res = await deleteMeetingAction(targetId);
         if (res.success) {
           showNotification('success', res.message || 'Sesi pertemuan berhasil dihapus.');
-          setMeetingsList((prev) => prev.filter((m) => m.id !== deleteModal.id));
         } else {
           showNotification('error', res.error || 'Gagal menghapus sesi.');
         }
-      } else if (deleteModal.type === 'material') {
-        const res = await deleteMaterialAction(deleteModal.id);
+        refetchAllData();
+      } else if (targetType === 'material') {
+        setMaterialsList((prev) => {
+          const next = prev.filter((m) => m.id !== targetId);
+          saveOfflineData(OFFLINE_KEYS.MATERIALS, next);
+          return next;
+        });
+
+        const res = await deleteMaterialAction(targetId);
         if (res.success) {
           showNotification('success', res.message || 'Materi berhasil dihapus.');
-          setMaterialsList((prev) => prev.filter((m) => m.id !== deleteModal.id));
         } else {
           showNotification('error', res.error || 'Gagal menghapus materi.');
         }
-      } else if (deleteModal.type === 'assignment') {
-        const res = await deleteAssignmentAction(deleteModal.id);
+        refetchAllData();
+      } else if (targetType === 'assignment') {
+        setAssignmentsList((prev) => {
+          const next = prev.filter((a) => a.id !== targetId);
+          saveOfflineData(OFFLINE_KEYS.ASSIGNMENTS, next);
+          return next;
+        });
+
+        const res = await deleteAssignmentAction(targetId);
         if (res.success) {
           showNotification('success', res.message || 'Tugas berhasil dihapus.');
-          setAssignmentsList((prev) => prev.filter((a) => a.id !== deleteModal.id));
         } else {
           showNotification('error', res.error || 'Gagal menghapus tugas.');
         }
+        refetchAllData();
       }
-
-      setDeleteModal({ isOpen: false, type: 'meeting', id: '', title: '' });
     });
   };
 

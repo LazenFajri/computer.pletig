@@ -1,5 +1,5 @@
 // computer.pletig - Service Worker (Offline-First Cache)
-const CACHE_NAME = 'pletig-offline-v1';
+const CACHE_NAME = 'pletig-offline-v2';
 
 // Aset dasar yang langsung dicache saat aplikasi pertama kali diakses
 const PRECACHE_ASSETS = [
@@ -51,10 +51,13 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // Jangan cache WebSocket, API rekap, atau chrome-extension
+  // Jangan cache WebSocket, rute admin/dashboard, portal guru, endpoint API, atau ekstensi browser
+  // Rute admin/guru harus 100% langsung (fresh) dari database tanpa cache
   if (
     url.protocol.startsWith('ws') ||
-    url.pathname.startsWith('/api/admin/rekap-excel') ||
+    url.pathname.startsWith('/admin') ||
+    url.pathname.startsWith('/guru') ||
+    url.pathname.startsWith('/api') ||
     url.protocol === 'chrome-extension:'
   ) {
     return;

@@ -27,7 +27,7 @@ export default function MateriClient({ initialMaterials }: MateriClientProps) {
   const [activeModalMaterial, setActiveModalMaterial] = useState<MaterialWithMeeting | null>(null);
 
   useEffect(() => {
-    if (initialMaterials && initialMaterials.length > 0) {
+    if (Array.isArray(initialMaterials)) {
       setMaterials(initialMaterials);
       saveOfflineData(OFFLINE_KEYS.MATERIALS, initialMaterials);
     } else {

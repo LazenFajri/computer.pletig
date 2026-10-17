@@ -121,11 +121,11 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
   const [meetings, setMeetings] = useState(initialMeetings);
 
   useEffect(() => {
-    if (initialMeetings && initialMeetings.length > 0) {
+    if (Array.isArray(initialMeetings)) {
       setMeetings(initialMeetings);
       saveOfflineData(OFFLINE_KEYS.HOME_MEETINGS, initialMeetings);
     } else {
-      // Pulihkan dari cache offline jika tersedia
+      // Pulihkan dari cache offline hanya jika initialMeetings tidak terdefinisi
       const cached = getOfflineData<DynamicMeetingData[]>(OFFLINE_KEYS.HOME_MEETINGS);
       if (cached && cached.length > 0) {
         setMeetings(cached);
@@ -133,12 +133,12 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
     }
   }, [initialMeetings]);
 
-  // Real-time synchronization saat pull-to-refresh atau berkala tiap 6 detik jika tab aktif
+  // Real-time synchronization saat pull-to-refresh atau berkala tiap 5 detik jika tab aktif
   useEffect(() => {
     const handleRefresh = async () => {
       try {
         const refreshed = await getAllMeetingsAction();
-        if (refreshed && refreshed.length > 0) {
+        if (Array.isArray(refreshed)) {
           saveOfflineData(OFFLINE_KEYS.HOME_MEETINGS, refreshed);
           setMeetings((prev) => {
             if (JSON.stringify(prev) !== JSON.stringify(refreshed)) {
