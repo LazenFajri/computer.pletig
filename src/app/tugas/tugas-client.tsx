@@ -21,6 +21,9 @@ import {
   AlertCircle,
   Send,
   Check,
+  FileDown,
+  Loader2,
+  Link as LinkIcon,
 } from 'lucide-react';
 
 interface StudentItem {
@@ -53,6 +56,9 @@ export default function TugasClient({
   const [studentName, setStudentName] = useState('');
   const [submissionUrl, setSubmissionUrl] = useState('');
   const [submissionText, setSubmissionText] = useState('');
+  const [submissionMode, setSubmissionMode] = useState<'file' | 'link'>('file');
+  const [uploadingStudentFile, setUploadingStudentFile] = useState(false);
+  const [studentUploadedFileName, setStudentUploadedFileName] = useState('');
 
   // Auto-suggest students for chosen grade
   const [studentsList, setStudentsList] = useState<StudentItem[]>([]);
@@ -88,6 +94,9 @@ export default function TugasClient({
     setSearchStudent('');
     setSubmissionUrl('');
     setSubmissionText('');
+    setSubmissionMode('file');
+    setUploadingStudentFile(false);
+    setStudentUploadedFileName('');
     setStatusMsg(null);
   };
 
@@ -99,6 +108,37 @@ export default function TugasClient({
   const filteredStudents = studentsList.filter((s) =>
     s.name.toLowerCase().includes(searchStudent.toLowerCase())
   );
+
+  const handleStudentFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      alert('Ukuran file terlalu besar! Maksimal 15MB.');
+      return;
+    }
+
+    setUploadingStudentFile(true);
+    setStatusMsg(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Gagal mengunggah file.');
+      }
+      setSubmissionUrl(data.fileUrl);
+      setStudentUploadedFileName(data.originalName || file.name);
+    } catch (err: any) {
+      alert(err.message || 'Gagal mengunggah file tugas.');
+    } finally {
+      setUploadingStudentFile(false);
+    }
+  };
 
   const handleSubmitTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +152,9 @@ export default function TugasClient({
     if (!submissionUrl.trim() && !submissionText.trim()) {
       setStatusMsg({
         type: 'error',
-        text: 'Silakan isi link tugas (Google Drive / Canva / Scratch) atau ketik catatan hasil praktikummu.',
+        text: submissionMode === 'file'
+          ? 'Silakan pilih dan upload file tugas kamu terlebih dahulu.'
+          : 'Silakan isi tautan/link tugas (Google Drive / Canva / Scratch).',
       });
       return;
     }
@@ -280,6 +322,21 @@ export default function TugasClient({
                         {ass.instructions}
                       </div>
                     )}
+
+                    {ass.attachmentUrl && (
+                      <div className="mb-4">
+                        <a
+                          href={ass.attachmentUrl}
+                          target="_blank"
+                          download
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-100/90 hover:bg-amber-200 border border-amber-300/80 px-3.5 py-2 rounded-2xl transition-all shadow-xs"
+                        >
+                          <FileDown className="w-4 h-4 text-amber-700" />
+                          <span>Unduh Lembar Kerja / Panduan Tugas</span>
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
@@ -353,15 +410,28 @@ export default function TugasClient({
                 </div>
 
                 {sub.submissionUrl && (
-                  <a
-                    href={sub.submissionUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-xl flex items-center gap-1 transition-colors shrink-0"
-                  >
-                    <span>Buka File / Link</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                  sub.submissionUrl.startsWith('/api/files/') ? (
+                    <a
+                      href={sub.submissionUrl}
+                      target="_blank"
+                      download
+                      rel="noreferrer"
+                      className="text-xs font-bold text-emerald-800 bg-emerald-100/90 hover:bg-emerald-200 border border-emerald-300/80 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
+                    >
+                      <FileDown className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>Unduh File Saya</span>
+                    </a>
+                  ) : (
+                    <a
+                      href={sub.submissionUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-xl flex items-center gap-1 transition-colors shrink-0"
+                    >
+                      <span>Buka Link Tugas</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )
                 )}
               </div>
             ))
@@ -499,21 +569,99 @@ export default function TugasClient({
                 )}
               </div>
 
-              {/* Step 3: Link Tugas */}
+              {/* Step 3: Pilih File Tugas atau Link Online */}
               <div>
-                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1.5">
-                  3. Link Hasil Tugas (Google Drive / Canva / Scratch / Video)
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://drive.google.com/... atau https://scratch.mit.edu/..."
-                  value={submissionUrl}
-                  onChange={(e) => setSubmissionUrl(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
-                />
-                <span className="text-[10px] text-slate-400 mt-1 block">
-                  Pastikan link Google Drive atau Canva disetel &quot;Siapa saja yang memiliki link dapat melihat&quot;.
-                </span>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
+                    3. Hasil Kerja Siswa *
+                  </label>
+                  <div className="flex bg-slate-100 p-0.5 rounded-xl text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setSubmissionMode('file')}
+                      className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                        submissionMode === 'file'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      📁 Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSubmissionMode('link')}
+                      className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                        submissionMode === 'link'
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      🔗 Link Online
+                    </button>
+                  </div>
+                </div>
+
+                {submissionMode === 'file' ? (
+                  <div className="border-2 border-dashed border-amber-300 bg-amber-50/50 hover:bg-amber-50 rounded-2xl p-4 text-center transition-all">
+                    {uploadingStudentFile ? (
+                      <div className="py-4 flex flex-col items-center justify-center text-amber-700">
+                        <Loader2 className="w-8 h-8 animate-spin text-amber-600 mb-2" />
+                        <span className="text-xs font-bold">Mengupload file tugas...</span>
+                        <span className="text-[10px] text-amber-600/70">Mohon tunggu sebentar</span>
+                      </div>
+                    ) : submissionUrl && submissionUrl.startsWith('/api/files/') ? (
+                      <div className="py-2 flex flex-col items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2">
+                          <CheckCircle2 className="w-6 h-6" />
+                        </div>
+                        <span className="text-xs font-bold text-slate-800 mb-0.5 max-w-[280px] truncate">
+                          {studentUploadedFileName || 'File berhasil diunggah'}
+                        </span>
+                        <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold border border-emerald-200">
+                          File siap dikirimkan
+                        </span>
+                        <label className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-700 font-bold hover:underline cursor-pointer">
+                          <span>Ganti File Lain</span>
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.sb3,.xlsx,.pptx"
+                            onChange={handleStudentFileUpload}
+                          />
+                        </label>
+                      </div>
+                    ) : (
+                      <label className="cursor-pointer flex flex-col items-center justify-center py-3">
+                        <Upload className="w-8 h-8 text-amber-600 mb-2 animate-bounce" />
+                        <span className="text-xs font-bold text-slate-800">
+                          Klik untuk Memilih File Tugas
+                        </span>
+                        <span className="text-[10px] text-slate-500 mt-1 max-w-xs">
+                          Word (.docx), PDF, Gambar (.png/.jpg), Scratch (.sb3), Excel (.xlsx) maks 15MB
+                        </span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.sb3,.xlsx,.pptx"
+                          onChange={handleStudentFileUpload}
+                        />
+                      </label>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/... atau https://scratch.mit.edu/..."
+                      value={submissionUrl}
+                      onChange={(e) => setSubmissionUrl(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      Pastikan link Google Drive atau Canva disetel &quot;Siapa saja yang memiliki link dapat melihat&quot;.
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Step 4: Catatan / Teks Tambahan */}

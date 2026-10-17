@@ -15,6 +15,7 @@ export interface CreateAssignmentParams {
   instructions?: string;
   dueDate?: string; // YYYY-MM-DD
   maxScore?: number;
+  attachmentUrl?: string | null;
 }
 
 export interface SubmitAssignmentParams {
@@ -38,6 +39,7 @@ export interface AssignmentWithDetails {
   instructions: string | null;
   dueDate: string | null;
   maxScore: number;
+  attachmentUrl: string | null;
   createdAt: Date;
   submissionCount: number;
   meeting: {
@@ -96,6 +98,7 @@ export async function getAssignmentsAction(
         instructions: ass.instructions,
         dueDate: ass.due_date,
         maxScore: ass.max_score,
+        attachmentUrl: ass.attachment_url || null,
         createdAt: ass.created_at,
         submissionCount: subCount,
         meeting: ass.meeting
@@ -128,10 +131,13 @@ export async function createAssignmentAction(
       return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat membuat tugas.' };
     }
 
-    const { meetingId, gradeLevel, title, instructions = '', dueDate, maxScore = 100 } = params;
+    const { meetingId, gradeLevel, title, instructions = '', dueDate, maxScore = 100, attachmentUrl } = params;
 
     const cleanTitle = sanitizeText(title.trim(), 120);
     const cleanInstructions = sanitizeText(instructions.trim(), 5000);
+    const cleanAttachmentUrl = attachmentUrl && attachmentUrl.trim()
+      ? (sanitizeUrl(attachmentUrl) || sanitizeText(attachmentUrl.trim(), 500))
+      : null;
 
     if (!cleanTitle) {
       return { success: false, error: 'Judul tugas wajib diisi.' };
@@ -190,6 +196,7 @@ export async function createAssignmentAction(
         instructions: cleanInstructions || null,
         due_date: dueDate?.trim() || null,
         max_score: maxScore || 100,
+        attachment_url: cleanAttachmentUrl || null,
         is_group_work: false,
       })
       .returning();
@@ -224,6 +231,7 @@ export interface UpdateAssignmentParams {
   instructions?: string;
   dueDate?: string;
   maxScore?: number;
+  attachmentUrl?: string | null;
 }
 
 /**
@@ -243,10 +251,16 @@ export async function updateAssignmentAction(
       return { success: false, error: 'Hanya Pembina yang berhak mengubah tugas.' };
     }
 
-    const { assignmentId, meetingId, title, instructions = '', dueDate, maxScore = 100 } = params;
+    const { assignmentId, meetingId, title, instructions = '', dueDate, maxScore = 100, attachmentUrl } = params;
 
     const cleanTitle = sanitizeText(title.trim(), 120);
     const cleanInstructions = sanitizeText(instructions.trim(), 5000);
+    const cleanAttachmentUrl =
+      attachmentUrl !== undefined
+        ? attachmentUrl && attachmentUrl.trim()
+          ? sanitizeUrl(attachmentUrl) || sanitizeText(attachmentUrl.trim(), 500)
+          : null
+        : undefined;
 
     if (!cleanTitle) {
       return { success: false, error: 'Judul tugas wajib diisi.' };
@@ -276,6 +290,7 @@ export async function updateAssignmentAction(
         instructions: cleanInstructions || null,
         due_date: dueDate?.trim() || null,
         max_score: maxScore || 100,
+        ...(cleanAttachmentUrl !== undefined ? { attachment_url: cleanAttachmentUrl || null } : {}),
       })
       .where(eq(assignments.id, assignmentId))
       .returning();

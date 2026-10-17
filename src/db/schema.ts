@@ -179,6 +179,7 @@ export const assignments = sqliteTable('assignments', {
   instructions: text('instructions'),
   due_date: text('due_date'), // YYYY-MM-DD
   max_score: integer('max_score').notNull().default(100),
+  attachment_url: text('attachment_url'), // File materi / panduan tugas dari pembina
   is_group_work: integer('is_group_work', { mode: 'boolean' })
     .notNull()
     .default(false),

@@ -71,6 +71,8 @@ import {
   Database,
   RefreshCw,
   Archive,
+  FileDown,
+  Loader2,
 } from 'lucide-react';
 
 interface AdminDashboardClientProps {
@@ -228,8 +230,10 @@ export default function AdminDashboardClient({
     title: '',
     contentMarkdown: '',
     fileUrl: '',
-    fileType: 'link' as 'link' | 'pdf' | 'doc' | 'video',
+    fileType: 'pdf' as 'link' | 'pdf' | 'doc' | 'video',
   });
+  const [uploadingMaterialFile, setUploadingMaterialFile] = useState(false);
+  const [materialFileName, setMaterialFileName] = useState('');
 
   // Modal / Form state: Tugas Baru
   const [showNewAssignmentModal, setShowNewAssignmentModal] = useState(false);
@@ -240,7 +244,28 @@ export default function AdminDashboardClient({
     instructions: '',
     dueDate: '',
     maxScore: 100,
+    attachmentUrl: '',
   });
+  const [uploadingAssignmentAttachment, setUploadingAssignmentAttachment] = useState(false);
+  const [assignmentAttachmentName, setAssignmentAttachmentName] = useState('');
+
+  // Helper upload file to server
+  const uploadFileToServer = async (file: File): Promise<{ fileUrl: string; originalName: string }> => {
+    if (file.size > 15 * 1024 * 1024) {
+      throw new Error('Ukuran file terlalu besar! Maksimal 15MB.');
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Gagal mengunggah file.');
+    }
+    return { fileUrl: data.fileUrl, originalName: data.originalName || file.name };
+  };
 
   // Feedback & Message notifications
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -277,6 +302,8 @@ export default function AdminDashboardClient({
     isOpen: boolean;
     data: AssignmentWithDetails | null;
   }>({ isOpen: false, data: null });
+  const [uploadingEditMaterialFile, setUploadingEditMaterialFile] = useState(false);
+  const [uploadingEditAssignmentAttachment, setUploadingEditAssignmentAttachment] = useState(false);
 
   // Modal Daftar Hadir Siswa per Sesi
   const [attendanceListModal, setAttendanceListModal] = useState<{
@@ -790,6 +817,7 @@ export default function AdminDashboardClient({
         instructions: assignmentForm.instructions,
         dueDate: assignmentForm.dueDate,
         maxScore: Number(assignmentForm.maxScore) || 100,
+        attachmentUrl: assignmentForm.attachmentUrl || null,
       });
 
       if (res.success && res.data) {
@@ -824,6 +852,7 @@ export default function AdminDashboardClient({
           instructions: res.data.instructions,
           dueDate: res.data.due_date,
           maxScore: res.data.max_score,
+          attachmentUrl: res.data.attachment_url,
           createdAt: new Date(),
           submissionCount: 0,
           meeting: parentMeeting
@@ -857,7 +886,9 @@ export default function AdminDashboardClient({
           instructions: '',
           dueDate: '',
           maxScore: 100,
+          attachmentUrl: '',
         });
+        setAssignmentAttachmentName('');
 
         refetchAllData();
       } else {
@@ -883,6 +914,7 @@ export default function AdminDashboardClient({
         instructions: target.instructions || '',
         dueDate: target.dueDate || '',
         maxScore: Number(target.maxScore) || 100,
+        attachmentUrl: target.attachmentUrl || null,
       });
 
       if (res.success && res.data) {
@@ -898,6 +930,7 @@ export default function AdminDashboardClient({
                   instructions: target.instructions,
                   dueDate: target.dueDate,
                   maxScore: target.maxScore,
+                  attachmentUrl: target.attachmentUrl,
                   meeting: parentMeeting
                     ? {
                         id: parentMeeting.id,
@@ -1627,6 +1660,21 @@ export default function AdminDashboardClient({
                         {ass.instructions}
                       </p>
                     )}
+
+                    {ass.attachmentUrl && (
+                      <div className="mb-3">
+                        <a
+                          href={ass.attachmentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          download
+                          className="inline-flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2.5 py-1.5 rounded-xl transition-colors font-bold shadow-xs"
+                        >
+                          <FileDown className="w-3.5 h-3.5 text-amber-700" />
+                          <span>Lembar Kerja / Panduan Tugas Terlampir</span>
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -1713,18 +1761,31 @@ export default function AdminDashboardClient({
                         Tugas: {sub.assignmentTitle || 'Praktikum Komputer'}
                       </div>
 
-                      {/* Content or URL */}
+                      {/* Content or File Download or URL */}
                       {sub.submissionUrl && (
-                        <div className="mb-2">
-                          <a
-                            href={sub.submissionUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-semibold bg-blue-50 px-2.5 py-1 rounded-xl"
-                          >
-                            <span>Lihat Link Karya / Drive Siswa</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                          {sub.submissionUrl.startsWith('/api/files/') ? (
+                            <a
+                              href={sub.submissionUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              download
+                              className="inline-flex items-center gap-1.5 text-xs text-emerald-800 hover:text-emerald-950 font-bold bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl transition-all shadow-xs"
+                            >
+                              <FileDown className="w-4 h-4 text-emerald-600" />
+                              <span>Unduh / Buka File Tugas Siswa</span>
+                            </a>
+                          ) : (
+                            <a
+                              href={sub.submissionUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-blue-700 hover:text-blue-900 font-semibold bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-xl transition-colors"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                              <span>Lihat Link Karya / Drive Siswa</span>
+                            </a>
+                          )}
                         </div>
                       )}
 
@@ -2412,34 +2473,125 @@ export default function AdminDashboardClient({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
-                    Tipe File / Media
+                    Tipe File / Media *
                   </label>
                   <select
                     value={materialForm.fileType}
-                    onChange={(e) => setMaterialForm({ ...materialForm, fileType: e.target.value as any })}
-                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white"
+                    onChange={(e) => {
+                      const newType = e.target.value as any;
+                      setMaterialForm({
+                        ...materialForm,
+                        fileType: newType,
+                        fileUrl: newType === 'video' || newType === 'link' ? '' : materialForm.fileUrl,
+                      });
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white font-medium"
                   >
-                    <option value="link">Link Google Drive / Canva</option>
-                    <option value="pdf">Dokumen Modul PDF</option>
-                    <option value="video">Video Tutorial</option>
-                    <option value="doc">Dokumen Word / Teks</option>
+                    <option value="pdf">📄 Dokumen Modul PDF (File)</option>
+                    <option value="doc">📝 Dokumen Word / Teks (File)</option>
+                    <option value="video">🎥 Video Tutorial (Link URL)</option>
+                    <option value="link">🔗 Link Canva / Google Drive</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
-                    URL File / Tautan Materi
+                    {materialForm.fileType === 'video'
+                      ? 'Link Video Tutorial (YouTube / Drive)'
+                      : materialForm.fileType === 'link'
+                      ? 'Link Canva / Google Drive'
+                      : 'File Dokumen Materi *'}
                   </label>
-                  <input
-                    type="url"
-                    placeholder="https://drive.google.com/..."
-                    value={materialForm.fileUrl}
-                    onChange={(e) => setMaterialForm({ ...materialForm, fileUrl: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none"
-                  />
+
+                  {materialForm.fileType === 'pdf' || materialForm.fileType === 'doc' ? (
+                    <div>
+                      {uploadingMaterialFile ? (
+                        <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-center gap-2 text-xs text-blue-700 font-bold">
+                          <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                          <span>Mengupload dokumen...</span>
+                        </div>
+                      ) : materialForm.fileUrl && materialForm.fileUrl.startsWith('/api/files/') ? (
+                        <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="text-xs font-bold text-emerald-950 truncate max-w-[140px]">
+                              {materialFileName || 'File terunggah'}
+                            </span>
+                          </div>
+                          <label className="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer shrink-0">
+                            Ganti File
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept={materialForm.fileType === 'pdf' ? '.pdf' : '.doc,.docx,.txt,.rtf'}
+                              onChange={async (e) => {
+                                const f = e.target.files?.[0];
+                                if (!f) return;
+                                setUploadingMaterialFile(true);
+                                try {
+                                  const uploaded = await uploadFileToServer(f);
+                                  setMaterialForm({ ...materialForm, fileUrl: uploaded.fileUrl });
+                                  setMaterialFileName(uploaded.originalName);
+                                } catch (err: any) {
+                                  showNotification('error', err.message);
+                                } finally {
+                                  setUploadingMaterialFile(false);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-700 text-xs font-bold cursor-pointer transition-colors">
+                            <Upload className="w-4 h-4" />
+                            <span>Pilih File ({materialForm.fileType === 'pdf' ? '.pdf' : '.doc, .docx'})</span>
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept={materialForm.fileType === 'pdf' ? '.pdf' : '.doc,.docx,.txt,.rtf'}
+                              onChange={async (e) => {
+                                const f = e.target.files?.[0];
+                                if (!f) return;
+                                setUploadingMaterialFile(true);
+                                try {
+                                  const uploaded = await uploadFileToServer(f);
+                                  setMaterialForm({ ...materialForm, fileUrl: uploaded.fileUrl });
+                                  setMaterialFileName(uploaded.originalName);
+                                } catch (err: any) {
+                                  showNotification('error', err.message);
+                                } finally {
+                                  setUploadingMaterialFile(false);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        type="url"
+                        placeholder={
+                          materialForm.fileType === 'video'
+                            ? 'https://youtube.com/watch?v=... atau https://drive.google.com/...'
+                            : 'https://drive.google.com/... atau https://canva.com/...'
+                        }
+                        value={materialForm.fileUrl}
+                        onChange={(e) => setMaterialForm({ ...materialForm, fileUrl: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none"
+                      />
+                      {materialForm.fileType === 'video' && (
+                        <span className="text-[10px] text-slate-500 mt-1 block">
+                          💡 Video tutorial memakai tautan (YouTube/Drive) agar tidak membebani database.
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -2594,6 +2746,88 @@ export default function AdminDashboardClient({
                   onChange={(e) => setAssignmentForm({ ...assignmentForm, instructions: e.target.value })}
                   className="w-full px-3.5 py-2 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                  Lampiran File Tugas / Lembar Soal (Opsional)
+                </label>
+                {uploadingAssignmentAttachment ? (
+                  <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-center gap-2 text-xs text-amber-700 font-bold">
+                    <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+                    <span>Mengupload file lembar kerja...</span>
+                  </div>
+                ) : assignmentForm.attachmentUrl ? (
+                  <div className="p-2 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <FileDown className="w-4 h-4 text-amber-700 shrink-0" />
+                      <span className="text-xs font-bold text-amber-950 truncate max-w-[200px]">
+                        {assignmentAttachmentName || 'File panduan terlampir'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <label className="text-[11px] font-bold text-amber-800 hover:underline cursor-pointer">
+                        Ganti
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.xlsx,.pptx,.sb3,.zip"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            setUploadingAssignmentAttachment(true);
+                            try {
+                              const uploaded = await uploadFileToServer(f);
+                              setAssignmentForm({ ...assignmentForm, attachmentUrl: uploaded.fileUrl });
+                              setAssignmentAttachmentName(uploaded.originalName);
+                            } catch (err: any) {
+                              showNotification('error', err.message);
+                            } finally {
+                              setUploadingAssignmentAttachment(false);
+                            }
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAssignmentForm({ ...assignmentForm, attachmentUrl: '' });
+                          setAssignmentAttachmentName('');
+                        }}
+                        className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/40 hover:bg-amber-50 text-amber-800 text-xs font-bold cursor-pointer transition-colors">
+                    <Upload className="w-4 h-4 text-amber-600" />
+                    <span>Upload Lembar Kerja / Panduan (.pdf, .docx, .sb3, dll)</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.xlsx,.pptx,.sb3,.zip"
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        setUploadingAssignmentAttachment(true);
+                        try {
+                          const uploaded = await uploadFileToServer(f);
+                          setAssignmentForm({ ...assignmentForm, attachmentUrl: uploaded.fileUrl });
+                          setAssignmentAttachmentName(uploaded.originalName);
+                        } catch (err: any) {
+                          showNotification('error', err.message);
+                        } finally {
+                          setUploadingAssignmentAttachment(false);
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  File ini dapat diunduh oleh siswa sebagai lembar materi kerja/latihan praktikum.
+                </span>
               </div>
 
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
@@ -2971,43 +3205,132 @@ export default function AdminDashboardClient({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
-                    Tipe File / Media
+                    Tipe File / Media *
                   </label>
                   <select
-                    value={editMaterialModal.data.fileType || 'link'}
+                    value={editMaterialModal.data.fileType || 'pdf'}
                     onChange={(e) =>
                       setEditMaterialModal({
                         ...editMaterialModal,
                         data: { ...editMaterialModal.data!, fileType: e.target.value as any },
                       })
                     }
-                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white"
+                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white font-medium"
                   >
-                    <option value="link">Link Google Drive / Canva</option>
-                    <option value="pdf">Dokumen Modul PDF</option>
-                    <option value="video">Video Tutorial</option>
-                    <option value="doc">Dokumen Word / Teks</option>
+                    <option value="pdf">📄 Dokumen Modul PDF (File)</option>
+                    <option value="doc">📝 Dokumen Word / Teks (File)</option>
+                    <option value="video">🎥 Video Tutorial (Link URL)</option>
+                    <option value="link">🔗 Link Canva / Google Drive</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
-                    URL File / Tautan Materi
+                    {editMaterialModal.data.fileType === 'video'
+                      ? 'Link Video Tutorial (YouTube / Drive)'
+                      : editMaterialModal.data.fileType === 'link'
+                      ? 'Link Canva / Google Drive'
+                      : 'File Dokumen Materi *'}
                   </label>
-                  <input
-                    type="url"
-                    value={editMaterialModal.data.fileUrl || ''}
-                    onChange={(e) =>
-                      setEditMaterialModal({
-                        ...editMaterialModal,
-                        data: { ...editMaterialModal.data!, fileUrl: e.target.value },
-                      })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none"
-                  />
+
+                  {editMaterialModal.data.fileType === 'pdf' || editMaterialModal.data.fileType === 'doc' ? (
+                    <div>
+                      {uploadingEditMaterialFile ? (
+                        <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-center gap-2 text-xs text-blue-700 font-bold">
+                          <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                          <span>Mengupload dokumen...</span>
+                        </div>
+                      ) : editMaterialModal.data.fileUrl && editMaterialModal.data.fileUrl.startsWith('/api/files/') ? (
+                        <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="text-xs font-bold text-emerald-950 truncate max-w-[140px]">
+                              File tersimpan di server
+                            </span>
+                          </div>
+                          <label className="text-[11px] font-bold text-blue-600 hover:underline cursor-pointer shrink-0">
+                            Ganti File
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept={editMaterialModal.data.fileType === 'pdf' ? '.pdf' : '.doc,.docx,.txt,.rtf'}
+                              onChange={async (e) => {
+                                const f = e.target.files?.[0];
+                                if (!f) return;
+                                setUploadingEditMaterialFile(true);
+                                try {
+                                  const uploaded = await uploadFileToServer(f);
+                                  setEditMaterialModal({
+                                    ...editMaterialModal,
+                                    data: { ...editMaterialModal.data!, fileUrl: uploaded.fileUrl },
+                                  });
+                                } catch (err: any) {
+                                  showNotification('error', err.message);
+                                } finally {
+                                  setUploadingEditMaterialFile(false);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-700 text-xs font-bold cursor-pointer transition-colors">
+                            <Upload className="w-4 h-4" />
+                            <span>Pilih File ({editMaterialModal.data.fileType === 'pdf' ? '.pdf' : '.doc, .docx'})</span>
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept={editMaterialModal.data.fileType === 'pdf' ? '.pdf' : '.doc,.docx,.txt,.rtf'}
+                              onChange={async (e) => {
+                                const f = e.target.files?.[0];
+                                if (!f) return;
+                                setUploadingEditMaterialFile(true);
+                                try {
+                                  const uploaded = await uploadFileToServer(f);
+                                  setEditMaterialModal({
+                                    ...editMaterialModal,
+                                    data: { ...editMaterialModal.data!, fileUrl: uploaded.fileUrl },
+                                  });
+                                } catch (err: any) {
+                                  showNotification('error', err.message);
+                                } finally {
+                                  setUploadingEditMaterialFile(false);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        type="url"
+                        placeholder={
+                          editMaterialModal.data.fileType === 'video'
+                            ? 'https://youtube.com/watch?v=... atau https://drive.google.com/...'
+                            : 'https://drive.google.com/... atau https://canva.com/...'
+                        }
+                        value={editMaterialModal.data.fileUrl || ''}
+                        onChange={(e) =>
+                          setEditMaterialModal({
+                            ...editMaterialModal,
+                            data: { ...editMaterialModal.data!, fileUrl: e.target.value },
+                          })
+                        }
+                        className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none"
+                      />
+                      {editMaterialModal.data.fileType === 'video' && (
+                        <span className="text-[10px] text-slate-500 mt-1 block">
+                          💡 Video tutorial memakai tautan (YouTube/Drive) agar tidak membebani database.
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -3173,6 +3496,94 @@ export default function AdminDashboardClient({
                   }
                   className="w-full px-3.5 py-2 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                  Lampiran File Tugas / Lembar Soal (Opsional)
+                </label>
+                {uploadingEditAssignmentAttachment ? (
+                  <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-center gap-2 text-xs text-amber-700 font-bold">
+                    <Loader2 className="w-4 h-4 animate-spin text-amber-600" />
+                    <span>Mengupload file lembar kerja...</span>
+                  </div>
+                ) : editAssignmentModal.data.attachmentUrl ? (
+                  <div className="p-2 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <FileDown className="w-4 h-4 text-amber-700 shrink-0" />
+                      <span className="text-xs font-bold text-amber-950 truncate max-w-[200px]">
+                        File panduan terlampir
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <label className="text-[11px] font-bold text-amber-800 hover:underline cursor-pointer">
+                        Ganti
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.doc,.docx,.xlsx,.pptx,.sb3,.zip"
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            setUploadingEditAssignmentAttachment(true);
+                            try {
+                              const uploaded = await uploadFileToServer(f);
+                              setEditAssignmentModal({
+                                ...editAssignmentModal,
+                                data: { ...editAssignmentModal.data!, attachmentUrl: uploaded.fileUrl },
+                              });
+                            } catch (err: any) {
+                              showNotification('error', err.message);
+                            } finally {
+                              setUploadingEditAssignmentAttachment(false);
+                            }
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditAssignmentModal({
+                            ...editAssignmentModal,
+                            data: { ...editAssignmentModal.data!, attachmentUrl: null },
+                          })
+                        }
+                        className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/40 hover:bg-amber-50 text-amber-800 text-xs font-bold cursor-pointer transition-colors">
+                    <Upload className="w-4 h-4 text-amber-600" />
+                    <span>Upload Lembar Kerja / Panduan (.pdf, .docx, .sb3, dll)</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.xlsx,.pptx,.sb3,.zip"
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        setUploadingEditAssignmentAttachment(true);
+                        try {
+                          const uploaded = await uploadFileToServer(f);
+                          setEditAssignmentModal({
+                            ...editAssignmentModal,
+                            data: { ...editAssignmentModal.data!, attachmentUrl: uploaded.fileUrl },
+                          });
+                        } catch (err: any) {
+                          showNotification('error', err.message);
+                        } finally {
+                          setUploadingEditAssignmentAttachment(false);
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  File ini dapat diunduh oleh siswa sebagai lembar materi kerja/latihan praktikum.
+                </span>
               </div>
 
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
