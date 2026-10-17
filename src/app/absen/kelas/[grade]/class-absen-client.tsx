@@ -43,8 +43,9 @@ interface StudentItem {
 interface AttendanceItem {
   id: string;
   student_name: string;
+  user_id?: string | null;
   grade_level: number;
-  checked_in_at: Date;
+  checked_in_at: Date | string;
 }
 
 interface ClassAbsenClientProps {
@@ -155,6 +156,28 @@ export default function ClassAbsenClient({
     return studentsList.filter((s) => s.class_name === rombel).length;
   };
 
+  // Cek apakah siswa tertentu sudah tercatat hadir di pertemuan aktif ini
+  const getStudentAttendanceRecord = (student: StudentItem | null) => {
+    if (!student) return null;
+    return (
+      attendancesList.find(
+        (a) =>
+          (a.user_id && a.user_id === student.id) ||
+          a.student_name.trim().toLowerCase() === student.name.trim().toLowerCase()
+      ) || null
+    );
+  };
+
+  const selectedStudentAttendance = getStudentAttendanceRecord(selectedStudent);
+  const isSelectedStudentAttended = Boolean(selectedStudentAttendance);
+  const attendedTimeString = selectedStudentAttendance
+    ? new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date(selectedStudentAttendance.checked_in_at)) + ' WIB'
+    : '';
+
   const handleSelectStudent = (student: StudentItem) => {
     setSelectedStudent(student);
     setSearchQuery(student.name);
@@ -187,6 +210,13 @@ export default function ClassAbsenClient({
 
     if (!selectedStudent) {
       setErrorMsg('Kamu belum memilih namamu! Silakan cari & klik namamu pada daftar siswa di bawah.');
+      return;
+    }
+
+    if (isSelectedStudentAttended) {
+      setErrorMsg(
+        `Nama "${selectedStudent.name}" sudah tercatat hadir pada pertemuan ini (${attendedTimeString}). Kamu tidak bisa absen dua kali ya!`
+      );
       return;
     }
 
@@ -553,33 +583,65 @@ export default function ClassAbsenClient({
 
               {/* Tampilan Siswa Terpilih (Jika sudah diklik) */}
               {selectedStudent ? (
-                <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-500 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-emerald-500/10 mb-4 animate-in fade-in">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold font-heading text-lg shrink-0 shadow-sm">
-                      {selectedStudent.name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        Siswa Terpilih (Siap Absen)
+                isSelectedStudentAttended ? (
+                  /* Kartu Jika Siswa Ini SUDAH TERCATAT HADIR */
+                  <div className="p-4 bg-emerald-50/90 border-2 border-emerald-400 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs mb-4 animate-in fade-in">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-700 text-white flex items-center justify-center font-bold font-heading text-lg shrink-0 shadow-xs">
+                        <CheckCircle2 className="w-7 h-7 text-emerald-200" />
                       </div>
-                      <h4 className="font-heading font-bold text-lg text-slate-900 mt-0.5">
-                        {selectedStudent.name}
-                      </h4>
-                      <div className="text-xs text-slate-600 font-medium">
-                        Rombel: <span className="font-bold text-emerald-800">{selectedStudent.class_name || `Kelas ${grade}`}</span> • Akun: <span className="font-mono text-slate-500">{selectedStudent.username}</span>
+                      <div>
+                        <div className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-emerald-900 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                          Sudah Hadir Hari Ini ({attendedTimeString})
+                        </div>
+                        <h4 className="font-heading font-bold text-lg text-slate-800 mt-0.5">
+                          {selectedStudent.name}
+                        </h4>
+                        <div className="text-xs text-slate-600 font-medium">
+                          Rombel: <span className="font-bold text-slate-800">{selectedStudent.class_name || `Kelas ${grade}`}</span> • Status: <span className="text-emerald-700 font-bold">Presensi telah tercatat</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={handleClearSelectedStudent}
-                    className="text-xs bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-bold px-3.5 py-2 rounded-xl border border-rose-200 transition-colors shadow-xs flex items-center justify-center gap-1.5 self-start sm:self-auto cursor-pointer"
-                  >
-                    <span>Ganti Nama Lain</span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={handleClearSelectedStudent}
+                      className="text-xs bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 font-bold px-3.5 py-2 rounded-xl border border-slate-300 transition-colors shadow-xs flex items-center justify-center gap-1.5 self-start sm:self-auto cursor-pointer"
+                    >
+                      <span>Pilih Siswa Lain</span>
+                    </button>
+                  </div>
+                ) : (
+                  /* Kartu Jika Siswa Belum Hadir (Siap Absen) */
+                  <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-500 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-emerald-500/10 mb-4 animate-in fade-in">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold font-heading text-lg shrink-0 shadow-sm">
+                        {selectedStudent.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          Siswa Terpilih (Siap Absen)
+                        </div>
+                        <h4 className="font-heading font-bold text-lg text-slate-900 mt-0.5">
+                          {selectedStudent.name}
+                        </h4>
+                        <div className="text-xs text-slate-600 font-medium">
+                          Rombel: <span className="font-bold text-emerald-800">{selectedStudent.class_name || `Kelas ${grade}`}</span> • Akun: <span className="font-mono text-slate-500">{selectedStudent.username}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleClearSelectedStudent}
+                      className="text-xs bg-white hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-bold px-3.5 py-2 rounded-xl border border-rose-200 transition-colors shadow-xs flex items-center justify-center gap-1.5 self-start sm:self-auto cursor-pointer"
+                    >
+                      <span>Ganti Nama Lain</span>
+                    </button>
+                  </div>
+                )
               ) : (
                 /* Input Pencarian Nama */
                 <div className="relative mb-3">
@@ -622,19 +684,35 @@ export default function ClassAbsenClient({
                   {filteredStudents.length > 0 ? (
                     filteredStudents.map((s) => {
                       const isSelected = selectedStudent?.id === s.id;
+                      const attRecord = getStudentAttendanceRecord(s);
+                      const isAttended = Boolean(attRecord);
+                      const attTime = attRecord
+                        ? new Intl.DateTimeFormat('id-ID', {
+                            timeZone: 'Asia/Jakarta',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          }).format(new Date(attRecord.checked_in_at)) + ' WIB'
+                        : '';
+
                       return (
                         <button
                           key={s.id}
                           type="button"
                           onClick={() => handleSelectStudent(s)}
                           className={`text-xs px-3.5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2 cursor-pointer ${
-                            isSelected
+                            isSelected && isAttended
+                              ? 'bg-slate-200 text-emerald-950 border-2 border-emerald-500 ring-2 ring-emerald-300 font-bold'
+                              : isSelected
                               ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/20 ring-2 ring-emerald-500 scale-[1.02]'
+                              : isAttended
+                              ? 'bg-emerald-50/80 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs'
                               : 'bg-white hover:bg-sky-50 hover:text-sky-900 text-slate-700 border border-slate-200 hover:border-sky-300 shadow-xs'
                           }`}
                         >
-                          {isSelected ? (
+                          {isSelected && !isAttended ? (
                             <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
+                          ) : isAttended ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                           ) : (
                             <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold flex items-center justify-center shrink-0">
                               {s.name.charAt(0)}
@@ -643,14 +721,16 @@ export default function ClassAbsenClient({
                           <span className="font-heading font-semibold">{s.name}</span>
                           <span
                             className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${
-                              isSelected
+                              isSelected && !isAttended
                                 ? 'bg-emerald-800 text-white'
+                                : isAttended
+                                ? 'bg-emerald-200/90 text-emerald-900 border border-emerald-300'
                                 : s.class_name?.includes('A')
                                 ? 'bg-blue-100 text-blue-800'
                                 : 'bg-teal-100 text-teal-800'
                             }`}
                           >
-                            {s.class_name || `${grade}`}
+                            {isAttended ? `✓ Hadir ${attTime}` : s.class_name || `${grade}`}
                           </span>
                         </button>
                       );
@@ -685,10 +765,12 @@ export default function ClassAbsenClient({
 
               <button
                 type="submit"
-                disabled={isSubmitting || !sessionStatus?.isOpen || !selectedStudent}
+                disabled={isSubmitting || !sessionStatus?.isOpen || !selectedStudent || isSelectedStudentAttended}
                 className={`w-full py-4 sm:py-5 px-8 rounded-2xl sm:rounded-3xl font-heading font-bold text-lg sm:text-xl shadow-lg transition-all flex items-center justify-center gap-2.5 ${
                   !sessionStatus?.isOpen || !selectedStudent
                     ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed select-none shadow-none'
+                    : isSelectedStudentAttended
+                    ? 'bg-slate-100 text-emerald-800 border-2 border-emerald-300 cursor-not-allowed select-none shadow-none'
                     : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30 hover:scale-[1.01] cursor-pointer ring-4 ring-emerald-500/20'
                 }`}
               >
@@ -697,14 +779,19 @@ export default function ClassAbsenClient({
                     <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                     Mencatat Kehadiran...
                   </span>
+                ) : isSelectedStudentAttended && selectedStudent ? (
+                  <>
+                    <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+                    <span>Sudah Hadir Hari Ini ({selectedStudent.name})</span>
+                  </>
                 ) : selectedStudent ? (
                   <>
-                    <CheckCircle2 className="w-6 h-6 text-white" />
+                    <CheckCircle2 className="w-6 h-6 text-white shrink-0" />
                     <span>Saya Hadir! ({selectedStudent.name})</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-6 h-6 text-slate-400" />
+                    <CheckCircle2 className="w-6 h-6 text-slate-400 shrink-0" />
                     <span>Pilih & Klik Namamu di Atas Dulu!</span>
                   </>
                 )}
@@ -714,6 +801,13 @@ export default function ClassAbsenClient({
                 <p className="text-center text-xs text-slate-400 mt-2 font-medium">
                   Tombol ini akan aktif otomatis saat sesi presensi dibuka oleh Kak Pembina.
                 </p>
+              ) : isSelectedStudentAttended && selectedStudent ? (
+                <div className="mt-2.5 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium text-center flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    Presensi atas nama <strong>{selectedStudent.name}</strong> sudah tercatat pada pukul <strong>{attendedTimeString}</strong>. Kamu tidak perlu absen lagi ya!
+                  </span>
+                </div>
               ) : !selectedStudent ? (
                 <p className="text-center text-xs text-slate-400 mt-2 font-medium">
                   Tombol &quot;Saya Hadir!&quot; akan otomatis aktif dan berwarna hijau setelah kamu mengklik namamu.
