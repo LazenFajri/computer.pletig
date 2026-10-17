@@ -9,7 +9,8 @@ import { revalidatePath } from 'next/cache';
 import { verifyRequestOrigin, sanitizeStudentName, sanitizeText, sanitizeUrl } from '@/lib/security';
 
 export interface CreateAssignmentParams {
-  meetingId: string;
+  meetingId?: string;
+  gradeLevel?: GradeLevel | 'all' | null;
   title: string;
   instructions?: string;
   dueDate?: string; // YYYY-MM-DD
@@ -115,7 +116,7 @@ export async function getAssignmentsAction(
  */
 export async function createAssignmentAction(
   params: CreateAssignmentParams
-): Promise<ActionState<typeof assignments.$inferSelect>> {
+): Promise<ActionState<typeof assignments.$inferSelect & { meeting?: typeof meetings.$inferSelect | null }>> {
   try {
     const originCheck = await verifyRequestOrigin();
     if (!originCheck.valid) {
@@ -127,7 +128,7 @@ export async function createAssignmentAction(
       return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat membuat tugas.' };
     }
 
-    const { meetingId, title, instructions = '', dueDate, maxScore = 100 } = params;
+    const { meetingId, gradeLevel, title, instructions = '', dueDate, maxScore = 100 } = params;
 
     const cleanTitle = sanitizeText(title.trim(), 120);
     const cleanInstructions = sanitizeText(instructions.trim(), 5000);
@@ -136,14 +137,55 @@ export async function createAssignmentAction(
       return { success: false, error: 'Judul tugas wajib diisi.' };
     }
 
-    if (!meetingId) {
-      return { success: false, error: 'Pilih sesi pertemuan untuk tugas ini.' };
+    // Resolve or auto-create parent meeting
+    let targetMeeting: typeof meetings.$inferSelect | null = null;
+    const cleanMeetingId = (meetingId && meetingId !== 'auto' && meetingId !== 'new') ? meetingId.trim() : '';
+
+    if (cleanMeetingId) {
+      const found = await db.query.meetings.findFirst({
+        where: eq(meetings.id, cleanMeetingId),
+      });
+      if (found) {
+        targetMeeting = found;
+      }
+    }
+
+    if (!targetMeeting) {
+      // Auto-create meeting for this assignment so admin is never blocked
+      const targetGrade = (!gradeLevel || gradeLevel === 'all')
+        ? null
+        : (Number(gradeLevel) as GradeLevel);
+
+      const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
+
+      const allMeetings = await db.query.meetings.findMany({
+        orderBy: [desc(meetings.meeting_number)],
+      });
+      const nextNum = allMeetings.length > 0 ? (allMeetings[0].meeting_number + 1) : 1;
+      const gradeLabel = targetGrade ? `Kelas ${targetGrade}` : 'Semua Kelas';
+
+      const insertedMeetings = await db
+        .insert(meetings)
+        .values({
+          meeting_number: nextNum,
+          grade_level: targetGrade,
+          title: `Pertemuan ${nextNum}: ${cleanTitle}`,
+          description: `Sesi tugas praktikum (${gradeLabel}) - ${cleanTitle}`,
+          date: todayStr,
+          start_time: '12:30',
+          end_time: '14:00',
+          is_open: true,
+          is_active: true,
+        })
+        .returning();
+
+      targetMeeting = insertedMeetings[0];
     }
 
     const inserted = await db
       .insert(assignments)
       .values({
-        meeting_id: meetingId,
+        meeting_id: targetMeeting.id,
         title: cleanTitle,
         instructions: cleanInstructions || null,
         due_date: dueDate?.trim() || null,
@@ -163,7 +205,10 @@ export async function createAssignmentAction(
 
     return {
       success: true,
-      data: inserted[0],
+      data: {
+        ...inserted[0],
+        meeting: targetMeeting,
+      },
       message: `Tugas "${cleanTitle}" berhasil dibuat!`,
     };
   } catch (error) {
@@ -207,10 +252,26 @@ export async function updateAssignmentAction(
       return { success: false, error: 'Judul tugas wajib diisi.' };
     }
 
+    // Ensure target meeting exists to prevent foreign key errors
+    let validMeetingId = meetingId;
+    if (meetingId) {
+      const exists = await db.query.meetings.findFirst({
+        where: eq(meetings.id, meetingId),
+      });
+      if (!exists) {
+        const oldAss = await db.query.assignments.findFirst({
+          where: eq(assignments.id, assignmentId),
+        });
+        if (oldAss) {
+          validMeetingId = oldAss.meeting_id;
+        }
+      }
+    }
+
     const updated = await db
       .update(assignments)
       .set({
-        meeting_id: meetingId,
+        meeting_id: validMeetingId,
         title: cleanTitle,
         instructions: cleanInstructions || null,
         due_date: dueDate?.trim() || null,

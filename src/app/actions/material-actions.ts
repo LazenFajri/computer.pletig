@@ -9,7 +9,8 @@ import { revalidatePath } from 'next/cache';
 import { verifyRequestOrigin, sanitizeText, sanitizeUrl } from '@/lib/security';
 
 export interface CreateMaterialParams {
-  meetingId: string;
+  meetingId?: string;
+  gradeLevel?: GradeLevel | 'all' | null;
   title: string;
   contentMarkdown?: string;
   fileUrl?: string;
@@ -85,7 +86,7 @@ export async function getMaterialsAction(
  */
 export async function createMaterialAction(
   params: CreateMaterialParams
-): Promise<ActionState<typeof materials.$inferSelect>> {
+): Promise<ActionState<typeof materials.$inferSelect & { meeting?: typeof meetings.$inferSelect | null }>> {
   try {
     const originCheck = await verifyRequestOrigin();
     if (!originCheck.valid) {
@@ -99,6 +100,7 @@ export async function createMaterialAction(
 
     const {
       meetingId,
+      gradeLevel,
       title,
       contentMarkdown = '',
       fileUrl = '',
@@ -114,14 +116,55 @@ export async function createMaterialAction(
       return { success: false, error: 'Judul materi wajib diisi.' };
     }
 
-    if (!meetingId) {
-      return { success: false, error: 'Pilih sesi pertemuan untuk materi ini.' };
+    // Resolve or auto-create parent meeting
+    let targetMeeting: typeof meetings.$inferSelect | null = null;
+    const cleanMeetingId = (meetingId && meetingId !== 'auto' && meetingId !== 'new') ? meetingId.trim() : '';
+
+    if (cleanMeetingId) {
+      const found = await db.query.meetings.findFirst({
+        where: eq(meetings.id, cleanMeetingId),
+      });
+      if (found) {
+        targetMeeting = found;
+      }
+    }
+
+    if (!targetMeeting) {
+      // Auto-create meeting for this material so admin is never blocked
+      const targetGrade = (!gradeLevel || gradeLevel === 'all')
+        ? null
+        : (Number(gradeLevel) as GradeLevel);
+
+      const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date());
+
+      const allMeetings = await db.query.meetings.findMany({
+        orderBy: [desc(meetings.meeting_number)],
+      });
+      const nextNum = allMeetings.length > 0 ? (allMeetings[0].meeting_number + 1) : 1;
+      const gradeLabel = targetGrade ? `Kelas ${targetGrade}` : 'Semua Kelas';
+
+      const insertedMeetings = await db
+        .insert(meetings)
+        .values({
+          meeting_number: nextNum,
+          grade_level: targetGrade,
+          title: `Pertemuan ${nextNum}: ${cleanTitle}`,
+          description: `Sesi materi praktikum (${gradeLabel}) - ${cleanTitle}`,
+          date: todayStr,
+          start_time: '12:30',
+          end_time: '14:00',
+          is_open: true,
+          is_active: true,
+        })
+        .returning();
+
+      targetMeeting = insertedMeetings[0];
     }
 
     const inserted = await db
       .insert(materials)
       .values({
-        meeting_id: meetingId,
+        meeting_id: targetMeeting.id,
         title: cleanTitle,
         content_markdown: cleanContent || null,
         file_url: cleanUrl || null,
@@ -141,7 +184,10 @@ export async function createMaterialAction(
 
     return {
       success: true,
-      data: inserted[0],
+      data: {
+        ...inserted[0],
+        meeting: targetMeeting,
+      },
       message: `Materi "${cleanTitle}" berhasil ditambahkan!`,
     };
   } catch (error) {
@@ -195,10 +241,26 @@ export async function updateMaterialAction(
       return { success: false, error: 'Judul materi wajib diisi.' };
     }
 
+    // Ensure target meeting exists to prevent foreign key errors
+    let validMeetingId = meetingId;
+    if (meetingId) {
+      const exists = await db.query.meetings.findFirst({
+        where: eq(meetings.id, meetingId),
+      });
+      if (!exists) {
+        const oldMat = await db.query.materials.findFirst({
+          where: eq(materials.id, materialId),
+        });
+        if (oldMat) {
+          validMeetingId = oldMat.meeting_id;
+        }
+      }
+    }
+
     const updated = await db
       .update(materials)
       .set({
-        meeting_id: meetingId,
+        meeting_id: validMeetingId,
         title: cleanTitle,
         content_markdown: cleanContent || null,
         file_url: cleanUrl || null,

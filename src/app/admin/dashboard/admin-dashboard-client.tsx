@@ -223,7 +223,8 @@ export default function AdminDashboardClient({
   // Modal / Form state: Materi Baru
   const [showNewMaterialModal, setShowNewMaterialModal] = useState(false);
   const [materialForm, setMaterialForm] = useState({
-    meetingId: meetingsList[0]?.id || '',
+    meetingId: 'auto',
+    gradeLevel: 'all' as 'all' | '4' | '5' | '6',
     title: '',
     contentMarkdown: '',
     fileUrl: '',
@@ -233,7 +234,8 @@ export default function AdminDashboardClient({
   // Modal / Form state: Tugas Baru
   const [showNewAssignmentModal, setShowNewAssignmentModal] = useState(false);
   const [assignmentForm, setAssignmentForm] = useState({
-    meetingId: meetingsList[0]?.id || '',
+    meetingId: 'auto',
+    gradeLevel: 'all' as 'all' | '4' | '5' | '6',
     title: '',
     instructions: '',
     dueDate: '',
@@ -626,6 +628,7 @@ export default function AdminDashboardClient({
     startTransition(async () => {
       const res = await createMaterialAction({
         meetingId: materialForm.meetingId,
+        gradeLevel: materialForm.gradeLevel === 'all' ? null : (Number(materialForm.gradeLevel) as GradeLevel),
         title: materialForm.title,
         contentMarkdown: materialForm.contentMarkdown,
         fileUrl: materialForm.fileUrl,
@@ -634,7 +637,29 @@ export default function AdminDashboardClient({
 
       if (res.success && res.data) {
         showNotification('success', res.message || 'Materi berhasil ditambahkan!');
-        const parentMeeting = meetingsList.find((m) => m.id === materialForm.meetingId);
+        const returnedMeeting = res.data.meeting;
+        const parentMeeting = returnedMeeting || meetingsList.find((m) => m.id === res.data!.meeting_id);
+
+        if (returnedMeeting && !meetingsList.some((m) => m.id === returnedMeeting.id)) {
+          const newMeetingItem: MeetingItemWithCounts = {
+            id: returnedMeeting.id,
+            meetingNumber: returnedMeeting.meeting_number,
+            gradeLevel: returnedMeeting.grade_level,
+            title: returnedMeeting.title,
+            description: returnedMeeting.description,
+            date: returnedMeeting.date,
+            startTime: returnedMeeting.start_time,
+            endTime: returnedMeeting.end_time,
+            isOpen: returnedMeeting.is_open,
+            isActive: returnedMeeting.is_active,
+            attendanceCount: 0,
+            materialCount: 1,
+            assignmentCount: 0,
+            createdAt: new Date(),
+          };
+          setMeetingsList((prev) => [newMeetingItem, ...prev]);
+        }
+
         const newMat: MaterialWithMeeting = {
           id: res.data.id,
           meetingId: res.data.meeting_id,
@@ -647,22 +672,37 @@ export default function AdminDashboardClient({
           meeting: parentMeeting
             ? {
                 id: parentMeeting.id,
-                meetingNumber: parentMeeting.meetingNumber,
+                meetingNumber: 'meeting_number' in parentMeeting ? parentMeeting.meeting_number : parentMeeting.meetingNumber,
                 title: parentMeeting.title,
-                gradeLevel: parentMeeting.gradeLevel,
+                gradeLevel: 'grade_level' in parentMeeting ? parentMeeting.grade_level : parentMeeting.gradeLevel,
                 date: parentMeeting.date,
               }
             : null,
         };
-        setMaterialsList([newMat, ...materialsList]);
+
+        setMaterialsList((prev) => {
+          const next = [newMat, ...prev];
+          saveOfflineData(OFFLINE_KEYS.MATERIALS, next);
+          return next;
+        });
+
+        // Tampilkan langsung di UI (pindah ke tab materi & sesuaikan filter kelas jika perlu)
+        setActiveTab('materials');
+        if (filterGrade !== 'all' && materialForm.gradeLevel !== 'all' && filterGrade !== Number(materialForm.gradeLevel)) {
+          setFilterGrade('all');
+        }
+
         setShowNewMaterialModal(false);
         setMaterialForm({
-          meetingId: meetingsList[0]?.id || '',
+          meetingId: 'auto',
+          gradeLevel: 'all',
           title: '',
           contentMarkdown: '',
           fileUrl: '',
           fileType: 'link',
         });
+
+        refetchAllData();
       } else {
         showNotification('error', res.error || 'Gagal menambahkan materi.');
       }
@@ -716,6 +756,7 @@ export default function AdminDashboardClient({
           )
         );
         setEditMaterialModal({ isOpen: false, data: null });
+        refetchAllData();
       } else {
         showNotification('error', res.error || 'Gagal memperbarui materi.');
       }
@@ -744,6 +785,7 @@ export default function AdminDashboardClient({
     startTransition(async () => {
       const res = await createAssignmentAction({
         meetingId: assignmentForm.meetingId,
+        gradeLevel: assignmentForm.gradeLevel === 'all' ? null : (Number(assignmentForm.gradeLevel) as GradeLevel),
         title: assignmentForm.title,
         instructions: assignmentForm.instructions,
         dueDate: assignmentForm.dueDate,
@@ -752,7 +794,29 @@ export default function AdminDashboardClient({
 
       if (res.success && res.data) {
         showNotification('success', res.message || 'Tugas berhasil dibuat!');
-        const parentMeeting = meetingsList.find((m) => m.id === assignmentForm.meetingId);
+        const returnedMeeting = res.data.meeting;
+        const parentMeeting = returnedMeeting || meetingsList.find((m) => m.id === res.data!.meeting_id);
+
+        if (returnedMeeting && !meetingsList.some((m) => m.id === returnedMeeting.id)) {
+          const newMeetingItem: MeetingItemWithCounts = {
+            id: returnedMeeting.id,
+            meetingNumber: returnedMeeting.meeting_number,
+            gradeLevel: returnedMeeting.grade_level,
+            title: returnedMeeting.title,
+            description: returnedMeeting.description,
+            date: returnedMeeting.date,
+            startTime: returnedMeeting.start_time,
+            endTime: returnedMeeting.end_time,
+            isOpen: returnedMeeting.is_open,
+            isActive: returnedMeeting.is_active,
+            attendanceCount: 0,
+            materialCount: 0,
+            assignmentCount: 1,
+            createdAt: new Date(),
+          };
+          setMeetingsList((prev) => [newMeetingItem, ...prev]);
+        }
+
         const newAss: AssignmentWithDetails = {
           id: res.data.id,
           meetingId: res.data.meeting_id,
@@ -765,22 +829,37 @@ export default function AdminDashboardClient({
           meeting: parentMeeting
             ? {
                 id: parentMeeting.id,
-                meetingNumber: parentMeeting.meetingNumber,
+                meetingNumber: 'meeting_number' in parentMeeting ? parentMeeting.meeting_number : parentMeeting.meetingNumber,
                 title: parentMeeting.title,
-                gradeLevel: parentMeeting.gradeLevel,
+                gradeLevel: 'grade_level' in parentMeeting ? parentMeeting.grade_level : parentMeeting.gradeLevel,
                 date: parentMeeting.date,
               }
             : null,
         };
-        setAssignmentsList([newAss, ...assignmentsList]);
+
+        setAssignmentsList((prev) => {
+          const next = [newAss, ...prev];
+          saveOfflineData(OFFLINE_KEYS.ASSIGNMENTS, next);
+          return next;
+        });
+
+        // Tampilkan langsung di UI (pindah ke tab tugas & sesuaikan filter kelas jika perlu)
+        setActiveTab('assignments');
+        if (filterGrade !== 'all' && assignmentForm.gradeLevel !== 'all' && filterGrade !== Number(assignmentForm.gradeLevel)) {
+          setFilterGrade('all');
+        }
+
         setShowNewAssignmentModal(false);
         setAssignmentForm({
-          meetingId: meetingsList[0]?.id || '',
+          meetingId: 'auto',
+          gradeLevel: 'all',
           title: '',
           instructions: '',
           dueDate: '',
           maxScore: 100,
         });
+
+        refetchAllData();
       } else {
         showNotification('error', res.error || 'Gagal membuat tugas.');
       }
@@ -2283,23 +2362,6 @@ export default function AdminDashboardClient({
             <form onSubmit={handleCreateMaterial} className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
-                  Pilih Sesi Pertemuan *
-                </label>
-                <select
-                  value={materialForm.meetingId}
-                  onChange={(e) => setMaterialForm({ ...materialForm, meetingId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white"
-                >
-                  {meetingsList.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      Pertemuan {m.meetingNumber} - {m.title} ({m.gradeLevel ? `Kelas ${m.gradeLevel}` : 'Semua'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
                   Judul Materi *
                 </label>
                 <input
@@ -2308,8 +2370,46 @@ export default function AdminDashboardClient({
                   placeholder="Misal: Tutorial Mengetik 10 Jari - Posisi Home Row"
                   value={materialForm.title}
                   onChange={(e) => setMaterialForm({ ...materialForm, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                    Target Kelas
+                  </label>
+                  <select
+                    value={materialForm.gradeLevel}
+                    onChange={(e) => setMaterialForm({ ...materialForm, gradeLevel: e.target.value as any })}
+                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white font-medium"
+                  >
+                    <option value="all">Semua Kelas (4, 5, 6)</option>
+                    <option value="4">Kelas 4 SD (Kamis)</option>
+                    <option value="5">Kelas 5 SD (Selasa)</option>
+                    <option value="6">Kelas 6 SD (Senin)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                    Sesi Pertemuan
+                  </label>
+                  <select
+                    value={materialForm.meetingId}
+                    onChange={(e) => setMaterialForm({ ...materialForm, meetingId: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white font-medium"
+                  >
+                    <option value="auto">✨ Sesi Otomatis (Sesuai Target Kelas)</option>
+                    {meetingsList
+                      .filter((m) => materialForm.gradeLevel === 'all' || m.gradeLevel === null || String(m.gradeLevel) === materialForm.gradeLevel)
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          Pertemuan {m.meetingNumber} - {m.title} ({m.gradeLevel ? `Kelas ${m.gradeLevel}` : 'Semua'})
+                        </option>
+                      ))}
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -2405,23 +2505,6 @@ export default function AdminDashboardClient({
             <form onSubmit={handleCreateAssignment} className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
-                  Pilih Sesi Pertemuan *
-                </label>
-                <select
-                  value={assignmentForm.meetingId}
-                  onChange={(e) => setAssignmentForm({ ...assignmentForm, meetingId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none bg-white"
-                >
-                  {meetingsList.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      Pertemuan {m.meetingNumber} - {m.title} ({m.gradeLevel ? `Kelas ${m.gradeLevel}` : 'Semua'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
                   Judul Tugas *
                 </label>
                 <input
@@ -2430,8 +2513,46 @@ export default function AdminDashboardClient({
                   placeholder="Misal: Latihan Mengetik 1 Paragraf Cerita Liburan di Word"
                   value={assignmentForm.title}
                   onChange={(e) => setAssignmentForm({ ...assignmentForm, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20 outline-none"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                    Target Kelas
+                  </label>
+                  <select
+                    value={assignmentForm.gradeLevel}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, gradeLevel: e.target.value as any })}
+                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none bg-white font-medium"
+                  >
+                    <option value="all">Semua Kelas (4, 5, 6)</option>
+                    <option value="4">Kelas 4 SD (Kamis)</option>
+                    <option value="5">Kelas 5 SD (Selasa)</option>
+                    <option value="6">Kelas 6 SD (Senin)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                    Sesi Pertemuan
+                  </label>
+                  <select
+                    value={assignmentForm.meetingId}
+                    onChange={(e) => setAssignmentForm({ ...assignmentForm, meetingId: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none bg-white font-medium"
+                  >
+                    <option value="auto">✨ Sesi Otomatis (Sesuai Target Kelas)</option>
+                    {meetingsList
+                      .filter((m) => assignmentForm.gradeLevel === 'all' || m.gradeLevel === null || String(m.gradeLevel) === assignmentForm.gradeLevel)
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          Pertemuan {m.meetingNumber} - {m.title} ({m.gradeLevel ? `Kelas ${m.gradeLevel}` : 'Semua'})
+                        </option>
+                      ))}
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -2817,8 +2938,13 @@ export default function AdminDashboardClient({
                       data: { ...editMaterialModal.data!, meetingId: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-blue-600 outline-none bg-white font-medium"
                 >
+                  {editMaterialModal.data.meeting && !meetingsList.some((m) => m.id === editMaterialModal.data!.meetingId) && (
+                    <option value={editMaterialModal.data.meetingId}>
+                      Pertemuan {editMaterialModal.data.meeting.meetingNumber} - {editMaterialModal.data.meeting.title} ({editMaterialModal.data.meeting.gradeLevel ? `Kelas ${editMaterialModal.data.meeting.gradeLevel}` : 'Semua'})
+                    </option>
+                  )}
                   {meetingsList.map((m) => (
                     <option key={m.id} value={m.id}>
                       Pertemuan {m.meetingNumber} - {m.title} ({m.gradeLevel ? `Kelas ${m.gradeLevel}` : 'Semua'})
@@ -2961,8 +3087,13 @@ export default function AdminDashboardClient({
                       data: { ...editAssignmentModal.data!, meetingId: e.target.value },
                     })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none bg-white font-medium"
                 >
+                  {editAssignmentModal.data.meeting && !meetingsList.some((m) => m.id === editAssignmentModal.data!.meetingId) && (
+                    <option value={editAssignmentModal.data.meetingId}>
+                      Pertemuan {editAssignmentModal.data.meeting.meetingNumber} - {editAssignmentModal.data.meeting.title} ({editAssignmentModal.data.meeting.gradeLevel ? `Kelas ${editAssignmentModal.data.meeting.gradeLevel}` : 'Semua'})
+                    </option>
+                  )}
                   {meetingsList.map((m) => (
                     <option key={m.id} value={m.id}>
                       Pertemuan {m.meetingNumber} - {m.title} ({m.gradeLevel ? `Kelas ${m.gradeLevel}` : 'Semua'})
