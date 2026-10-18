@@ -156,6 +156,47 @@ export async function getAttendanceMatrixAction(
       }
     }
 
+    // 4. Ambil catatan presensi siswa pada rombel ini
+    const studentIds = studentsList.map((s) => s.id);
+    const studentNames = studentsList.map((s) => s.name);
+
+    const attendanceRecords = studentIds.length > 0
+      ? await db.query.attendance.findMany({
+          where: or(
+            inArray(attendance.user_id, studentIds),
+            inArray(attendance.student_name, studentNames)
+          ),
+          with: {
+            meeting: true,
+          },
+        })
+      : [];
+
+    const normalizeName = (n?: string | null) =>
+      n ? n.trim().toLowerCase().replace(/\s+/g, ' ') : '';
+
+    // Pastikan jika ada presensi yang tanggalnya belum ada di allDatesMap, tetap ditambahkan agar tidak hilang
+    for (const att of attendanceRecords) {
+      if (att.status !== 'hadir') continue;
+      const ts = att.checked_in_at || att.check_in_time || att.created_at;
+      const dateKey =
+        att.meeting?.date?.trim() ||
+        (ts
+          ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date(ts))
+          : null);
+
+      if (dateKey && !allDatesMap.has(dateKey)) {
+        const parts = dateKey.split('-');
+        const displayDate = parts.length === 3 ? `${parts[2]}/${parts[1]}` : dateKey;
+        allDatesMap.set(dateKey, {
+          displayDate,
+          dayName: baseSchedule[0]?.dayName || 'Sesi',
+          meetingNumber: att.meeting?.meeting_number || allDatesMap.size + 1,
+          meetingId: att.meeting_id,
+        });
+      }
+    }
+
     // Urutkan kolom tanggal secara kronologis
     const sortedDateEntries = Array.from(allDatesMap.entries()).sort(([dateA], [dateB]) =>
       dateA.localeCompare(dateB)
@@ -169,43 +210,37 @@ export async function getAttendanceMatrixAction(
       meetingId: meta.meetingId,
     }));
 
-    // 4. Ambil catatan presensi siswa pada rombel ini
-    const studentIds = studentsList.map((s) => s.id);
-    const studentNames = studentsList.map((s) => s.name.toLowerCase());
-
-    const attendanceRecords = studentIds.length > 0
-      ? await db.query.attendance.findMany({
-          where: or(
-            inArray(attendance.user_id, studentIds),
-            inArray(attendance.student_name, studentsList.map((s) => s.name))
-          ),
-          with: {
-            meeting: true,
-          },
-        })
-      : [];
-
-    // Pemetaan Presensi: Key = `${studentId_or_normalizedName}_${dateStr}` -> boolean
+    // Pemetaan Presensi: Key = `${studentId_or_normalizedName}_${dateStr}` & `${id}_mid_${meetingId}` -> boolean
     const presenceSet = new Set<string>();
 
     for (const att of attendanceRecords) {
       if (att.status !== 'hadir') continue;
 
+      const ts = att.checked_in_at || att.check_in_time || att.created_at;
       let dateKey: string | null = null;
       if (att.meeting && att.meeting.date) {
-        dateKey = att.meeting.date;
-      } else if (att.checked_in_at) {
-        // Fallback format Asia/Jakarta YYYY-MM-DD
-        const dateObj = new Date(att.checked_in_at);
-        dateKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(dateObj);
+        dateKey = att.meeting.date.trim();
+      } else if (ts) {
+        dateKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(new Date(ts));
       }
+
+      const normAttName = normalizeName(att.student_name);
 
       if (dateKey) {
         if (att.user_id) {
           presenceSet.add(`${att.user_id}_${dateKey}`);
         }
-        if (att.student_name) {
-          presenceSet.add(`${att.student_name.trim().toLowerCase()}_${dateKey}`);
+        if (normAttName) {
+          presenceSet.add(`${normAttName}_${dateKey}`);
+        }
+      }
+
+      if (att.meeting_id) {
+        if (att.user_id) {
+          presenceSet.add(`${att.user_id}_mid_${att.meeting_id}`);
+        }
+        if (normAttName) {
+          presenceSet.add(`${normAttName}_mid_${att.meeting_id}`);
         }
       }
     }
@@ -221,11 +256,17 @@ export async function getAttendanceMatrixAction(
     const studentRows: StudentMatrixRow[] = studentsList.map((student) => {
       const attendanceMap: Record<string, boolean> = {};
       let totalPresent = 0;
+      const normStudentName = normalizeName(student.name);
 
       columns.forEach((col) => {
         const isPresentById = presenceSet.has(`${student.id}_${col.dateStr}`);
-        const isPresentByName = presenceSet.has(`${student.name.trim().toLowerCase()}_${col.dateStr}`);
-        const isPresent = isPresentById || isPresentByName;
+        const isPresentByName = normStudentName ? presenceSet.has(`${normStudentName}_${col.dateStr}`) : false;
+        const isPresentByMid = col.meetingId
+          ? presenceSet.has(`${student.id}_mid_${col.meetingId}`) ||
+            (normStudentName ? presenceSet.has(`${normStudentName}_mid_${col.meetingId}`) : false)
+          : false;
+
+        const isPresent = isPresentById || isPresentByName || isPresentByMid;
 
         attendanceMap[col.dateStr] = isPresent;
         if (isPresent) {
