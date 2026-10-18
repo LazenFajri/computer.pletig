@@ -74,6 +74,7 @@ import {
   FileDown,
   Loader2,
 } from 'lucide-react';
+import AttendanceChecklistGrid from '@/components/attendance-checklist-grid';
 
 interface AdminDashboardClientProps {
   initialMeetings: MeetingItemWithCounts[];
@@ -90,7 +91,7 @@ export default function AdminDashboardClient({
   initialSubmissions,
   userName,
 }: AdminDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<'meetings' | 'materials' | 'assignments' | 'submissions' | 'rekap'>('meetings');
+  const [activeTab, setActiveTab] = useState<'meetings' | 'materials' | 'assignments' | 'submissions' | 'rekap' | 'matrix'>('meetings');
   const [isPending, startTransition] = useTransition();
 
   // State lists
@@ -1226,6 +1227,22 @@ export default function AdminDashboardClient({
 
           <button
             type="button"
+            onClick={() => setActiveTab('matrix')}
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
+              activeTab === 'matrix'
+                ? 'bg-slate-900 text-white shadow-md shadow-slate-900/25 ring-2 ring-emerald-400/40'
+                : 'text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/60'
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>
+              <span className="2xl:hidden">Matriks Presensi</span>
+              <span className="hidden 2xl:inline">✓ Matriks Presensi Centang</span>
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('rekap')}
             className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
               activeTab === 'rekap'
@@ -1891,6 +1908,31 @@ export default function AdminDashboardClient({
             </button>
           </div>
 
+          {/* Banner Quick Link ke Matriks Presensi Centang */}
+          <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border border-emerald-200 p-4 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3">
+              <span className="w-9 h-9 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+                ✓
+              </span>
+              <div>
+                <h4 className="font-heading font-bold text-sm text-slate-900">
+                  Tabel Matriks Presensi Centang (Format Tanggal Nyata)
+                </h4>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Tandai centang manual per tanggal (19/10, 26/10, dst) untuk kelas 6B, 6A, 5B, 5A, 4B, 4A.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab('matrix')}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm shrink-0 cursor-pointer flex items-center gap-1.5"
+            >
+              <span>Buka Matriks Presensi</span>
+              <span>→</span>
+            </button>
+          </div>
+
           {/* Kontrol Filter & Tombol Download */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Filter Sesi & Kelas */}
@@ -2235,6 +2277,15 @@ export default function AdminDashboardClient({
               );
             })()}
           </div>
+        </div>
+      )}
+
+      {/* ========================================================
+          TAB 6: MATRIKS PRESENSI CENTANG (JADWAL NYATA 2026)
+          ======================================================== */}
+      {activeTab === 'matrix' && (
+        <div className="animate-in fade-in duration-200">
+          <AttendanceChecklistGrid isAdmin={true} />
         </div>
       )}
 

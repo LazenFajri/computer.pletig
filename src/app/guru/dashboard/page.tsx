@@ -12,6 +12,7 @@ import {
   FileSpreadsheet,
   CheckCircle2,
 } from 'lucide-react';
+import AttendanceChecklistGrid from '@/components/attendance-checklist-grid';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,6 +114,11 @@ export default async function GuruDashboardPage() {
             </p>
           </div>
         </div>
+
+        {/* Tabel Matriks Presensi Centang (Read-Only untuk Guru) */}
+        <section className="mb-8">
+          <AttendanceChecklistGrid isAdmin={false} />
+        </section>
 
         {/* Back Link */}
         <div>
