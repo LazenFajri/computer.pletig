@@ -55,4 +55,10 @@ interface MeetingDao {
 
     @Query("DELETE FROM meetings WHERE id = :id")
     suspend fun deleteById(id: String)
+
+    @Query("UPDATE meetings SET is_open = 0, is_active = 0, sync_status = 'PENDING_UPDATE', updated_at = :updatedAt WHERE is_open = 1 OR is_active = 1")
+    suspend fun closeAllMeetings(updatedAt: Long = System.currentTimeMillis())
+
+    @Query("DELETE FROM meetings")
+    suspend fun clearAll()
 }

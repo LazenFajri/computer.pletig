@@ -1,0 +1,2262 @@
+﻿{
+    "success":  true,
+    "timestamp":  1792424168768,
+    "meetings":  [
+                     {
+                         "id":  "b0bdddcf-8cb1-4142-9f76-e1f02895990d",
+                         "meeting_number":  2,
+                         "grade_level":  4,
+                         "title":  "Alignment Text",
+                         "description":  "Sesi pertemuan 2 ekstrakurikuler komputer.",
+                         "date":  "2026-10-29",
+                         "start_time":  "12:30",
+                         "end_time":  "14:00",
+                         "is_open":  false,
+                         "is_active":  false,
+                         "session_token":  "4432",
+                         "attendance_token":  "4432",
+                         "created_at":  "2026-10-19T11:03:04.610Z",
+                         "updated_at":  "2026-10-19T11:03:04.610Z"
+                     },
+                     {
+                         "id":  "b956916c-cb34-40a2-ac15-6f98c4757cb5",
+                         "meeting_number":  2,
+                         "grade_level":  5,
+                         "title":  "Transitions",
+                         "description":  "Sesi pertemuan 2 ekstrakurikuler komputer.",
+                         "date":  "2026-10-27",
+                         "start_time":  "12:30",
+                         "end_time":  "14:00",
+                         "is_open":  false,
+                         "is_active":  false,
+                         "session_token":  "9208",
+                         "attendance_token":  "9208",
+                         "created_at":  "2026-10-19T11:02:14.658Z",
+                         "updated_at":  "2026-10-19T11:02:14.658Z"
+                     },
+                     {
+                         "id":  "d09fe387-2d96-49b3-8a96-ef9cde4ac98e",
+                         "meeting_number":  2,
+                         "grade_level":  6,
+                         "title":  "Format Currency",
+                         "description":  "Sesi pertemuan 2 ekstrakurikuler komputer.",
+                         "date":  "2026-10-26",
+                         "start_time":  "12:30",
+                         "end_time":  "14:00",
+                         "is_open":  false,
+                         "is_active":  false,
+                         "session_token":  "2545",
+                         "attendance_token":  "2545",
+                         "created_at":  "2026-10-19T10:57:42.863Z",
+                         "updated_at":  "2026-10-19T10:57:42.863Z"
+                     },
+                     {
+                         "id":  "71a18809-c856-4195-8081-2443694bcd46",
+                         "meeting_number":  1,
+                         "grade_level":  4,
+                         "title":  "Mengetik 10 Jari Kelas 4",
+                         "description":  "Sesi pertemuan 1 ekstrakurikuler komputer.",
+                         "date":  "2026-10-22",
+                         "start_time":  "12:30",
+                         "end_time":  "14:00",
+                         "is_open":  false,
+                         "is_active":  false,
+                         "session_token":  "9804",
+                         "attendance_token":  "9804",
+                         "created_at":  "2026-10-17T13:06:18.907Z",
+                         "updated_at":  "2026-10-19T09:41:40.077Z"
+                     },
+                     {
+                         "id":  "e9fa3637-73c8-4db5-98d5-f7fbc4e55b28",
+                         "meeting_number":  1,
+                         "grade_level":  5,
+                         "title":  "Mengetik 10 Jari Kelas 5",
+                         "description":  "Sesi pertemuan 1 ekstrakurikuler komputer.",
+                         "date":  "2026-10-20",
+                         "start_time":  "12:30",
+                         "end_time":  "14:00",
+                         "is_open":  false,
+                         "is_active":  false,
+                         "session_token":  "5855",
+                         "attendance_token":  "5855",
+                         "created_at":  "2026-10-17T13:05:23.883Z",
+                         "updated_at":  "2026-10-19T09:18:55.762Z"
+                     },
+                     {
+                         "id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                         "meeting_number":  1,
+                         "grade_level":  6,
+                         "title":  "Mengetik 10 Jari Kelas 6",
+                         "description":  "Sesi pertemuan 1 ekstrakurikuler komputer.",
+                         "date":  "2026-10-19",
+                         "start_time":  "12:30",
+                         "end_time":  "14:00",
+                         "is_open":  false,
+                         "is_active":  false,
+                         "session_token":  "6580",
+                         "attendance_token":  "6580",
+                         "created_at":  "2026-10-17T12:54:39.135Z",
+                         "updated_at":  "2026-10-19T11:00:55.158Z"
+                     }
+                 ],
+    "students":  [
+                     {
+                         "id":  "f9b4670f-485f-4c8e-ac88-a1fbc4294c6e",
+                         "name":  "AYSHA KHANINDIA ZHAFIRA",
+                         "username":  "4a-10",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=AYSHA%20KHANINDIA%20ZHAFIRA"
+                     },
+                     {
+                         "id":  "e2c97548-6df7-4f87-a768-a2f98ec02681",
+                         "name":  "Abizar Fahrezi Hamid",
+                         "username":  "4a-01",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Abizar%20Fahrezi%20Hamid"
+                     },
+                     {
+                         "id":  "df2c5339-b744-4b5f-a570-2da03863fbb2",
+                         "name":  "Adhyastha Giorgino Ibrahim",
+                         "username":  "4a-02",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Adhyastha%20Giorgino%20Ibrahim"
+                     },
+                     {
+                         "id":  "b3b7670a-9c33-416f-863d-b6ca85f7a6e1",
+                         "name":  "Adiba Khanza Az Zahra",
+                         "username":  "4a-03",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Adiba%20Khanza%20Az%20Zahra"
+                     },
+                     {
+                         "id":  "e0ea8183-c550-4a3d-9ce1-70afcd9a54a8",
+                         "name":  "Alfarezky Sharga Aguita",
+                         "username":  "4a-04",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alfarezky%20Sharga%20Aguita"
+                     },
+                     {
+                         "id":  "bcceda3a-bd10-44df-bd9a-c0533b517086",
+                         "name":  "Alya Maulida Ridiasmara",
+                         "username":  "4a-05",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alya%20Maulida%20Ridiasmara"
+                     },
+                     {
+                         "id":  "799797cc-ab5b-4476-b6ca-6e86a935a023",
+                         "name":  "Anindita Cantika Rahmawati",
+                         "username":  "4a-06",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Anindita%20Cantika%20Rahmawati"
+                     },
+                     {
+                         "id":  "7b4732f0-38f0-4ed7-a4d4-a38066092d48",
+                         "name":  "Arka Satya Pratama",
+                         "username":  "4a-07",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Arka%20Satya%20Pratama"
+                     },
+                     {
+                         "id":  "3cb20230-2800-4eae-b8eb-7000640a11c2",
+                         "name":  "Asyfa Rabbani",
+                         "username":  "4a-08",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Asyfa%20Rabbani"
+                     },
+                     {
+                         "id":  "224d7380-d113-49f4-a362-44b13f1b7253",
+                         "name":  "Aurel Natania Septiani",
+                         "username":  "4a-09",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Aurel%20Natania%20Septiani"
+                     },
+                     {
+                         "id":  "45fc75f5-146f-4d2b-9646-b384bada5bab",
+                         "name":  "Berlian Daffa Nur Sya\u0027bani",
+                         "username":  "4a-11",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Berlian%20Daffa%20Nur%20Sya\u0027bani"
+                     },
+                     {
+                         "id":  "0c53ae17-994c-4e65-8e91-5ca1aec4bf8f",
+                         "name":  "Bian Fiandra Pratama",
+                         "username":  "4a-12",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Bian%20Fiandra%20Pratama"
+                     },
+                     {
+                         "id":  "6fa645b7-88dd-4a12-b2b1-26367be7219d",
+                         "name":  "Fabian Rifqi",
+                         "username":  "4a-13",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Fabian%20Rifqi"
+                     },
+                     {
+                         "id":  "7a1c8e03-e391-4ca8-8385-3ec97d86ba90",
+                         "name":  "Farrania Adzkia Shanum",
+                         "username":  "4a-14",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Farrania%20Adzkia%20Shanum"
+                     },
+                     {
+                         "id":  "e68ac918-34b3-40b8-833a-6dcf7b01e1e8",
+                         "name":  "Keisha Ainuha Syarifah",
+                         "username":  "4a-15",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Keisha%20Ainuha%20Syarifah"
+                     },
+                     {
+                         "id":  "48e79a4e-b40e-43d1-9453-df2f7ed8378d",
+                         "name":  "MIKAEL CHRISTIAN",
+                         "username":  "4a-16",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=MIKAEL%20CHRISTIAN"
+                     },
+                     {
+                         "id":  "315d2766-7094-4b5e-ac63-43901a064f2d",
+                         "name":  "MUHAMMAD IRFAN SASMOKO",
+                         "username":  "4a-18",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=MUHAMMAD%20IRFAN%20SASMOKO"
+                     },
+                     {
+                         "id":  "a3d21aa3-429a-4983-a43d-c1d02db54925",
+                         "name":  "Muhammad Gio Ananda Putra",
+                         "username":  "4a-17",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Muhammad%20Gio%20Ananda%20Putra"
+                     },
+                     {
+                         "id":  "853fd3b2-723b-4f0d-afb8-7966b5ffdd12",
+                         "name":  "Nay Fatimah Yunarta",
+                         "username":  "4a-19",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Nay%20Fatimah%20Yunarta"
+                     },
+                     {
+                         "id":  "0975b63d-3344-4642-a7a2-9567070903e0",
+                         "name":  "Rafizqy Azka Evano Putra",
+                         "username":  "4a-20",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rafizqy%20Azka%20Evano%20Putra"
+                     },
+                     {
+                         "id":  "e0e5aec8-22db-477c-a32a-94296bc036e9",
+                         "name":  "Raihan Nizham Maulana",
+                         "username":  "4a-21",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Raihan%20Nizham%20Maulana"
+                     },
+                     {
+                         "id":  "1d70d8a8-b6eb-4525-b4c3-ff8c61f716ab",
+                         "name":  "Razvandra Dwi Tama",
+                         "username":  "4a-22",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Razvandra%20Dwi%20Tama"
+                     },
+                     {
+                         "id":  "464d0424-1427-44ad-b790-8d4beb3e8f85",
+                         "name":  "Regan Ozzi Setyo Nugroho",
+                         "username":  "4a-23",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Regan%20Ozzi%20Setyo%20Nugroho"
+                     },
+                     {
+                         "id":  "1767832a-1534-49a1-abe1-0f60d66bfa68",
+                         "name":  "Syahar Banu Alatas",
+                         "username":  "4a-24",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Syahar%20Banu%20Alatas"
+                     },
+                     {
+                         "id":  "345a7370-7a2f-4ec6-8ade-793b951339aa",
+                         "name":  "Talia Putri Wijayanti",
+                         "username":  "4a-25",
+                         "grade_level":  4,
+                         "class_name":  "4A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Talia%20Putri%20Wijayanti"
+                     },
+                     {
+                         "id":  "5a262d19-f5d3-4f26-aee7-2bc5da456d36",
+                         "name":  "ARBIAN UMAR RAKHSHAN",
+                         "username":  "4b-04",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=ARBIAN%20UMAR%20RAKHSHAN"
+                     },
+                     {
+                         "id":  "1b36a261-3979-40ba-88d8-6d7ecd9d08b2",
+                         "name":  "Akdanendra Suluh Dewandaru",
+                         "username":  "4b-01",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Akdanendra%20Suluh%20Dewandaru"
+                     },
+                     {
+                         "id":  "d595e020-d6dc-422f-9153-c31b2e105076",
+                         "name":  "Alesha Callista Putri",
+                         "username":  "4b-02",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alesha%20Callista%20Putri"
+                     },
+                     {
+                         "id":  "a25defd1-8175-4dd2-a5a6-c560616333cd",
+                         "name":  "Anakku Perempuan Wibisono",
+                         "username":  "4b-03",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Anakku%20Perempuan%20Wibisono"
+                     },
+                     {
+                         "id":  "736bdbbc-dafc-49d0-bcad-f04d0217e3e3",
+                         "name":  "Arfa Razqel Wibowo",
+                         "username":  "4b-05",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Arfa%20Razqel%20Wibowo"
+                     },
+                     {
+                         "id":  "25794019-4374-4e6a-b9fa-e89cc32c6f1f",
+                         "name":  "Ayra Kusuma Dewi",
+                         "username":  "4b-06",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Ayra%20Kusuma%20Dewi"
+                     },
+                     {
+                         "id":  "32580fa8-5613-4022-8d37-7b1da5c2091f",
+                         "name":  "Barid Althafaris Izadin",
+                         "username":  "4b-07",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Barid%20Althafaris%20Izadin"
+                     },
+                     {
+                         "id":  "460e4a0a-a393-490a-9701-a8177e98602e",
+                         "name":  "Danendra Niyaz Saputra",
+                         "username":  "4b-08",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Danendra%20Niyaz%20Saputra"
+                     },
+                     {
+                         "id":  "0e6f4838-638b-43c0-9088-4a2b2f75a847",
+                         "name":  "Fillio Zakwan Arsenio",
+                         "username":  "4b-09",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Fillio%20Zakwan%20Arsenio"
+                     },
+                     {
+                         "id":  "136808eb-a8ca-465e-8d9e-b14f8be5150a",
+                         "name":  "Ivander Aesar Athafariz Hidayat",
+                         "username":  "4b-10",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Ivander%20Aesar%20Athafariz%20Hidayat"
+                     },
+                     {
+                         "id":  "2fb9c091-4aa8-4a75-be32-22146f84e6b4",
+                         "name":  "Jeremya Reynand Abinaya",
+                         "username":  "4b-11",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Jeremya%20Reynand%20Abinaya"
+                     },
+                     {
+                         "id":  "1feb7ebb-8559-45d7-ba8c-a832acd860bb",
+                         "name":  "Kenzie Azfarrizky Oceano",
+                         "username":  "4b-12",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Kenzie%20Azfarrizky%20Oceano"
+                     },
+                     {
+                         "id":  "56b9df37-f8a4-410e-a272-6c04af408416",
+                         "name":  "Khoirul Anam Putro Susilo",
+                         "username":  "4b-13",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Khoirul%20Anam%20Putro%20Susilo"
+                     },
+                     {
+                         "id":  "51d26084-468f-4825-83c8-03d932c80eef",
+                         "name":  "Kikandrya Sybil Arsavin",
+                         "username":  "4b-14",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Kikandrya%20Sybil%20Arsavin"
+                     },
+                     {
+                         "id":  "02c91c30-5f8a-4fe5-9ea6-e49f5d024d71",
+                         "name":  "Liam Alano Lova",
+                         "username":  "4b-15",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Liam%20Alano%20Lova"
+                     },
+                     {
+                         "id":  "e93d83bc-75ed-4592-9e53-afb5e18a4f87",
+                         "name":  "MUTIARA SHAFIA AGHA",
+                         "username":  "4b-17",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=MUTIARA%20SHAFIA%20AGHA"
+                     },
+                     {
+                         "id":  "6853388a-7c38-40b1-a79b-ef88567b96e8",
+                         "name":  "Messias Geronimo Nugroho",
+                         "username":  "4b-16",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Messias%20Geronimo%20Nugroho"
+                     },
+                     {
+                         "id":  "b6736259-edb2-4720-9c2b-31604309c21c",
+                         "name":  "NOVAN RASYAA ALFARIZQI",
+                         "username":  "4b-21",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=NOVAN%20RASYAA%20ALFARIZQI"
+                     },
+                     {
+                         "id":  "b1a61036-ae06-4256-b790-6bf2ce6183e0",
+                         "name":  "Nadya Alesha Rahma",
+                         "username":  "4b-18",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Nadya%20Alesha%20Rahma"
+                     },
+                     {
+                         "id":  "6be7d060-9379-4535-93b0-decc285636d8",
+                         "name":  "Natasya Lestiani Putri Niyan",
+                         "username":  "4b-19",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Natasya%20Lestiani%20Putri%20Niyan"
+                     },
+                     {
+                         "id":  "ae75a633-ea6f-4609-9512-0972cfe0bcb8",
+                         "name":  "Naufal Hafidz Fadhila",
+                         "username":  "4b-20",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Naufal%20Hafidz%20Fadhila"
+                     },
+                     {
+                         "id":  "cfb14bc4-a99e-4a7b-840f-1ddd2e9e7df7",
+                         "name":  "REYKYANDRINA ALESHA FAJRIA",
+                         "username":  "4b-23",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=REYKYANDRINA%20ALESHA%20FAJRIA"
+                     },
+                     {
+                         "id":  "d8126ef1-3f81-4fee-ab8d-06be2bc21b8e",
+                         "name":  "Rakhsandrina Gava Putri",
+                         "username":  "4b-22",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rakhsandrina%20Gava%20Putri"
+                     },
+                     {
+                         "id":  "df0ec871-3226-4fcd-bc74-cfdd7c0d87a6",
+                         "name":  "Umar Abdullah",
+                         "username":  "4b-24",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Umar%20Abdullah"
+                     },
+                     {
+                         "id":  "51f1b5ff-76c5-4c95-90be-e942b4e06b27",
+                         "name":  "Vallency Maylika Azzahra",
+                         "username":  "4b-25",
+                         "grade_level":  4,
+                         "class_name":  "4B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Vallency%20Maylika%20Azzahra"
+                     },
+                     {
+                         "id":  "a3bbc378-abb1-41c9-ac4d-d1de826e1725",
+                         "name":  "Adhwa Alrito Hutama",
+                         "username":  "5a-01",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Adhwa%20Alrito%20Hutama"
+                     },
+                     {
+                         "id":  "4eec1c49-123e-4db8-97bb-acf33970e171",
+                         "name":  "Adiva Afsheen Myesha",
+                         "username":  "5a-02",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Adiva%20Afsheen%20Myesha"
+                     },
+                     {
+                         "id":  "b9c3042a-85f8-4fa9-b530-e8e908037f18",
+                         "name":  "Alisha Putri Anggraeni",
+                         "username":  "5a-03",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alisha%20Putri%20Anggraeni"
+                     },
+                     {
+                         "id":  "ce83606a-f65c-4dfe-baed-8748e024ce2b",
+                         "name":  "Annisa Dwi Ramadhani",
+                         "username":  "5a-04",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Annisa%20Dwi%20Ramadhani"
+                     },
+                     {
+                         "id":  "b519d38e-1ff9-443c-a1fc-b96f3c265920",
+                         "name":  "Avifa Varisha Inara Pramono",
+                         "username":  "5a-05",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Avifa%20Varisha%20Inara%20Pramono"
+                     },
+                     {
+                         "id":  "64c0f318-e8d4-4972-8086-6272edbe239d",
+                         "name":  "Azka Sendy Ramadhan",
+                         "username":  "5a-06",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Azka%20Sendy%20Ramadhan"
+                     },
+                     {
+                         "id":  "8665f171-78b1-4ccd-af66-387c2ecf5e07",
+                         "name":  "CALLYSTA FELICIA NATHANIA MAATITA",
+                         "username":  "5a-07",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=CALLYSTA%20FELICIA%20NATHANIA%20MAATITA"
+                     },
+                     {
+                         "id":  "4796d268-1dbc-4917-ae3a-e829bd96facf",
+                         "name":  "Chelsea Karita Wibisono",
+                         "username":  "5a-08",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Chelsea%20Karita%20Wibisono"
+                     },
+                     {
+                         "id":  "c11ea608-c750-4332-bcc4-59f73213ad6e",
+                         "name":  "Elycia Mutiara Deeva",
+                         "username":  "5a-09",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Elycia%20Mutiara%20Deeva"
+                     },
+                     {
+                         "id":  "abb6365b-9fd8-4182-8642-c0c006746397",
+                         "name":  "Emanuela Verarita Stevanie",
+                         "username":  "5a-10",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Emanuela%20Verarita%20Stevanie"
+                     },
+                     {
+                         "id":  "4a8265fb-82a4-413a-accc-ef805e81c618",
+                         "name":  "Fazli Maeka Maulana",
+                         "username":  "5a-11",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Fazli%20Maeka%20Maulana"
+                     },
+                     {
+                         "id":  "e72effbb-cb47-43c7-9fb2-59025cf99024",
+                         "name":  "GIAN KINAN RAISSA RISMA",
+                         "username":  "5a-12",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=GIAN%20KINAN%20RAISSA%20RISMA"
+                     },
+                     {
+                         "id":  "888acc7e-e506-4fe8-bee8-cf7b078c3e2a",
+                         "name":  "Kinanti Alradya Ma\u0027rifah",
+                         "username":  "5a-13",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Kinanti%20Alradya%20Ma\u0027rifah"
+                     },
+                     {
+                         "id":  "c53ffb3d-090e-4417-b76c-758ccb135683",
+                         "name":  "Mega Sarisha Kirana",
+                         "username":  "5a-14",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Mega%20Sarisha%20Kirana"
+                     },
+                     {
+                         "id":  "61459aec-6a39-400d-a15c-4b5cf9b30d36",
+                         "name":  "Muhammad Fathan Al-Azka",
+                         "username":  "5a-15",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Muhammad%20Fathan%20Al-Azka"
+                     },
+                     {
+                         "id":  "431a0f1d-871f-4bc8-a907-b629f70b261b",
+                         "name":  "Muhammad Sabila Rizky",
+                         "username":  "5a-16",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Muhammad%20Sabila%20Rizky"
+                     },
+                     {
+                         "id":  "adc49380-074a-4bf7-9d5b-24bf50592fe3",
+                         "name":  "NAJWA MUTIARA VANESA",
+                         "username":  "5a-18",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=NAJWA%20MUTIARA%20VANESA"
+                     },
+                     {
+                         "id":  "4fde04c1-fbc1-453d-b6a4-20be1cac52dc",
+                         "name":  "Nafisa Kusuma Maharani",
+                         "username":  "5a-17",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Nafisa%20Kusuma%20Maharani"
+                     },
+                     {
+                         "id":  "270288e7-3be7-4daa-b803-ee64f8fec142",
+                         "name":  "Nurul Maulida",
+                         "username":  "5a-19",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Nurul%20Maulida"
+                     },
+                     {
+                         "id":  "7e4c6309-26e0-45e5-b85b-06f9366059bc",
+                         "name":  "Qonita Nadhira Thafana Widiarto",
+                         "username":  "5a-20",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Qonita%20Nadhira%20Thafana%20Widiarto"
+                     },
+                     {
+                         "id":  "98c05107-0d64-488c-baef-1d49b90d62e8",
+                         "name":  "Rafi Yusuf Nugroho",
+                         "username":  "5a-21",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rafi%20Yusuf%20Nugroho"
+                     },
+                     {
+                         "id":  "fdccbe21-e2bd-40a8-935e-08fd86c2d15a",
+                         "name":  "Rasendria Abhia Nata",
+                         "username":  "5a-22",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rasendria%20Abhia%20Nata"
+                     },
+                     {
+                         "id":  "fc2b0615-a447-413b-a161-9fa29627a60e",
+                         "name":  "Riyan Wijaya Kusuma",
+                         "username":  "5a-23",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Riyan%20Wijaya%20Kusuma"
+                     },
+                     {
+                         "id":  "9fd2d7e6-c9b3-4dd7-b116-341cd3085bda",
+                         "name":  "Senandung Gita Nawacita",
+                         "username":  "5a-24",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Senandung%20Gita%20Nawacita"
+                     },
+                     {
+                         "id":  "2a898647-71b8-4c8b-bb74-2873961bae7d",
+                         "name":  "Suhayla Zahra Al Atas",
+                         "username":  "5a-25",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Suhayla%20Zahra%20Al%20Atas"
+                     },
+                     {
+                         "id":  "e72e3071-48aa-44ff-98d4-3a669c8e88a2",
+                         "name":  "TRISTAN AL GHAZALI ARSENIO",
+                         "username":  "5a-26",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=TRISTAN%20AL%20GHAZALI%20ARSENIO"
+                     },
+                     {
+                         "id":  "236e466f-96f6-4af4-a134-69159d3078a3",
+                         "name":  "Xylia Naera Adiningrum",
+                         "username":  "5a-27",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Xylia%20Naera%20Adiningrum"
+                     },
+                     {
+                         "id":  "fc5fe92c-0558-4b16-a71b-262282a3e3fd",
+                         "name":  "Zelenia Parahita Emery",
+                         "username":  "5a-28",
+                         "grade_level":  5,
+                         "class_name":  "5A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Zelenia%20Parahita%20Emery"
+                     },
+                     {
+                         "id":  "bbff4100-b82e-4048-8aba-c886fccdd9b9",
+                         "name":  "AHMAD AAMAR UTAMA",
+                         "username":  "5b-03",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=AHMAD%20AAMAR%20UTAMA"
+                     },
+                     {
+                         "id":  "05868688-6367-4c85-9bc6-52c39b467667",
+                         "name":  "AZKA AZFAR RABBANI",
+                         "username":  "5b-12",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=AZKA%20AZFAR%20RABBANI"
+                     },
+                     {
+                         "id":  "96143ead-1fee-4cbf-b34e-069f96a62c1b",
+                         "name":  "AZKA RADITYA PRATAMA",
+                         "username":  "5b-13",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=AZKA%20RADITYA%20PRATAMA"
+                     },
+                     {
+                         "id":  "bf3a13d3-c6fa-4616-a4d5-a1cbaeefabe9",
+                         "name":  "Adeeva Shakila Sophia Salsabila",
+                         "username":  "5b-01",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Adeeva%20Shakila%20Sophia%20Salsabila"
+                     },
+                     {
+                         "id":  "6b101ce1-319e-4881-ab1e-5c0edb9f0276",
+                         "name":  "Adzanta Angga Maulana",
+                         "username":  "5b-02",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Adzanta%20Angga%20Maulana"
+                     },
+                     {
+                         "id":  "f6289bf2-1eab-496f-a59a-eae9b7a01ee0",
+                         "name":  "Aldebaran Nabhan Pratama",
+                         "username":  "5b-04",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Aldebaran%20Nabhan%20Pratama"
+                     },
+                     {
+                         "id":  "727bb091-fe8d-42a4-9b9a-07d9f9e0d846",
+                         "name":  "Alesha Bianca Mikhaylova",
+                         "username":  "5b-05",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alesha%20Bianca%20Mikhaylova"
+                     },
+                     {
+                         "id":  "fd094095-080a-45d3-b426-3d3f80220eb1",
+                         "name":  "Aline Fernanda Insan",
+                         "username":  "5b-06",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Aline%20Fernanda%20Insan"
+                     },
+                     {
+                         "id":  "0738d0a5-a7e3-4280-8407-1783c15b7789",
+                         "name":  "Alya Salsabilla Sumarno",
+                         "username":  "5b-07",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alya%20Salsabilla%20Sumarno"
+                     },
+                     {
+                         "id":  "eb32c2c6-3fbb-4fef-b114-b875596b8f01",
+                         "name":  "Arka Virendra Kurniawan",
+                         "username":  "5b-08",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Arka%20Virendra%20Kurniawan"
+                     },
+                     {
+                         "id":  "e4bf495f-f83c-454a-b67d-2acdc71be07f",
+                         "name":  "Arsenio Azzam Endrysaputra",
+                         "username":  "5b-09",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Arsenio%20Azzam%20Endrysaputra"
+                     },
+                     {
+                         "id":  "0a1afd5b-fb09-4f83-b810-f4d5301cd2d7",
+                         "name":  "Auril Anjasmara",
+                         "username":  "5b-10",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Auril%20Anjasmara"
+                     },
+                     {
+                         "id":  "a94b66b1-3910-4488-bda6-55da5c09ea73",
+                         "name":  "Azerious Varel Viegas",
+                         "username":  "5b-11",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Azerious%20Varel%20Viegas"
+                     },
+                     {
+                         "id":  "8d66f82a-0b18-4e51-9bdd-e4974e227094",
+                         "name":  "BAGUS MUHAMAD SHOLEH",
+                         "username":  "5b-14",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=BAGUS%20MUHAMAD%20SHOLEH"
+                     },
+                     {
+                         "id":  "571f64d4-7f96-4046-900e-f6f68acd6038",
+                         "name":  "Callista Aurora Arkhanza",
+                         "username":  "5b-15",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Callista%20Aurora%20Arkhanza"
+                     },
+                     {
+                         "id":  "eda6c6f9-d66a-47ea-897f-080bf4406ecf",
+                         "name":  "Faishal Salim Abdurrahman",
+                         "username":  "5b-16",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Faishal%20Salim%20Abdurrahman"
+                     },
+                     {
+                         "id":  "8f3bdb1b-44e9-4a1d-948d-48d63a0981f8",
+                         "name":  "Jadira Janan Janitra",
+                         "username":  "5b-17",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Jadira%20Janan%20Janitra"
+                     },
+                     {
+                         "id":  "ad3d236c-2e19-4f84-a963-130c50f8e0a4",
+                         "name":  "Julian Raka Putra Aditya",
+                         "username":  "5b-18",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Julian%20Raka%20Putra%20Aditya"
+                     },
+                     {
+                         "id":  "cb6a52ab-4c87-4ecc-8ae2-31f5070a11f6",
+                         "name":  "Kirana Azkadira Nugroho",
+                         "username":  "5b-19",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Kirana%20Azkadira%20Nugroho"
+                     },
+                     {
+                         "id":  "c28fcd9b-3f64-4807-8aca-a50fef6e2bed",
+                         "name":  "Muhammad Vallen Hafiz Putra Nugraha",
+                         "username":  "5b-20",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Muhammad%20Vallen%20Hafiz%20Putra%20Nugraha"
+                     },
+                     {
+                         "id":  "70733c73-0ac4-4550-bc91-a47cd0f7b54f",
+                         "name":  "Naufal Fairuzt Ramazan",
+                         "username":  "5b-21",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Naufal%20Fairuzt%20Ramazan"
+                     },
+                     {
+                         "id":  "28f5f955-3a06-4c5a-ad77-2cf4f3c6b89e",
+                         "name":  "Queenayya Aisya Agifania",
+                         "username":  "5b-22",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Queenayya%20Aisya%20Agifania"
+                     },
+                     {
+                         "id":  "917deaf7-1d82-4e4e-b75e-73f0ff020ea7",
+                         "name":  "Radhitya Al Farizi Putra Darmawan",
+                         "username":  "5b-23",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Radhitya%20Al%20Farizi%20Putra%20Darmawan"
+                     },
+                     {
+                         "id":  "41c20021-254b-4a0a-ba53-45471ff8d4d6",
+                         "name":  "Rafifa Humaira Sakhi",
+                         "username":  "5b-24",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rafifa%20Humaira%20Sakhi"
+                     },
+                     {
+                         "id":  "fb7a65d1-bcd0-4df8-944c-5f4becabd0d7",
+                         "name":  "Vindy Citra Aulia",
+                         "username":  "5b-25",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Vindy%20Citra%20Aulia"
+                     },
+                     {
+                         "id":  "70e1c64a-594c-435a-923d-7a7d861c3467",
+                         "name":  "Yessica Tatyana Tavania Sustyarin",
+                         "username":  "5b-26",
+                         "grade_level":  5,
+                         "class_name":  "5B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Yessica%20Tatyana%20Tavania%20Sustyarin"
+                     },
+                     {
+                         "id":  "34eb4101-c351-415d-ab01-3d60808c6add",
+                         "name":  "ATHALLA NUR ARZIKI",
+                         "username":  "6a-06",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=ATHALLA%20NUR%20ARZIKI"
+                     },
+                     {
+                         "id":  "1ab9991f-6535-4098-846d-f0ecfc9f0ac3",
+                         "name":  "Abyan Faeyza Hamid",
+                         "username":  "6a-01",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Abyan%20Faeyza%20Hamid"
+                     },
+                     {
+                         "id":  "0dffde2d-0c7c-46d6-a03c-e5777be9edb6",
+                         "name":  "Ahmad Farhan Azaria",
+                         "username":  "6a-02",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Ahmad%20Farhan%20Azaria"
+                     },
+                     {
+                         "id":  "4a1064ba-b12f-4593-93cd-7db8df34eb0e",
+                         "name":  "Akmal Safaraz",
+                         "username":  "6a-03",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Akmal%20Safaraz"
+                     },
+                     {
+                         "id":  "b745692b-c14d-41fc-8327-7e801efcfc15",
+                         "name":  "Alisha Khaira Kun Ayunindya",
+                         "username":  "6a-04",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alisha%20Khaira%20Kun%20Ayunindya"
+                     },
+                     {
+                         "id":  "400f44b6-63a6-40df-94d9-9172be608c3d",
+                         "name":  "Alvaro Danendra Rafassya",
+                         "username":  "6a-05",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alvaro%20Danendra%20Rafassya"
+                     },
+                     {
+                         "id":  "70dd0e3c-bad5-4664-93a9-ec0259ec5beb",
+                         "name":  "Dipo Sayyid Ali",
+                         "username":  "6a-07",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Dipo%20Sayyid%20Ali"
+                     },
+                     {
+                         "id":  "5373b858-7a7a-4d88-bbe3-165ce85afd94",
+                         "name":  "Fachry Nur Hernawan",
+                         "username":  "6a-08",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Fachry%20Nur%20Hernawan"
+                     },
+                     {
+                         "id":  "65c937d7-894e-4db1-ac70-705c9660b0e9",
+                         "name":  "Ganendra Daniello Falefie",
+                         "username":  "6a-09",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Ganendra%20Daniello%20Falefie"
+                     },
+                     {
+                         "id":  "639ba90a-b8bb-4779-876e-2fa7e348acd9",
+                         "name":  "Gideon Krismawan",
+                         "username":  "6a-10",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Gideon%20Krismawan"
+                     },
+                     {
+                         "id":  "2bb5fcca-7f64-4894-bee0-7fd50dbf1d21",
+                         "name":  "Hafidzah Dian Nafia",
+                         "username":  "6a-11",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Hafidzah%20Dian%20Nafia"
+                     },
+                     {
+                         "id":  "3c45fa55-37dc-438f-a65c-a0dbd443796f",
+                         "name":  "Haikal Satria Wibowo",
+                         "username":  "6a-12",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Haikal%20Satria%20Wibowo"
+                     },
+                     {
+                         "id":  "863462fe-767e-4fba-8f07-e6bb4553c10a",
+                         "name":  "Hanifah Chairunia Rohadi",
+                         "username":  "6a-13",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Hanifah%20Chairunia%20Rohadi"
+                     },
+                     {
+                         "id":  "09670181-56dc-46e8-b4f8-2f5733c04f0a",
+                         "name":  "Hanindya Suci Salsabila",
+                         "username":  "6a-14",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Hanindya%20Suci%20Salsabila"
+                     },
+                     {
+                         "id":  "58e93923-54c6-4e23-8898-818a24648230",
+                         "name":  "Hisyam Mughni Zahirulhaq",
+                         "username":  "6a-15",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Hisyam%20Mughni%20Zahirulhaq"
+                     },
+                     {
+                         "id":  "69d85c5a-1a56-4d42-b8f6-3baf585db328",
+                         "name":  "Muhammad Habibie Putra",
+                         "username":  "6a-16",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Muhammad%20Habibie%20Putra"
+                     },
+                     {
+                         "id":  "f33ab6cf-0e7c-4cf5-b032-f5df2d93a23e",
+                         "name":  "NAURA ANINDYA BELVA",
+                         "username":  "6a-21",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=NAURA%20ANINDYA%20BELVA"
+                     },
+                     {
+                         "id":  "d538688a-385f-4fe6-b2c7-310e5347721a",
+                         "name":  "Nabila Labiba Putri Prayoga",
+                         "username":  "6a-17",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Nabila%20Labiba%20Putri%20Prayoga"
+                     },
+                     {
+                         "id":  "bb09eabc-bbcd-4e7c-af50-b529751143c7",
+                         "name":  "Nafisa Ramadhani Kiswanto",
+                         "username":  "6a-18",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Nafisa%20Ramadhani%20Kiswanto"
+                     },
+                     {
+                         "id":  "0217d7b8-b635-484d-b5d2-8c601877e56a",
+                         "name":  "Naila Saidah Zulfa",
+                         "username":  "6a-19",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Naila%20Saidah%20Zulfa"
+                     },
+                     {
+                         "id":  "3543867a-4491-4095-8bfe-27dc171e6e2f",
+                         "name":  "Najla Zakiya Zulfa",
+                         "username":  "6a-20",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Najla%20Zakiya%20Zulfa"
+                     },
+                     {
+                         "id":  "88842045-f549-4474-a6af-ef8b21e1615d",
+                         "name":  "Rafa Juna Abyasa",
+                         "username":  "6a-22",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rafa%20Juna%20Abyasa"
+                     },
+                     {
+                         "id":  "6e0aae77-a1dd-4b10-a1e3-230310324e94",
+                         "name":  "Rafa Putra Prasetyo",
+                         "username":  "6a-23",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rafa%20Putra%20Prasetyo"
+                     },
+                     {
+                         "id":  "4736046f-b90f-4f26-bedd-6741b8811e7e",
+                         "name":  "Rezky Kurniawan",
+                         "username":  "6a-24",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rezky%20Kurniawan"
+                     },
+                     {
+                         "id":  "a84bbb8a-9f1e-44f9-a301-a43a1af481fd",
+                         "name":  "Rifki Alfredo Iswanto",
+                         "username":  "6a-25",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Rifki%20Alfredo%20Iswanto"
+                     },
+                     {
+                         "id":  "81c1077d-efe4-49d3-8ea9-92cece263ed3",
+                         "name":  "Thalita Hasna Humaira Agufis",
+                         "username":  "6a-26",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Thalita%20Hasna%20Humaira%20Agufis"
+                     },
+                     {
+                         "id":  "211c7f4a-f2f0-4b26-adee-6d2c999dcc01",
+                         "name":  "Vidya Candra Amelia",
+                         "username":  "6a-27",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Vidya%20Candra%20Amelia"
+                     },
+                     {
+                         "id":  "32f0a29f-c52e-49df-96d4-d6e788b1478a",
+                         "name":  "Zafira Janeta Lentemona",
+                         "username":  "6a-28",
+                         "grade_level":  6,
+                         "class_name":  "6A",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Zafira%20Janeta%20Lentemona"
+                     },
+                     {
+                         "id":  "36d661c0-37b4-4c18-bc8a-beaf8595159f",
+                         "name":  "AISA KANAYA AFRINDIYA",
+                         "username":  "6b-01",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=AISA%20KANAYA%20AFRINDIYA"
+                     },
+                     {
+                         "id":  "ddeea5f8-880b-4f0a-a0ee-df9ae1baec78",
+                         "name":  "AL GHAZALI TZAQIB ANANDA REZA",
+                         "username":  "6b-02",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=AL%20GHAZALI%20TZAQIB%20ANANDA%20REZA"
+                     },
+                     {
+                         "id":  "00d794af-7270-4128-a149-4a8bb35736c5",
+                         "name":  "ARKAN BINTANG SANTOSO",
+                         "username":  "6b-05",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=ARKAN%20BINTANG%20SANTOSO"
+                     },
+                     {
+                         "id":  "0b651120-10bf-44bf-8689-12b997143fc3",
+                         "name":  "Alvaro Gavriel Arsenio",
+                         "username":  "6b-03",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Alvaro%20Gavriel%20Arsenio"
+                     },
+                     {
+                         "id":  "6decb4b7-ff8f-4059-9a22-a561666de39c",
+                         "name":  "Ar Sakha Ransi Alden",
+                         "username":  "6b-04",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Ar%20Sakha%20Ransi%20Alden"
+                     },
+                     {
+                         "id":  "3b17f8e2-113b-49c3-bc70-df0fdec43824",
+                         "name":  "Arlena Syakira Syafiq",
+                         "username":  "6b-06",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Arlena%20Syakira%20Syafiq"
+                     },
+                     {
+                         "id":  "23ab4101-42a0-487b-9669-2b8389d712d8",
+                         "name":  "FARID ATALLAH SUSANTO",
+                         "username":  "6b-07",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=FARID%20ATALLAH%20SUSANTO"
+                     },
+                     {
+                         "id":  "31c26632-c87d-4ae2-ba9e-400c9845b9ad",
+                         "name":  "FLEUR CLARABELLE YUELIKA SUHENDI",
+                         "username":  "6b-08",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=FLEUR%20CLARABELLE%20YUELIKA%20SUHENDI"
+                     },
+                     {
+                         "id":  "544f6b94-9d92-41b0-9512-1e3c2d8062db",
+                         "name":  "Ghazali Shaka Al Islami",
+                         "username":  "6b-09",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Ghazali%20Shaka%20Al%20Islami"
+                     },
+                     {
+                         "id":  "523243a0-f8f0-4f89-a5fc-afd06d9edfb5",
+                         "name":  "Greysia Putri Karinov",
+                         "username":  "6b-10",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Greysia%20Putri%20Karinov"
+                     },
+                     {
+                         "id":  "beb05a4d-648b-462a-bf48-1b014d79ffe9",
+                         "name":  "Hafiza Khaira Lubna",
+                         "username":  "6b-11",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Hafiza%20Khaira%20Lubna"
+                     },
+                     {
+                         "id":  "9693283a-cc27-4e6b-9cda-bc892f21b8f7",
+                         "name":  "Haidar Prasraya",
+                         "username":  "6b-12",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Haidar%20Prasraya"
+                     },
+                     {
+                         "id":  "f4a1270f-7666-4dde-8072-fc013c0d876a",
+                         "name":  "Jagaditha Ariezki",
+                         "username":  "6b-13",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Jagaditha%20Ariezki"
+                     },
+                     {
+                         "id":  "17acecfe-aa69-4033-b402-c9cd2c5c8831",
+                         "name":  "Juventino Ahza Santoso",
+                         "username":  "6b-14",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Juventino%20Ahza%20Santoso"
+                     },
+                     {
+                         "id":  "00f1664e-817b-4858-9c0b-9f7c94aa6c8f",
+                         "name":  "Kevin Lestio Putra Niyan",
+                         "username":  "6b-15",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Kevin%20Lestio%20Putra%20Niyan"
+                     },
+                     {
+                         "id":  "168faa23-456a-406b-b3f2-bfd166d76b29",
+                         "name":  "LUCENA ETHANIA ALAMSYAH",
+                         "username":  "6b-17",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=LUCENA%20ETHANIA%20ALAMSYAH"
+                     },
+                     {
+                         "id":  "e7ddb298-cc7c-4e58-b488-ca859f3c9e8d",
+                         "name":  "Lathifahtunnisa Anindya Azhari",
+                         "username":  "6b-16",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Lathifahtunnisa%20Anindya%20Azhari"
+                     },
+                     {
+                         "id":  "9268b86e-9a53-4662-8cfe-6d9a90e82882",
+                         "name":  "Muhammad Afiq Kaka Pratama",
+                         "username":  "6b-18",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Muhammad%20Afiq%20Kaka%20Pratama"
+                     },
+                     {
+                         "id":  "ca3a2247-abcb-484a-8d1e-7240ee895103",
+                         "name":  "Muhammad Evan Daffa Al\u0027Barra",
+                         "username":  "6b-19",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Muhammad%20Evan%20Daffa%20Al\u0027Barra"
+                     },
+                     {
+                         "id":  "23a7f4b7-f192-4403-9f2b-4d6e9ffa7a71",
+                         "name":  "Muhammad Prali Noya",
+                         "username":  "6b-20",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Muhammad%20Prali%20Noya"
+                     },
+                     {
+                         "id":  "71588541-13b3-4094-9168-05b05ac6c029",
+                         "name":  "Nabila Putri Maysari",
+                         "username":  "6b-21",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Nabila%20Putri%20Maysari"
+                     },
+                     {
+                         "id":  "49b3033b-65bb-485a-9568-93ebb80f291b",
+                         "name":  "Nagita Mayza Puspitasari",
+                         "username":  "6b-22",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Nagita%20Mayza%20Puspitasari"
+                     },
+                     {
+                         "id":  "9b453b15-0ce5-4f7f-8183-2d9052aea7fa",
+                         "name":  "Raffie Fidelyo Aryasatya Haidar",
+                         "username":  "6b-23",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Raffie%20Fidelyo%20Aryasatya%20Haidar"
+                     },
+                     {
+                         "id":  "fd57111f-907e-4a7f-8a0c-a35458b463ca",
+                         "name":  "Reza Putri Qualia",
+                         "username":  "6b-24",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Reza%20Putri%20Qualia"
+                     },
+                     {
+                         "id":  "7b89e4de-fedf-4bd5-a12e-a5e0da03728b",
+                         "name":  "VALERIE LAVINA PUTRI ARIEF",
+                         "username":  "6b-26",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=VALERIE%20LAVINA%20PUTRI%20ARIEF"
+                     },
+                     {
+                         "id":  "7831d91e-32b3-48ef-a8b8-009891e9427f",
+                         "name":  "Valenia Shinta Rustrichristy",
+                         "username":  "6b-25",
+                         "grade_level":  6,
+                         "class_name":  "6B",
+                         "avatar_url":  "https://api.dicebear.com/7.x/fun-emoji/svg?seed=Valenia%20Shinta%20Rustrichristy"
+                     }
+                 ],
+    "attendances":  [
+                        {
+                            "id":  "1cc5da1a-4124-49a5-9d66-31f760447b8b",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "5373b858-7a7a-4d88-bbe3-165ce85afd94",
+                            "student_name":  "Fachry Nur Hernawan",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:28:59.900Z",
+                            "checked_in_at":  "2026-10-19T06:28:59.900Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:28:59.900Z"
+                        },
+                        {
+                            "id":  "75f35b81-0380-48d8-a3c1-b851adcd5d50",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "09670181-56dc-46e8-b4f8-2f5733c04f0a",
+                            "student_name":  "Hanindya Suci Salsabila",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:28:16.304Z",
+                            "checked_in_at":  "2026-10-19T06:28:16.304Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:28:16.304Z"
+                        },
+                        {
+                            "id":  "0174a004-74bf-47d3-b377-3e937c6ec633",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "3c45fa55-37dc-438f-a65c-a0dbd443796f",
+                            "student_name":  "Haikal Satria Wibowo",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:28:11.755Z",
+                            "checked_in_at":  "2026-10-19T06:28:11.755Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:28:11.756Z"
+                        },
+                        {
+                            "id":  "f2e8d226-3ee1-4324-bb43-2e59f0b11178",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "863462fe-767e-4fba-8f07-e6bb4553c10a",
+                            "student_name":  "Hanifah Chairunia Rohadi",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:28:02.233Z",
+                            "checked_in_at":  "2026-10-19T06:28:02.233Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:28:02.233Z"
+                        },
+                        {
+                            "id":  "1ff9fdad-bb7a-47a7-8d71-d4a7d3e8053e",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "b745692b-c14d-41fc-8327-7e801efcfc15",
+                            "student_name":  "Alisha Khaira Kun Ayunindya",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:27:59.209Z",
+                            "checked_in_at":  "2026-10-19T06:27:59.209Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:27:59.209Z"
+                        },
+                        {
+                            "id":  "be60536f-3022-4803-853c-336f7cb6a934",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "0217d7b8-b635-484d-b5d2-8c601877e56a",
+                            "student_name":  "Naila Saidah Zulfa",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:27:57.627Z",
+                            "checked_in_at":  "2026-10-19T06:27:57.627Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:27:57.627Z"
+                        },
+                        {
+                            "id":  "bbde2027-7558-4304-a72c-6401a53abc30",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "81c1077d-efe4-49d3-8ea9-92cece263ed3",
+                            "student_name":  "Thalita Hasna Humaira Agufis",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:27:40.677Z",
+                            "checked_in_at":  "2026-10-19T06:27:40.677Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:27:40.677Z"
+                        },
+                        {
+                            "id":  "652a59d7-533c-4304-9e0a-d1181dacefbf",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "211c7f4a-f2f0-4b26-adee-6d2c999dcc01",
+                            "student_name":  "Vidya Candra Amelia",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:27:36.955Z",
+                            "checked_in_at":  "2026-10-19T06:27:36.955Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:27:36.955Z"
+                        },
+                        {
+                            "id":  "0ca81d9c-6673-46e1-a4a0-9fa2c69fd101",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "3543867a-4491-4095-8bfe-27dc171e6e2f",
+                            "student_name":  "Najla Zakiya Zulfa",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:27:35.081Z",
+                            "checked_in_at":  "2026-10-19T06:27:35.081Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:27:35.081Z"
+                        },
+                        {
+                            "id":  "f6229b20-3462-4594-9b9c-dfbdf56016f7",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "6e0aae77-a1dd-4b10-a1e3-230310324e94",
+                            "student_name":  "Rafa Putra Prasetyo",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:27:32.803Z",
+                            "checked_in_at":  "2026-10-19T06:27:32.803Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:27:32.804Z"
+                        },
+                        {
+                            "id":  "9db7af18-c73b-48e2-8f77-22221a17cb4a",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "70dd0e3c-bad5-4664-93a9-ec0259ec5beb",
+                            "student_name":  "Dipo Sayyid Ali",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:27:32.549Z",
+                            "checked_in_at":  "2026-10-19T06:27:32.549Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:27:32.550Z"
+                        },
+                        {
+                            "id":  "f0c99e39-2773-4863-bf4e-62dc4886f5f4",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "f33ab6cf-0e7c-4cf5-b032-f5df2d93a23e",
+                            "student_name":  "NAURA ANINDYA BELVA",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:26:56.631Z",
+                            "checked_in_at":  "2026-10-19T06:26:56.631Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:26:56.631Z"
+                        },
+                        {
+                            "id":  "45cfc0e7-9410-498c-b23f-096780d5a6f0",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "400f44b6-63a6-40df-94d9-9172be608c3d",
+                            "student_name":  "Alvaro Danendra Rafassya",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:26:54.016Z",
+                            "checked_in_at":  "2026-10-19T06:26:54.016Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:26:54.017Z"
+                        },
+                        {
+                            "id":  "899d6749-c8bf-43de-a079-cdde10468fc9",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "0dffde2d-0c7c-46d6-a03c-e5777be9edb6",
+                            "student_name":  "Ahmad Farhan Azaria",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:26:37.396Z",
+                            "checked_in_at":  "2026-10-19T06:26:37.396Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:26:37.398Z"
+                        },
+                        {
+                            "id":  "33021ef7-df18-4358-9005-ab1c742a1b0a",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "d538688a-385f-4fe6-b2c7-310e5347721a",
+                            "student_name":  "Nabila Labiba Putri Prayoga",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:26:32.793Z",
+                            "checked_in_at":  "2026-10-19T06:26:32.793Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:26:32.793Z"
+                        },
+                        {
+                            "id":  "5faf4c6d-b6e8-48d2-886e-11a73524e685",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "639ba90a-b8bb-4779-876e-2fa7e348acd9",
+                            "student_name":  "Gideon Krismawan",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:26:29.665Z",
+                            "checked_in_at":  "2026-10-19T06:26:29.665Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:26:29.665Z"
+                        },
+                        {
+                            "id":  "d76e1488-8b0a-4ada-9e0e-2de49dd09c8c",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "1ab9991f-6535-4098-846d-f0ecfc9f0ac3",
+                            "student_name":  "Abyan Faeyza Hamid",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:26:18.465Z",
+                            "checked_in_at":  "2026-10-19T06:26:18.465Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:26:18.465Z"
+                        },
+                        {
+                            "id":  "3dbc5929-22dc-4139-b650-46560b7ca921",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "32f0a29f-c52e-49df-96d4-d6e788b1478a",
+                            "student_name":  "Zafira Janeta Lentemona",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:26:07.237Z",
+                            "checked_in_at":  "2026-10-19T06:26:07.237Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:26:07.237Z"
+                        },
+                        {
+                            "id":  "14f6681b-1414-40dd-837d-cb65ce690a7b",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "bb09eabc-bbcd-4e7c-af50-b529751143c7",
+                            "student_name":  "Nafisa Ramadhani Kiswanto",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:26:05.954Z",
+                            "checked_in_at":  "2026-10-19T06:26:05.954Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:26:05.955Z"
+                        },
+                        {
+                            "id":  "c57642bf-e16f-41af-9bf5-f86e0c4132d9",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "2bb5fcca-7f64-4894-bee0-7fd50dbf1d21",
+                            "student_name":  "Hafidzah Dian Nafia",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:25:52.205Z",
+                            "checked_in_at":  "2026-10-19T06:25:52.205Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:25:52.205Z"
+                        },
+                        {
+                            "id":  "4a533846-b5ea-4145-9cfd-28eecdb44688",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "58e93923-54c6-4e23-8898-818a24648230",
+                            "student_name":  "Hisyam Mughni Zahirulhaq",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:25:50.680Z",
+                            "checked_in_at":  "2026-10-19T06:25:50.680Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:25:50.681Z"
+                        },
+                        {
+                            "id":  "599e0931-f707-4354-84d7-6096f9c8b1d4",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "7b89e4de-fedf-4bd5-a12e-a5e0da03728b",
+                            "student_name":  "VALERIE LAVINA PUTRI ARIEF",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:02:32.494Z",
+                            "checked_in_at":  "2026-10-19T06:02:32.494Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:02:32.494Z"
+                        },
+                        {
+                            "id":  "17e5b363-59fd-4541-988b-5b1c4f15b560",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "ddeea5f8-880b-4f0a-a0ee-df9ae1baec78",
+                            "student_name":  "AL GHAZALI TZAQIB ANANDA REZA",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:01:21.341Z",
+                            "checked_in_at":  "2026-10-19T06:01:21.341Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:01:21.341Z"
+                        },
+                        {
+                            "id":  "a7de6725-54f8-4e0e-b4e0-f2f1b9641aac",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "49b3033b-65bb-485a-9568-93ebb80f291b",
+                            "student_name":  "Nagita Mayza Puspitasari",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:01:03.005Z",
+                            "checked_in_at":  "2026-10-19T06:01:03.005Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:01:03.005Z"
+                        },
+                        {
+                            "id":  "9e0e13dc-db0e-461b-aa17-f8683cc3db41",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "9b453b15-0ce5-4f7f-8183-2d9052aea7fa",
+                            "student_name":  "Raffie Fidelyo Aryasatya Haidar",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:01:01.880Z",
+                            "checked_in_at":  "2026-10-19T06:01:01.880Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:01:01.880Z"
+                        },
+                        {
+                            "id":  "a7cf4d85-2d07-41dc-acaf-6598302c2c3d",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "17acecfe-aa69-4033-b402-c9cd2c5c8831",
+                            "student_name":  "Juventino Ahza Santoso",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:00:46.676Z",
+                            "checked_in_at":  "2026-10-19T06:00:46.676Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:00:46.676Z"
+                        },
+                        {
+                            "id":  "d988c820-8e2d-47c8-bdd3-5c6f13797cf0",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "beb05a4d-648b-462a-bf48-1b014d79ffe9",
+                            "student_name":  "Hafiza Khaira Lubna",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:00:38.291Z",
+                            "checked_in_at":  "2026-10-19T06:00:38.291Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:00:38.291Z"
+                        },
+                        {
+                            "id":  "26b7032e-0c78-4847-92d0-a25496e77996",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "31c26632-c87d-4ae2-ba9e-400c9845b9ad",
+                            "student_name":  "FLEUR CLARABELLE YUELIKA SUHENDI",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:00:20.724Z",
+                            "checked_in_at":  "2026-10-19T06:00:20.724Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:00:20.725Z"
+                        },
+                        {
+                            "id":  "dc2b4daf-54a1-496a-81b1-0d9ea762944f",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "168faa23-456a-406b-b3f2-bfd166d76b29",
+                            "student_name":  "LUCENA ETHANIA ALAMSYAH",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:00:10.219Z",
+                            "checked_in_at":  "2026-10-19T06:00:10.219Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:00:10.219Z"
+                        },
+                        {
+                            "id":  "860e295b-2970-441e-a182-dd374143a6cb",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "6decb4b7-ff8f-4059-9a22-a561666de39c",
+                            "student_name":  "Ar Sakha Ransi Alden",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:00:08.881Z",
+                            "checked_in_at":  "2026-10-19T06:00:08.881Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:00:08.881Z"
+                        },
+                        {
+                            "id":  "aa3fde2c-221c-44cc-8e92-02cd13a84be8",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "9693283a-cc27-4e6b-9cda-bc892f21b8f7",
+                            "student_name":  "Haidar Prasraya",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T06:00:02.793Z",
+                            "checked_in_at":  "2026-10-19T06:00:02.793Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T06:00:02.794Z"
+                        },
+                        {
+                            "id":  "a1af8c90-35ab-46dd-9977-d453904b3d67",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "523243a0-f8f0-4f89-a5fc-afd06d9edfb5",
+                            "student_name":  "Greysia Putri Karinov",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:59:53.505Z",
+                            "checked_in_at":  "2026-10-19T05:59:53.505Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:59:53.505Z"
+                        },
+                        {
+                            "id":  "ababa21a-d201-44aa-9a7a-89e5905eeedb",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "0b651120-10bf-44bf-8689-12b997143fc3",
+                            "student_name":  "Alvaro Gavriel Arsenio",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:59:52.430Z",
+                            "checked_in_at":  "2026-10-19T05:59:52.430Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:59:52.430Z"
+                        },
+                        {
+                            "id":  "1d1d15c7-5e7b-4415-82b4-fcb79a2b3068",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "f4a1270f-7666-4dde-8072-fc013c0d876a",
+                            "student_name":  "Jagaditha Ariezki",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:59:48.608Z",
+                            "checked_in_at":  "2026-10-19T05:59:48.608Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:59:48.608Z"
+                        },
+                        {
+                            "id":  "ca5580c9-1d49-424b-ab7e-d95a53b8051f",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "544f6b94-9d92-41b0-9512-1e3c2d8062db",
+                            "student_name":  "Ghazali Shaka Al Islami",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:59:21.261Z",
+                            "checked_in_at":  "2026-10-19T05:59:21.261Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:59:21.261Z"
+                        },
+                        {
+                            "id":  "658dfc11-d0c9-45b6-b94c-8ae65565cc0a",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "00f1664e-817b-4858-9c0b-9f7c94aa6c8f",
+                            "student_name":  "Kevin Lestio Putra Niyan",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:59:18.869Z",
+                            "checked_in_at":  "2026-10-19T05:59:18.869Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:59:18.869Z"
+                        },
+                        {
+                            "id":  "ecb5dcf3-95f2-4121-a854-85770d2a3174",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "00d794af-7270-4128-a149-4a8bb35736c5",
+                            "student_name":  "ARKAN BINTANG SANTOSO",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:59:09.569Z",
+                            "checked_in_at":  "2026-10-19T05:59:09.569Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:59:09.569Z"
+                        },
+                        {
+                            "id":  "da3538c4-2123-43d3-86aa-bc59ea82beaf",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "fd57111f-907e-4a7f-8a0c-a35458b463ca",
+                            "student_name":  "Reza Putri Qualia",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:59:03.881Z",
+                            "checked_in_at":  "2026-10-19T05:59:03.881Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:59:03.882Z"
+                        },
+                        {
+                            "id":  "5ed1ff33-c83f-4247-907e-7e7dadb3d608",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "23a7f4b7-f192-4403-9f2b-4d6e9ffa7a71",
+                            "student_name":  "Muhammad Prali Noya",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:59:01.082Z",
+                            "checked_in_at":  "2026-10-19T05:59:01.082Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:59:01.082Z"
+                        },
+                        {
+                            "id":  "c2be8301-93fe-4d3f-8a6b-4d2d4e41844c",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "3b17f8e2-113b-49c3-bc70-df0fdec43824",
+                            "student_name":  "Arlena Syakira Syafiq",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:58:52.041Z",
+                            "checked_in_at":  "2026-10-19T05:58:52.041Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:58:52.042Z"
+                        },
+                        {
+                            "id":  "9a78a9b1-2bfb-43a6-bd1d-b1de5de2eeea",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "23ab4101-42a0-487b-9669-2b8389d712d8",
+                            "student_name":  "FARID ATALLAH SUSANTO",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:58:49.347Z",
+                            "checked_in_at":  "2026-10-19T05:58:49.347Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:58:49.347Z"
+                        },
+                        {
+                            "id":  "75f2e237-a05f-459b-b3b7-c05ebd43ad21",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "ca3a2247-abcb-484a-8d1e-7240ee895103",
+                            "student_name":  "Muhammad Evan Daffa Al\u0027Barra",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:58:48.365Z",
+                            "checked_in_at":  "2026-10-19T05:58:48.365Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:58:48.366Z"
+                        },
+                        {
+                            "id":  "7b734260-bf2d-4614-af0c-8ff573861656",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "9268b86e-9a53-4662-8cfe-6d9a90e82882",
+                            "student_name":  "Muhammad Afiq Kaka Pratama",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:58:33.162Z",
+                            "checked_in_at":  "2026-10-19T05:58:33.162Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:58:33.163Z"
+                        },
+                        {
+                            "id":  "23b2db32-0e87-437c-8b4a-c2825431e6b8",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "36d661c0-37b4-4c18-bc8a-beaf8595159f",
+                            "student_name":  "AISA KANAYA AFRINDIYA",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:58:28.240Z",
+                            "checked_in_at":  "2026-10-19T05:58:28.240Z",
+                            "status":  "hadir",
+                            "notes":  null,
+                            "created_at":  "2026-10-19T05:58:28.241Z"
+                        },
+                        {
+                            "id":  "11370696-0e3c-42da-ae3d-f6bbc6e434ec",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "user_id":  "e7ddb298-cc7c-4e58-b488-ca859f3c9e8d",
+                            "student_name":  "Lathifahtunnisa Anindya Azhari",
+                            "grade_level":  6,
+                            "station_number":  null,
+                            "partner_user_id":  null,
+                            "check_in_time":  "2026-10-19T05:30:00.000Z",
+                            "checked_in_at":  "2026-10-19T05:30:00.000Z",
+                            "status":  "hadir",
+                            "notes":  "Presensi manual via Matriks Pembina",
+                            "created_at":  "2026-10-19T07:04:55.092Z"
+                        }
+                    ],
+    "assignments":  [
+                        {
+                            "id":  "ass-69e7ba4e",
+                            "meeting_id":  "69e7ba4e-3b7d-4629-88e2-a13b19952bb1",
+                            "title":  "Praktikum: Mengetik 10 Jari Kelas 6",
+                            "instructions":  "Kerjakan tugas praktik lab sesuai materi Mengetik 10 Jari Kelas 6. Kumpulkan hasil file atau ringkasan tugas di sini.",
+                            "due_date":  "2026-10-19",
+                            "max_score":  100,
+                            "attachment_url":  null,
+                            "is_group_work":  false,
+                            "created_at":  "2026-10-19T15:36:06.887Z"
+                        },
+                        {
+                            "id":  "ass-e9fa3637",
+                            "meeting_id":  "e9fa3637-73c8-4db5-98d5-f7fbc4e55b28",
+                            "title":  "Praktikum: Mengetik 10 Jari Kelas 5",
+                            "instructions":  "Kerjakan tugas praktik lab sesuai materi Mengetik 10 Jari Kelas 5. Kumpulkan hasil file atau ringkasan tugas di sini.",
+                            "due_date":  "2026-10-20",
+                            "max_score":  100,
+                            "attachment_url":  null,
+                            "is_group_work":  false,
+                            "created_at":  "2026-10-19T15:36:06.752Z"
+                        },
+                        {
+                            "id":  "ass-71a18809",
+                            "meeting_id":  "71a18809-c856-4195-8081-2443694bcd46",
+                            "title":  "Praktikum: Mengetik 10 Jari Kelas 4",
+                            "instructions":  "Kerjakan tugas praktik lab sesuai materi Mengetik 10 Jari Kelas 4. Kumpulkan hasil file atau ringkasan tugas di sini.",
+                            "due_date":  "2026-10-22",
+                            "max_score":  100,
+                            "attachment_url":  null,
+                            "is_group_work":  false,
+                            "created_at":  "2026-10-19T15:36:06.634Z"
+                        },
+                        {
+                            "id":  "ass-d09fe387",
+                            "meeting_id":  "d09fe387-2d96-49b3-8a96-ef9cde4ac98e",
+                            "title":  "Praktikum: Format Currency",
+                            "instructions":  "Kerjakan tugas praktik lab sesuai materi Format Currency. Kumpulkan hasil file atau ringkasan tugas di sini.",
+                            "due_date":  "2026-10-26",
+                            "max_score":  100,
+                            "attachment_url":  null,
+                            "is_group_work":  false,
+                            "created_at":  "2026-10-19T15:36:06.513Z"
+                        },
+                        {
+                            "id":  "ass-b956916c",
+                            "meeting_id":  "b956916c-cb34-40a2-ac15-6f98c4757cb5",
+                            "title":  "Praktikum: Transitions",
+                            "instructions":  "Kerjakan tugas praktik lab sesuai materi Transitions. Kumpulkan hasil file atau ringkasan tugas di sini.",
+                            "due_date":  "2026-10-27",
+                            "max_score":  100,
+                            "attachment_url":  null,
+                            "is_group_work":  false,
+                            "created_at":  "2026-10-19T15:36:06.394Z"
+                        },
+                        {
+                            "id":  "ass-b0bdddcf",
+                            "meeting_id":  "b0bdddcf-8cb1-4142-9f76-e1f02895990d",
+                            "title":  "Praktikum: Alignment Text",
+                            "instructions":  "Kerjakan tugas praktik lab sesuai materi Alignment Text. Kumpulkan hasil file atau ringkasan tugas di sini.",
+                            "due_date":  "2026-10-29",
+                            "max_score":  100,
+                            "attachment_url":  null,
+                            "is_group_work":  false,
+                            "created_at":  "2026-10-19T15:36:06.046Z"
+                        }
+                    ],
+    "submissions":  [
+                        {
+                            "id":  "sub-0-ass-69",
+                            "assignment_id":  "ass-69e7ba4e",
+                            "user_id":  "f9b4670f-485f-4c8e-ac88-a1fbc4294c6e",
+                            "student_name":  "AYSHA KHANINDIA ZHAFIRA",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Mengetik 10 Jari Kelas 6 selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T15:36:07.204Z",
+                            "status":  "graded",
+                            "score":  85,
+                            "feedback":  "Bagus sekali! Langkah praktikum rapi dan tuntas.",
+                            "graded_by":  "Guru Pembina",
+                            "graded_at":  "2026-10-19T15:36:07.204Z"
+                        },
+                        {
+                            "id":  "sub-1-ass-e9",
+                            "assignment_id":  "ass-e9fa3637",
+                            "user_id":  "e2c97548-6df7-4f87-a768-a2f98ec02681",
+                            "student_name":  "Abizar Fahrezi Hamid",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Mengetik 10 Jari Kelas 5 selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T14:36:07.325Z",
+                            "status":  "submitted",
+                            "score":  null,
+                            "feedback":  null,
+                            "graded_by":  null,
+                            "graded_at":  null
+                        },
+                        {
+                            "id":  "sub-2-ass-71",
+                            "assignment_id":  "ass-71a18809",
+                            "user_id":  "df2c5339-b744-4b5f-a570-2da03863fbb2",
+                            "student_name":  "Adhyastha Giorgino Ibrahim",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Mengetik 10 Jari Kelas 4 selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T13:36:07.453Z",
+                            "status":  "graded",
+                            "score":  91,
+                            "feedback":  "Bagus sekali! Langkah praktikum rapi dan tuntas.",
+                            "graded_by":  "Guru Pembina",
+                            "graded_at":  "2026-10-19T15:36:07.453Z"
+                        },
+                        {
+                            "id":  "sub-3-ass-d0",
+                            "assignment_id":  "ass-d09fe387",
+                            "user_id":  "b3b7670a-9c33-416f-863d-b6ca85f7a6e1",
+                            "student_name":  "Adiba Khanza Az Zahra",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Format Currency selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T12:36:07.574Z",
+                            "status":  "submitted",
+                            "score":  null,
+                            "feedback":  null,
+                            "graded_by":  null,
+                            "graded_at":  null
+                        },
+                        {
+                            "id":  "sub-4-ass-b9",
+                            "assignment_id":  "ass-b956916c",
+                            "user_id":  "e0ea8183-c550-4a3d-9ce1-70afcd9a54a8",
+                            "student_name":  "Alfarezky Sharga Aguita",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Transitions selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T11:36:07.694Z",
+                            "status":  "graded",
+                            "score":  97,
+                            "feedback":  "Bagus sekali! Langkah praktikum rapi dan tuntas.",
+                            "graded_by":  "Guru Pembina",
+                            "graded_at":  "2026-10-19T15:36:07.694Z"
+                        },
+                        {
+                            "id":  "sub-5-ass-b0",
+                            "assignment_id":  "ass-b0bdddcf",
+                            "user_id":  "bcceda3a-bd10-44df-bd9a-c0533b517086",
+                            "student_name":  "Alya Maulida Ridiasmara",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Alignment Text selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T10:36:07.810Z",
+                            "status":  "submitted",
+                            "score":  null,
+                            "feedback":  null,
+                            "graded_by":  null,
+                            "graded_at":  null
+                        },
+                        {
+                            "id":  "sub-6-ass-69",
+                            "assignment_id":  "ass-69e7ba4e",
+                            "user_id":  "799797cc-ab5b-4476-b6ca-6e86a935a023",
+                            "student_name":  "Anindita Cantika Rahmawati",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Mengetik 10 Jari Kelas 6 selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T09:36:07.934Z",
+                            "status":  "graded",
+                            "score":  88,
+                            "feedback":  "Bagus sekali! Langkah praktikum rapi dan tuntas.",
+                            "graded_by":  "Guru Pembina",
+                            "graded_at":  "2026-10-19T15:36:07.934Z"
+                        },
+                        {
+                            "id":  "sub-7-ass-e9",
+                            "assignment_id":  "ass-e9fa3637",
+                            "user_id":  "7b4732f0-38f0-4ed7-a4d4-a38066092d48",
+                            "student_name":  "Arka Satya Pratama",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Mengetik 10 Jari Kelas 5 selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T08:36:08.053Z",
+                            "status":  "submitted",
+                            "score":  null,
+                            "feedback":  null,
+                            "graded_by":  null,
+                            "graded_at":  null
+                        },
+                        {
+                            "id":  "sub-8-ass-71",
+                            "assignment_id":  "ass-71a18809",
+                            "user_id":  "3cb20230-2800-4eae-b8eb-7000640a11c2",
+                            "student_name":  "Asyfa Rabbani",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Mengetik 10 Jari Kelas 4 selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T07:36:08.178Z",
+                            "status":  "graded",
+                            "score":  94,
+                            "feedback":  "Bagus sekali! Langkah praktikum rapi dan tuntas.",
+                            "graded_by":  "Guru Pembina",
+                            "graded_at":  "2026-10-19T15:36:08.178Z"
+                        },
+                        {
+                            "id":  "sub-9-ass-d0",
+                            "assignment_id":  "ass-d09fe387",
+                            "user_id":  "224d7380-d113-49f4-a362-44b13f1b7253",
+                            "student_name":  "Aurel Natania Septiani",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Format Currency selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T06:36:08.297Z",
+                            "status":  "submitted",
+                            "score":  null,
+                            "feedback":  null,
+                            "graded_by":  null,
+                            "graded_at":  null
+                        },
+                        {
+                            "id":  "sub-10-ass-b9",
+                            "assignment_id":  "ass-b956916c",
+                            "user_id":  "45fc75f5-146f-4d2b-9646-b384bada5bab",
+                            "student_name":  "Berlian Daffa Nur Sya\u0027bani",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Transitions selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T05:36:08.417Z",
+                            "status":  "graded",
+                            "score":  85,
+                            "feedback":  "Bagus sekali! Langkah praktikum rapi dan tuntas.",
+                            "graded_by":  "Guru Pembina",
+                            "graded_at":  "2026-10-19T15:36:08.417Z"
+                        },
+                        {
+                            "id":  "sub-11-ass-b0",
+                            "assignment_id":  "ass-b0bdddcf",
+                            "user_id":  "0c53ae17-994c-4e65-8e91-5ca1aec4bf8f",
+                            "student_name":  "Bian Fiandra Pratama",
+                            "grade_level":  4,
+                            "partner_user_id":  null,
+                            "submission_url":  null,
+                            "submission_text":  "Hasil pengerjaan praktikum mandiri Praktikum: Alignment Text selesai dengan baik di laptop lab.",
+                            "submitted_at":  "2026-10-19T04:36:08.537Z",
+                            "status":  "submitted",
+                            "score":  null,
+                            "feedback":  null,
+                            "graded_by":  null,
+                            "graded_at":  null
+                        }
+                    ]
+}

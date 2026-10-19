@@ -16,7 +16,7 @@ class AdminApplication : Application() {
 
         // 1. Inisialisasi data offline default jika database baru/kosong
         CoroutineScope(Dispatchers.IO).launch {
-            DatabaseInitializer.populateInitialDataIfEmpty(database)
+            DatabaseInitializer.populateInitialDataIfEmpty(this@AdminApplication, database)
         }
 
         // 2. Jadwalkan background auto-sync saat terhubung ke Wi-Fi sekolah

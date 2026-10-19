@@ -24,6 +24,12 @@ interface StudentDao {
     @Query("SELECT COUNT(*) FROM students")
     suspend fun getStudentCount(): Int
 
+    @Query("SELECT * FROM students WHERE name LIKE '%' || :query || '%' OR username LIKE '%' || :query || '%' ORDER BY grade_level ASC, class_name ASC, name ASC")
+    fun searchStudents(query: String): Flow<List<StudentEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(students: List<StudentEntity>)
+
+    @Query("DELETE FROM students")
+    suspend fun clearAll()
 }

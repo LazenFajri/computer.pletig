@@ -18,6 +18,9 @@ interface AttendanceDao {
     @Query("SELECT * FROM attendances WHERE sync_status != 'SYNCED'")
     suspend fun getUnsyncedAttendances(): List<AttendanceEntity>
 
+    @Query("SELECT * FROM attendances WHERE meeting_id = :meetingId AND (user_id = :userId OR student_name = :studentName) LIMIT 1")
+    suspend fun findAttendanceForStudent(meetingId: String, userId: String?, studentName: String): AttendanceEntity?
+
     @Query("SELECT COUNT(*) FROM attendances WHERE sync_status != 'SYNCED'")
     fun getUnsyncedCount(): Flow<Int>
 

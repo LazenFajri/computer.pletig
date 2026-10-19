@@ -1,78 +1,128 @@
 package id.sch.sdnpleburan03.admin.data.local
 
+import android.content.Context
+import com.google.gson.Gson
+import id.sch.sdnpleburan03.admin.data.local.entity.AttendanceEntity
 import id.sch.sdnpleburan03.admin.data.local.entity.MeetingEntity
 import id.sch.sdnpleburan03.admin.data.local.entity.StudentEntity
 import id.sch.sdnpleburan03.admin.data.local.entity.SyncStatus
+import id.sch.sdnpleburan03.admin.data.remote.SyncPullResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.UUID
+import java.io.InputStreamReader
 
 object DatabaseInitializer {
 
-    suspend fun populateInitialDataIfEmpty(database: AppDatabase) = withContext(Dispatchers.IO) {
+    suspend fun populateInitialDataIfEmpty(context: Context, database: AppDatabase) = withContext(Dispatchers.IO) {
         val studentDao = database.studentDao()
         val meetingDao = database.meetingDao()
+        val attendanceDao = database.attendanceDao()
 
         val count = studentDao.getStudentCount()
-        if (count == 0) {
-            // 1. Seed Siswa Kelas 4, 5, 6 SDN Pleburan 03
-            val sampleStudents = listOf(
-                // Kelas 4A
-                StudentEntity(UUID.randomUUID().toString(), "Aditia Pratama", "40101", 4, "4A"),
-                StudentEntity(UUID.randomUUID().toString(), "Dimas Arya Putra", "40103", 4, "4A"),
-                StudentEntity(UUID.randomUUID().toString(), "Ahmad Rizky Pratama", "40105", 4, "4A"),
-                StudentEntity(UUID.randomUUID().toString(), "Bima Satria Wijaya", "40107", 4, "4A"),
-                StudentEntity(UUID.randomUUID().toString(), "Citra Kirana", "40109", 4, "4A"),
+        // Jika database masih kosong atau kurang dari 50 siswa (indikasi data dummy sebelumnya), load data riil dari seed_data.json
+        if (count < 50) {
+            try {
+                val inputStream = context.assets.open("seed_data.json")
+                val reader = InputStreamReader(inputStream)
+                val seedData = Gson().fromJson(reader, SyncPullResponse::class.java)
+                reader.close()
+                inputStream.close()
 
-                // Kelas 4B
-                StudentEntity(UUID.randomUUID().toString(), "Naura Azkadina", "40102", 4, "4B"),
-                StudentEntity(UUID.randomUUID().toString(), "Anisa Rahma", "40104", 4, "4B"),
-                StudentEntity(UUID.randomUUID().toString(), "Daffa Alfarezi", "40106", 4, "4B"),
-                StudentEntity(UUID.randomUUID().toString(), "Evelyn Aurelia", "40108", 4, "4B"),
+                if (seedData != null && seedData.students.isNotEmpty()) {
+                    // 1. Bersihkan data dummy lama
+                    studentDao.clearAll()
 
-                // Kelas 5A
-                StudentEntity(UUID.randomUUID().toString(), "Fathan Alvaro", "50101", 5, "5A"),
-                StudentEntity(UUID.randomUUID().toString(), "Ghani Pratama", "50103", 5, "5A"),
-                StudentEntity(UUID.randomUUID().toString(), "Haikal Firdaus", "50105", 5, "5A"),
-                StudentEntity(UUID.randomUUID().toString(), "Indra Maulana", "50107", 5, "5A"),
+                    // 2. Insert 158 Siswa Riil SDN Pleburan 03
+                    val realStudents = seedData.students.map { dto ->
+                        StudentEntity(
+                            id = dto.id,
+                            name = dto.name,
+                            username = dto.username,
+                            gradeLevel = dto.gradeLevel,
+                            className = dto.className,
+                            avatarUrl = dto.avatarUrl
+                        )
+                    }
+                    studentDao.insertAll(realStudents)
 
-                // Kelas 5B
-                StudentEntity(UUID.randomUUID().toString(), "Keysha Aurelia", "50102", 5, "5B"),
-                StudentEntity(UUID.randomUUID().toString(), "Jihan Salsabila", "50104", 5, "5B"),
-                StudentEntity(UUID.randomUUID().toString(), "Kayla Azzahra", "50106", 5, "5B"),
+                    // 3. Insert 6 Pertemuan Riil
+                    val realMeetings = seedData.meetings.map { dto ->
+                        MeetingEntity(
+                            id = dto.id,
+                            meetingNumber = dto.meetingNumber,
+                            gradeLevel = dto.gradeLevel,
+                            title = dto.title,
+                            description = dto.description,
+                            date = dto.date,
+                            startTime = dto.startTime,
+                            endTime = dto.endTime,
+                            isOpen = dto.isOpen,
+                            isActive = dto.isActive,
+                            sessionToken = dto.sessionToken,
+                            syncStatus = SyncStatus.SYNCED
+                        )
+                    }
+                    meetingDao.insertAll(realMeetings)
 
-                // Kelas 6A
-                StudentEntity(UUID.randomUUID().toString(), "Muhammad Fakhri", "60101", 6, "6A"),
-                StudentEntity(UUID.randomUUID().toString(), "Naufal Ramadhan", "60103", 6, "6A"),
-                StudentEntity(UUID.randomUUID().toString(), "Panji Kusuma", "60105", 6, "6A"),
+                    // 4. Insert Riwayat Presensi Riil
+                    val realAttendances = seedData.attendances.map { dto ->
+                        AttendanceEntity(
+                            id = dto.id,
+                            meetingId = dto.meetingId,
+                            userId = dto.userId,
+                            studentName = dto.studentName,
+                            gradeLevel = dto.gradeLevel ?: 4,
+                            stationNumber = dto.stationNumber,
+                            status = dto.status,
+                            notes = dto.notes,
+                            checkInTime = dto.checkInTime ?: System.currentTimeMillis(),
+                            syncStatus = SyncStatus.SYNCED
+                        )
+                    }
+                    attendanceDao.insertAll(realAttendances)
 
-                // Kelas 6B
-                StudentEntity(UUID.randomUUID().toString(), "Zaskia Mecca", "60102", 6, "6B"),
-                StudentEntity(UUID.randomUUID().toString(), "Rania Putri", "60104", 6, "6B"),
-                StudentEntity(UUID.randomUUID().toString(), "Salwa Aurelia", "60106", 6, "6B")
-            )
-            studentDao.insertAll(sampleStudents)
+                    // 5. Insert Tugas Praktikum jika ada
+                    if (seedData.assignments.isNotEmpty()) {
+                        val assignmentDao = database.assignmentDao()
+                        val realAssignments = seedData.assignments.map { dto ->
+                            id.sch.sdnpleburan03.admin.data.local.entity.AssignmentEntity(
+                                id = dto.id,
+                                meetingId = dto.meetingId,
+                                title = dto.title,
+                                instructions = dto.instructions,
+                                dueDate = dto.dueDate,
+                                maxScore = dto.maxScore,
+                                isGroupWork = dto.isGroupWork
+                            )
+                        }
+                        assignmentDao.insertAll(realAssignments)
+                    }
 
-            // 2. Seed Pertemuan Awal
-            val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-            val initialMeeting = MeetingEntity(
-                id = UUID.randomUUID().toString(),
-                meetingNumber = 1,
-                gradeLevel = null, // Semua Kelas
-                title = "Pertemuan 1 - Praktik Lab Komputer Pleburan",
-                description = "Sesi aktif ekstrakurikuler komputer lab SDN Pleburan 03 Semarang.",
-                date = todayDate,
-                startTime = "12:30",
-                endTime = "14:00",
-                isOpen = true,
-                isActive = true,
-                sessionToken = (1000..9999).random().toString(),
-                syncStatus = SyncStatus.SYNCED
-            )
-            meetingDao.insertOrUpdate(initialMeeting)
+                    // 6. Insert Pengumpulan Tugas (Submissions) jika ada
+                    if (seedData.submissions.isNotEmpty()) {
+                        val submissionDao = database.submissionDao()
+                        val realSubmissions = seedData.submissions.map { dto ->
+                            id.sch.sdnpleburan03.admin.data.local.entity.SubmissionEntity(
+                                id = dto.id,
+                                assignmentId = dto.assignmentId,
+                                userId = dto.userId,
+                                studentName = dto.studentName,
+                                gradeLevel = dto.gradeLevel,
+                                submissionUrl = dto.submissionUrl,
+                                submissionText = dto.submissionText,
+                                score = dto.score,
+                                feedback = dto.feedback,
+                                status = dto.status,
+                                submittedAt = dto.submittedAt ?: System.currentTimeMillis(),
+                                syncStatus = SyncStatus.SYNCED
+                            )
+                        }
+                        submissionDao.insertAll(realSubmissions)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

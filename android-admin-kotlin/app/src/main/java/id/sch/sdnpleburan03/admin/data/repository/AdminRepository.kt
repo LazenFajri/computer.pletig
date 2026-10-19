@@ -2,14 +2,16 @@ package id.sch.sdnpleburan03.admin.data.repository
 
 import android.content.Context
 import id.sch.sdnpleburan03.admin.data.local.AppDatabase
+import id.sch.sdnpleburan03.admin.data.local.entity.AssignmentEntity
 import id.sch.sdnpleburan03.admin.data.local.entity.AttendanceEntity
 import id.sch.sdnpleburan03.admin.data.local.entity.MeetingEntity
 import id.sch.sdnpleburan03.admin.data.local.entity.StudentEntity
+import id.sch.sdnpleburan03.admin.data.local.entity.SubmissionEntity
 import id.sch.sdnpleburan03.admin.data.local.entity.SyncStatus
 import id.sch.sdnpleburan03.admin.data.remote.ApiClient
 import id.sch.sdnpleburan03.admin.data.remote.AttendanceDto
+import id.sch.sdnpleburan03.admin.data.remote.GradedSubmissionDto
 import id.sch.sdnpleburan03.admin.data.remote.MeetingDto
-import id.sch.sdnpleburan03.admin.data.remote.StudentDto
 import id.sch.sdnpleburan03.admin.data.remote.SyncPushRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +26,8 @@ class AdminRepository(private val context: Context) {
     private val meetingDao = database.meetingDao()
     private val studentDao = database.studentDao()
     private val attendanceDao = database.attendanceDao()
+    private val assignmentDao = database.assignmentDao()
+    private val submissionDao = database.submissionDao()
 
     // 1. Data Streams
     fun getAllMeetings(): Flow<List<MeetingEntity>> = meetingDao.getAllMeetings()
@@ -31,6 +35,8 @@ class AdminRepository(private val context: Context) {
     fun getPrimaryActiveMeeting(): Flow<MeetingEntity?> = meetingDao.getPrimaryActiveMeeting()
 
     fun getAllStudents(): Flow<List<StudentEntity>> = studentDao.getAllStudents()
+
+    fun searchStudents(query: String): Flow<List<StudentEntity>> = studentDao.searchStudents(query)
 
     fun getStudentsByGrade(gradeLevel: Int): Flow<List<StudentEntity>> =
         studentDao.getStudentsByGrade(gradeLevel)
@@ -43,6 +49,18 @@ class AdminRepository(private val context: Context) {
 
     fun getAttendancesByMeeting(meetingId: String): Flow<List<AttendanceEntity>> =
         attendanceDao.getAttendancesByMeeting(meetingId)
+
+    fun getAllAttendances(): Flow<List<AttendanceEntity>> = attendanceDao.getAllAttendances()
+
+    fun getAllAssignments(): Flow<List<AssignmentEntity>> = assignmentDao.getAllAssignments()
+
+    fun getAssignmentsByMeeting(meetingId: String): Flow<List<AssignmentEntity>> =
+        assignmentDao.getAssignmentsByMeeting(meetingId)
+
+    fun getAllSubmissions(): Flow<List<SubmissionEntity>> = submissionDao.getAllSubmissions()
+
+    fun getSubmissionsByAssignment(assignmentId: String): Flow<List<SubmissionEntity>> =
+        submissionDao.getSubmissionsByAssignment(assignmentId)
 
     fun getUnsyncedCount(): Flow<Int> = attendanceDao.getUnsyncedCount()
 
@@ -101,6 +119,14 @@ class AdminRepository(private val context: Context) {
         newToken
     }
 
+    suspend fun closeAllMeetingsOffline() = withContext(Dispatchers.IO) {
+        meetingDao.closeAllMeetings()
+    }
+
+    suspend fun deleteMeetingOffline(meetingId: String) = withContext(Dispatchers.IO) {
+        meetingDao.deleteById(meetingId)
+    }
+
     suspend fun recordAttendanceOffline(
         meetingId: String,
         student: StudentEntity,
@@ -108,19 +134,65 @@ class AdminRepository(private val context: Context) {
         stationNumber: String? = null,
         notes: String? = null
     ) = withContext(Dispatchers.IO) {
-        val newAttendance = AttendanceEntity(
-            id = UUID.randomUUID().toString(),
-            meetingId = meetingId,
-            userId = student.id,
-            studentName = student.name,
-            gradeLevel = student.gradeLevel,
-            stationNumber = stationNumber,
-            status = status,
-            notes = notes,
-            checkInTime = System.currentTimeMillis(),
-            syncStatus = SyncStatus.PENDING_INSERT
-        )
-        attendanceDao.insertOrUpdate(newAttendance)
+        val existing = attendanceDao.findAttendanceForStudent(meetingId, student.id, student.name)
+        val attendance = if (existing != null) {
+            existing.copy(
+                status = status,
+                stationNumber = stationNumber ?: existing.stationNumber,
+                notes = notes ?: existing.notes,
+                checkInTime = System.currentTimeMillis(),
+                syncStatus = SyncStatus.PENDING_UPDATE
+            )
+        } else {
+            AttendanceEntity(
+                id = UUID.randomUUID().toString(),
+                meetingId = meetingId,
+                userId = student.id,
+                studentName = student.name,
+                gradeLevel = student.gradeLevel,
+                stationNumber = stationNumber,
+                status = status,
+                notes = notes,
+                checkInTime = System.currentTimeMillis(),
+                syncStatus = SyncStatus.PENDING_INSERT
+            )
+        }
+        attendanceDao.insertOrUpdate(attendance)
+    }
+
+    suspend fun quickCheckInAttendance(
+        meetingId: String,
+        student: StudentEntity,
+        status: String
+    ) = withContext(Dispatchers.IO) {
+        val existing = attendanceDao.findAttendanceForStudent(meetingId, student.id, student.name)
+        val toSave = if (existing != null) {
+            existing.copy(
+                status = status,
+                checkInTime = System.currentTimeMillis(),
+                syncStatus = SyncStatus.PENDING_UPDATE
+            )
+        } else {
+            AttendanceEntity(
+                id = UUID.randomUUID().toString(),
+                meetingId = meetingId,
+                userId = student.id,
+                studentName = student.name,
+                gradeLevel = student.gradeLevel,
+                status = status,
+                checkInTime = System.currentTimeMillis(),
+                syncStatus = SyncStatus.PENDING_INSERT
+            )
+        }
+        attendanceDao.insertOrUpdate(toSave)
+    }
+
+    suspend fun gradeSubmissionOffline(
+        submissionId: String,
+        score: Int,
+        feedback: String?
+    ) = withContext(Dispatchers.IO) {
+        submissionDao.gradeSubmission(submissionId, score, feedback, SyncStatus.PENDING_UPDATE)
     }
 
     // 3. Two-Way BaaS Synchronization
@@ -131,8 +203,9 @@ class AdminRepository(private val context: Context) {
             // Step A: Push unsynced changes to server
             val unsyncedMeetings = meetingDao.getUnsyncedMeetings()
             val unsyncedAttendances = attendanceDao.getUnsyncedAttendances()
+            val unsyncedGradedSubmissions = submissionDao.getUnsyncedGradedSubmissions()
 
-            if (unsyncedMeetings.isNotEmpty() || unsyncedAttendances.isNotEmpty()) {
+            if (unsyncedMeetings.isNotEmpty() || unsyncedAttendances.isNotEmpty() || unsyncedGradedSubmissions.isNotEmpty()) {
                 val pushRequest = SyncPushRequest(
                     unsyncedMeetings = unsyncedMeetings.map {
                         MeetingDto(
@@ -161,6 +234,13 @@ class AdminRepository(private val context: Context) {
                             notes = it.notes,
                             checkInTime = it.checkInTime
                         )
+                    },
+                    gradedSubmissions = unsyncedGradedSubmissions.map {
+                        GradedSubmissionDto(
+                            id = it.id,
+                            score = it.score ?: 100,
+                            feedback = it.feedback
+                        )
                     }
                 )
 
@@ -168,6 +248,7 @@ class AdminRepository(private val context: Context) {
                 if (pushResponse.isSuccessful && pushResponse.body()?.success == true) {
                     meetingDao.markAsSynced(unsyncedMeetings.map { it.id })
                     attendanceDao.markAsSynced(unsyncedAttendances.map { it.id })
+                    submissionDao.markAsSynced(unsyncedGradedSubmissions.map { it.id })
                 }
             }
 
@@ -176,7 +257,7 @@ class AdminRepository(private val context: Context) {
             if (pullResponse.isSuccessful && pullResponse.body()?.success == true) {
                 val data = pullResponse.body()!!
 
-                // Merge meetings (keep local if pending update)
+                // Merge meetings
                 val serverMeetings = data.meetings.map { dto ->
                     MeetingEntity(
                         id = dto.id,
@@ -195,14 +276,14 @@ class AdminRepository(private val context: Context) {
                 }
                 meetingDao.insertAll(serverMeetings)
 
-                // Merge students master data
+                // Merge students master data (158 siswa)
                 val serverStudents = data.students.map { dto ->
                     StudentEntity(
                         id = dto.id,
                         name = dto.name,
                         username = dto.username,
-                        gradeLevel = dto.gradeLevel,
-                        className = dto.className,
+                        gradeLevel = dto.gradeLevel ?: 4,
+                        className = dto.className ?: "4A",
                         avatarUrl = dto.avatarUrl
                     )
                 }
@@ -217,7 +298,7 @@ class AdminRepository(private val context: Context) {
                         meetingId = dto.meetingId,
                         userId = dto.userId,
                         studentName = dto.studentName,
-                        gradeLevel = dto.gradeLevel,
+                        gradeLevel = dto.gradeLevel ?: 4,
                         stationNumber = dto.stationNumber,
                         status = dto.status,
                         notes = dto.notes,
@@ -229,7 +310,44 @@ class AdminRepository(private val context: Context) {
                     attendanceDao.insertAll(serverAttendances)
                 }
 
-                return@withContext kotlin.Result.success("Sinkronisasi Wi-Fi Berhasil! Data terhubung dengan server.")
+                // Merge assignments
+                if (data.assignments.isNotEmpty()) {
+                    val serverAssignments = data.assignments.map { dto ->
+                        AssignmentEntity(
+                            id = dto.id,
+                            meetingId = dto.meetingId,
+                            title = dto.title,
+                            instructions = dto.instructions,
+                            dueDate = dto.dueDate,
+                            maxScore = dto.maxScore,
+                            isGroupWork = dto.isGroupWork
+                        )
+                    }
+                    assignmentDao.insertAll(serverAssignments)
+                }
+
+                // Merge submissions
+                if (data.submissions.isNotEmpty()) {
+                    val serverSubmissions = data.submissions.map { dto ->
+                        SubmissionEntity(
+                            id = dto.id,
+                            assignmentId = dto.assignmentId,
+                            userId = dto.userId,
+                            studentName = dto.studentName,
+                            gradeLevel = dto.gradeLevel,
+                            submissionUrl = dto.submissionUrl,
+                            submissionText = dto.submissionText,
+                            score = dto.score,
+                            feedback = dto.feedback,
+                            status = dto.status,
+                            submittedAt = dto.submittedAt ?: System.currentTimeMillis(),
+                            syncStatus = SyncStatus.SYNCED
+                        )
+                    }
+                    submissionDao.insertAll(serverSubmissions)
+                }
+
+                return@withContext kotlin.Result.success("Sinkronisasi Berhasil! Terhubung direct ke database Turso.")
             } else {
                 return@withContext kotlin.Result.failure(Exception("Server mengembalikan kode: ${pullResponse.code()}"))
             }

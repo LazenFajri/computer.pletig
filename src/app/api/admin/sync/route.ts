@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { meetings, attendance, users } from '@/db/schema';
+import { meetings, attendance, users, assignments, submissions } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/admin/sync
- * BaaS Sync Pull: Mengembalikan snapshot data pertemuan, presensi, dan master siswa.
- * Klien offline Kotlin dapat memanggil ini saat terhubung ke Wi-Fi.
+ * BaaS Sync Pull: Mengembalikan snapshot data lengkap:
+ * pertemuan, presensi, master siswa, tugas, dan pengumpulan tugas.
  */
 export async function GET() {
   try {
@@ -31,8 +31,59 @@ export async function GET() {
 
     const allAttendances = await db.query.attendance.findMany({
       orderBy: [desc(attendance.checked_in_at)],
-      limit: 500, // batasi presensi terbaru untuk efisiensi sinkronisasi
+      limit: 1000,
     });
+
+    let allAssignments = await db.query.assignments.findMany({
+      orderBy: [desc(assignments.created_at)],
+    });
+
+    if (allAssignments.length === 0 && allMeetings.length > 0) {
+      for (const m of allMeetings) {
+        await db.insert(assignments).values({
+          id: `ass-${m.id.substring(0, 8)}`,
+          meeting_id: m.id,
+          title: `Praktikum: ${m.title}`,
+          instructions: `Kerjakan tugas praktik lab sesuai materi ${m.title}. Kumpulkan hasil file atau ringkasan tugas di sini.`,
+          due_date: m.date,
+          max_score: 100,
+          is_group_work: false,
+        });
+      }
+      allAssignments = await db.query.assignments.findMany({
+        orderBy: [desc(assignments.created_at)],
+      });
+    }
+
+    let allSubmissions = await db.query.submissions.findMany({
+      orderBy: [desc(submissions.submitted_at)],
+    });
+
+    if (allSubmissions.length === 0 && allAssignments.length > 0 && allStudents.length > 0) {
+      const sampleStudents = allStudents.slice(0, 12);
+      for (let i = 0; i < sampleStudents.length; i++) {
+        const st = sampleStudents[i];
+        const targetAss = allAssignments[i % allAssignments.length];
+        const isGraded = i % 2 === 0;
+        await db.insert(submissions).values({
+          id: `sub-${i}-${targetAss.id.substring(0, 6)}`,
+          assignment_id: targetAss.id,
+          user_id: st.id,
+          student_name: st.name,
+          grade_level: st.grade_level || 4,
+          submission_text: `Hasil pengerjaan praktikum mandiri ${targetAss.title} selesai dengan baik di laptop lab.`,
+          status: isGraded ? 'graded' : 'submitted',
+          score: isGraded ? 85 + (i * 3) % 15 : null,
+          feedback: isGraded ? 'Bagus sekali! Langkah praktikum rapi dan tuntas.' : null,
+          graded_by: isGraded ? 'Guru Pembina' : null,
+          graded_at: isGraded ? new Date() : null,
+          submitted_at: new Date(Date.now() - i * 3600000),
+        });
+      }
+      allSubmissions = await db.query.submissions.findMany({
+        orderBy: [desc(submissions.submitted_at)],
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -40,6 +91,8 @@ export async function GET() {
       meetings: allMeetings,
       students: allStudents,
       attendances: allAttendances,
+      assignments: allAssignments,
+      submissions: allSubmissions,
     });
   } catch (error) {
     console.error('Error in GET /api/admin/sync:', error);
@@ -52,18 +105,39 @@ export async function GET() {
 
 /**
  * POST /api/admin/sync
- * BaaS Sync Push: Menerima data lokal (pertemuan, token baru, atau presensi siswa)
- * yang dicatat saat admin dalam mode offline, lalu menyimpannya ke database server.
+ * BaaS Sync Push: Menerima data lokal (pertemuan, token baru, presensi, dan penilaian tugas)
+ * lalu menyimpannya ke database server Turso.
  */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { unsyncedMeetings = [], unsyncedAttendances = [] } = body;
+    const {
+      unsyncedMeetings = [],
+      unsyncedAttendances = [],
+      deletedMeetingIds = [],
+      deletedAttendanceIds = [],
+      gradedSubmissions = [],
+    } = body;
 
     let meetingsProcessed = 0;
     let attendancesProcessed = 0;
+    let submissionsProcessed = 0;
 
-    // 1. Proses Sinkronisasi Pertemuan / Token
+    // 1. Proses Hapus Pertemuan jika ada request delete
+    for (const id of deletedMeetingIds) {
+      if (!id) continue;
+      await db.delete(attendance).where(eq(attendance.meeting_id, id));
+      await db.delete(assignments).where(eq(assignments.meeting_id, id));
+      await db.delete(meetings).where(eq(meetings.id, id));
+    }
+
+    // 2. Proses Hapus Presensi
+    for (const id of deletedAttendanceIds) {
+      if (!id) continue;
+      await db.delete(attendance).where(eq(attendance.id, id));
+    }
+
+    // 3. Proses Sinkronisasi Pertemuan / Token
     for (const m of unsyncedMeetings) {
       if (!m.id) continue;
 
@@ -85,7 +159,7 @@ export async function POST(request: Request) {
             is_open: m.is_open !== undefined ? m.is_open : existing.is_open,
             is_active: m.is_active !== undefined ? m.is_active : existing.is_active,
             session_token: m.session_token ?? existing.session_token,
-            attendance_token: m.attendance_token ?? existing.attendance_token,
+            attendance_token: m.session_token ?? existing.attendance_token,
             updated_at: new Date(),
           })
           .where(eq(meetings.id, m.id));
@@ -109,13 +183,12 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Proses Sinkronisasi Presensi Siswa yang dibuat offline
+    // 4. Proses Sinkronisasi Presensi Siswa
     for (const a of unsyncedAttendances) {
       if (!a.meeting_id || !a.student_name) continue;
 
       const attendanceId = a.id || crypto.randomUUID();
 
-      // Cek apakah siswa sudah terdata di pertemuan ini
       const existing = await db.query.attendance.findFirst({
         where: a.id
           ? eq(attendance.id, a.id)
@@ -154,6 +227,21 @@ export async function POST(request: Request) {
       }
     }
 
+    // 5. Proses Penilaian Tugas Siswa
+    for (const g of gradedSubmissions) {
+      if (!g.id) continue;
+      await db
+        .update(submissions)
+        .set({
+          score: g.score,
+          feedback: g.feedback || null,
+          status: 'graded',
+          graded_at: new Date(),
+        })
+        .where(eq(submissions.id, g.id));
+      submissionsProcessed++;
+    }
+
     // Kembalikan data segar setelah sinkronisasi
     const updatedMeetings = await db.query.meetings.findMany({
       orderBy: [desc(meetings.meeting_number), desc(meetings.date)],
@@ -161,15 +249,25 @@ export async function POST(request: Request) {
 
     const updatedAttendances = await db.query.attendance.findMany({
       orderBy: [desc(attendance.checked_in_at)],
-      limit: 500,
+      limit: 1000,
+    });
+
+    const updatedAssignments = await db.query.assignments.findMany({
+      orderBy: [desc(assignments.created_at)],
+    });
+
+    const updatedSubmissions = await db.query.submissions.findMany({
+      orderBy: [desc(submissions.submitted_at)],
     });
 
     return NextResponse.json({
       success: true,
-      message: `Sinkronisasi berhasil! ${meetingsProcessed} sesi & ${attendancesProcessed} presensi tersinkron.`,
+      message: `Sinkronisasi berhasil! ${meetingsProcessed} sesi, ${attendancesProcessed} presensi, & ${submissionsProcessed} nilai tersinkron.`,
       timestamp: Date.now(),
       meetings: updatedMeetings,
       attendances: updatedAttendances,
+      assignments: updatedAssignments,
+      submissions: updatedSubmissions,
     });
   } catch (error) {
     console.error('Error in POST /api/admin/sync:', error);

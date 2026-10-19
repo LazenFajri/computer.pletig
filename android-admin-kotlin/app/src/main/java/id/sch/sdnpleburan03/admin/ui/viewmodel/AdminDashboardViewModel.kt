@@ -3,7 +3,10 @@ package id.sch.sdnpleburan03.admin.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import id.sch.sdnpleburan03.admin.data.local.entity.AssignmentEntity
+import id.sch.sdnpleburan03.admin.data.local.entity.MeetingEntity
 import id.sch.sdnpleburan03.admin.data.local.entity.StudentEntity
+import id.sch.sdnpleburan03.admin.data.local.entity.SubmissionEntity
 import id.sch.sdnpleburan03.admin.data.remote.ApiClient
 import id.sch.sdnpleburan03.admin.data.repository.AdminRepository
 import id.sch.sdnpleburan03.admin.sync.NetworkMonitor
@@ -26,7 +29,7 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
     val uiState: StateFlow<AdminDashboardState> = _uiState.asStateFlow()
 
     init {
-        // 1. Observe Network state & Otomatis sync online real-time saat terhubung ke internet/Wi-Fi
+        // 1. Observe Network state & Sync real-time saat online
         viewModelScope.launch {
             networkMonitor.networkState.collectLatest { netState ->
                 _uiState.update { it.copy(networkState = netState) }
@@ -40,7 +43,8 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             repository.getPrimaryActiveMeeting().collectLatest { activeMeeting ->
                 _uiState.update { it.copy(primaryMeeting = activeMeeting) }
-                if (activeMeeting != null) {
+                if (activeMeeting != null && _uiState.value.selectedMeetingForMatrix == null) {
+                    _uiState.update { it.copy(selectedMeetingForMatrix = activeMeeting) }
                     loadAttendancesForMeeting(activeMeeting.id)
                 }
             }
@@ -51,24 +55,74 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
             repository.getAllMeetings().collectLatest { meetings ->
                 _uiState.update { it.copy(allMeetings = meetings) }
                 if (_uiState.value.primaryMeeting == null && meetings.isNotEmpty()) {
-                    _uiState.update { it.copy(primaryMeeting = meetings.first()) }
-                    loadAttendancesForMeeting(meetings.first().id)
+                    val firstM = meetings.first()
+                    _uiState.update {
+                        it.copy(
+                            primaryMeeting = firstM,
+                            selectedMeetingForMatrix = it.selectedMeetingForMatrix ?: firstM
+                        )
+                    }
+                    loadAttendancesForMeeting(firstM.id)
                 }
             }
         }
 
-        // 4. Observe Unsynced Count
+        // 4. Observe All Students (158 master)
+        viewModelScope.launch {
+            repository.getAllStudents().collectLatest { allStudents ->
+                _uiState.update { it.copy(allStudents = allStudents) }
+            }
+        }
+
+        // 5. Observe All Attendances for Rekap
+        viewModelScope.launch {
+            repository.getAllAttendances().collectLatest { allAtt ->
+                _uiState.update { it.copy(allAttendances = allAtt) }
+            }
+        }
+
+        // 6. Observe Assignments
+        viewModelScope.launch {
+            repository.getAllAssignments().collectLatest { assignments ->
+                _uiState.update { it.copy(assignments = assignments) }
+                if (_uiState.value.selectedAssignmentForFilter == null && assignments.isNotEmpty()) {
+                    _uiState.update { it.copy(selectedAssignmentForFilter = assignments.first()) }
+                }
+            }
+        }
+
+        // 7. Observe Submissions
+        viewModelScope.launch {
+            repository.getAllSubmissions().collectLatest { submissions ->
+                _uiState.update { it.copy(submissions = submissions) }
+            }
+        }
+
+        // 8. Observe Unsynced Count
         viewModelScope.launch {
             repository.getUnsyncedCount().collectLatest { count ->
                 _uiState.update { it.copy(unsyncedCount = count) }
             }
         }
 
-        // 5. Initial load of students
+        // 9. Initial load of filtered students
         loadFilteredStudents()
 
-        // 6. Tarik data terbaru dari server online saat pertama kali app terbuka
+        // 10. Sync awal saat app dibuka
         syncNow()
+    }
+
+    fun setTab(tab: AdminTab) {
+        _uiState.update { it.copy(currentTab = tab) }
+    }
+
+    fun selectMeetingForMatrix(meeting: MeetingEntity) {
+        _uiState.update { it.copy(selectedMeetingForMatrix = meeting) }
+        loadAttendancesForMeeting(meeting.id)
+    }
+
+    fun selectAssignmentForFilter(assignment: AssignmentEntity?) {
+        _uiState.update { it.copy(selectedAssignmentForFilter = assignment) }
     }
 
     private fun loadAttendancesForMeeting(meetingId: String) {
@@ -89,9 +143,15 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
         loadFilteredStudents()
     }
 
+    fun onSearchStudent(query: String) {
+        _uiState.update { it.copy(studentSearchQuery = query) }
+        loadFilteredStudents()
+    }
+
     private fun loadFilteredStudents() {
         val grade = _uiState.value.selectedGrade
         val className = _uiState.value.selectedClass
+        val query = _uiState.value.studentSearchQuery.trim()
 
         viewModelScope.launch {
             if (grade != null) {
@@ -104,19 +164,28 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
         }
 
         viewModelScope.launch {
-            val studentFlow = when {
-                grade != null && className != null -> repository.getStudentsByGradeAndClass(grade, className)
-                grade != null -> repository.getStudentsByGrade(grade)
-                else -> repository.getAllStudents()
+            val studentFlow = if (query.isNotBlank()) {
+                repository.searchStudents(query)
+            } else {
+                when {
+                    grade != null && className != null -> repository.getStudentsByGradeAndClass(grade, className)
+                    grade != null -> repository.getStudentsByGrade(grade)
+                    else -> repository.getAllStudents()
+                }
             }
 
             studentFlow.collectLatest { list ->
-                _uiState.update { it.copy(students = list) }
+                // Jika search query aktif dengan filter grade/class, filter in-memory
+                val filtered = list.filter { st ->
+                    (grade == null || st.gradeLevel == grade) &&
+                    (className == null || st.className.equals(className, ignoreCase = true))
+                }
+                _uiState.update { it.copy(students = filtered) }
             }
         }
     }
 
-    // Toggle Sesi Buka/Tutup (Optimistic Local + Instant Online Push)
+    // Toggle Sesi Buka/Tutup
     fun toggleMeetingStatus(isOpen: Boolean) {
         val current = _uiState.value.primaryMeeting ?: return
         viewModelScope.launch {
@@ -127,18 +196,66 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    // Acak Token Sesi Lab Baru (Optimistic Local + Instant Online Push)
-    fun generateNewToken() {
-        val current = _uiState.value.primaryMeeting ?: return
+    fun toggleMeetingStatus(meetingId: String, isOpen: Boolean) {
         viewModelScope.launch {
-            repository.generateNewTokenOffline(current.id)
+            repository.toggleMeetingStatusOffline(meetingId, isOpen)
             if (_uiState.value.networkState.isOnline) {
                 syncNow()
             }
         }
     }
 
-    // Catat Presensi Siswa (Optimistic Local + Instant Online Push)
+    // Acak Token Sesi Lab Baru (Anti-Titip Absen)
+    fun generateNewToken() {
+        val current = _uiState.value.primaryMeeting ?: return
+        generateNewTokenForMeeting(current.id)
+    }
+
+    fun generateNewTokenForMeeting(meetingId: String) {
+        viewModelScope.launch {
+            repository.generateNewTokenOffline(meetingId)
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
+        }
+    }
+
+    // Tutup Semua Sesi (Emergency Lock)
+    fun closeAllMeetings() {
+        viewModelScope.launch {
+            repository.closeAllMeetingsOffline()
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
+        }
+    }
+
+    // Hapus Sesi Pertemuan
+    fun deleteMeeting(meetingId: String) {
+        viewModelScope.launch {
+            repository.deleteMeetingOffline(meetingId)
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
+        }
+    }
+
+    // Quick Check-in Presensi (Hadir, Izin, Sakit, Alpa) 1-tap
+    fun quickCheckIn(student: StudentEntity, status: String) {
+        val meeting = _uiState.value.selectedMeetingForMatrix ?: _uiState.value.primaryMeeting ?: return
+        viewModelScope.launch {
+            repository.quickCheckInAttendance(
+                meetingId = meeting.id,
+                student = student,
+                status = status
+            )
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
+        }
+    }
+
+    // Catat Presensi Siswa Biasa
     fun recordAttendance(student: StudentEntity, status: String) {
         val current = _uiState.value.primaryMeeting ?: return
         viewModelScope.launch {
@@ -153,7 +270,7 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    // Buat Pertemuan Baru (Optimistic Local + Instant Online Push)
+    // Buat Pertemuan Baru
     fun createMeeting(title: String, grade: Int?, start: String, end: String, desc: String?) {
         viewModelScope.launch {
             val created = repository.createMeetingOffline(
@@ -163,8 +280,32 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
                 endTime = end,
                 description = desc
             )
-            _uiState.update { it.copy(primaryMeeting = created) }
+            _uiState.update {
+                it.copy(
+                    primaryMeeting = created,
+                    selectedMeetingForMatrix = created
+                )
+            }
             loadAttendancesForMeeting(created.id)
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
+        }
+    }
+
+    // Dialog Penilaian Tugas
+    fun openGradeDialog(submission: SubmissionEntity) {
+        _uiState.update { it.copy(selectedSubmissionForGrading = submission) }
+    }
+
+    fun closeGradeDialog() {
+        _uiState.update { it.copy(selectedSubmissionForGrading = null) }
+    }
+
+    fun submitGrade(submissionId: String, score: Int, feedback: String?) {
+        viewModelScope.launch {
+            repository.gradeSubmissionOffline(submissionId, score, feedback)
+            closeGradeDialog()
             if (_uiState.value.networkState.isOnline) {
                 syncNow()
             }
@@ -180,7 +321,7 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
                 _uiState.update {
                     it.copy(
                         isSyncing = false,
-                        syncMessage = result.getOrNull() ?: "Online: Data tersinkron dengan cloud"
+                        syncMessage = result.getOrNull() ?: "Online: Data tersinkron dengan cloud Turso"
                     )
                 }
             } else {
