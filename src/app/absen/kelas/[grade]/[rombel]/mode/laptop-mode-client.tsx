@@ -14,6 +14,7 @@ import {
   Sparkles,
   Info,
 } from 'lucide-react';
+import AutoScroll from '@/components/auto-scroll';
 
 interface LaptopModeClientProps {
   grade: number;
@@ -113,8 +114,11 @@ export default function LaptopModeClient({
           )}
         </div>
 
+        {/* Auto Scroll ke Pilihan Kartu Laptop */}
+        <AutoScroll targetId="pilihan-mode-laptop" delay={250} offset={-24} duration={800} />
+
         {/* Option Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
+        <div id="pilihan-mode-laptop" className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 scroll-mt-6">
           {/* Opsi 1: 1 Laptop 1 Orang */}
           <div
             onClick={() => !isSaving && handleSelectMode(1)}

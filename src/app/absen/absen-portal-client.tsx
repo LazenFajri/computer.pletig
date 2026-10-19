@@ -14,6 +14,7 @@ import {
   Laptop,
   Users,
 } from 'lucide-react';
+import AutoScroll from '@/components/auto-scroll';
 
 interface MeetingSummary {
   id: string;
@@ -86,17 +87,6 @@ export default function AbsenPortalClient({
   currentUser,
 }: AbsenPortalClientProps) {
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel>(initialTodayGrade);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const el = document.getElementById('pilihan-rombel');
-      if (el) {
-        const y = el.getBoundingClientRect().top + window.pageYOffset - 24;
-        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-      }
-    }, 250);
-    return () => clearTimeout(timer);
-  }, []);
 
   const activeMeeting = todayMeetings[selectedGrade];
   const config = GRADE_CONFIG[selectedGrade];
@@ -173,6 +163,7 @@ export default function AbsenPortalClient({
         {/* ========================================================
             LANGSUNG PILIH ROMBEL (Langsung di atas, mudah dijangkau)
             ======================================================== */}
+        <AutoScroll targetId="pilihan-rombel" delay={250} offset={-24} duration={800} />
         <div id="pilihan-rombel" className="bg-white rounded-3xl p-5 sm:p-7 border-2 border-purple-200/80 shadow-md shadow-purple-600/5 mb-5 text-center scroll-mt-6">
           <div className="inline-flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold mb-2 border border-purple-200">
             <GraduationCap className="w-3.5 h-3.5 text-purple-600" />

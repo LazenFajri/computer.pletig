@@ -32,6 +32,7 @@ import {
   KeyRound,
   Laptop,
 } from 'lucide-react';
+import { smoothScrollToElement } from '@/components/auto-scroll';
 
 interface StudentItem {
   id: string;
@@ -188,14 +189,10 @@ export default function ClassAbsenClient({
       setDeviceStudentsCount(getDeviceStudents(selectedMeetingId).length);
     }
 
-    // Auto-scroll smooth ke container pilihan nama siswa
+    // Auto-scroll animasi smooth ke container pilihan nama siswa
     const scrollTimer = setTimeout(() => {
-      const el = document.getElementById('pilih-nama-siswa');
-      if (el) {
-        const y = el.getBoundingClientRect().top + window.pageYOffset - 24;
-        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-      }
-    }, 300);
+      smoothScrollToElement('pilih-nama-siswa', { offset: -24, duration: 800 });
+    }, 250);
 
     return () => clearTimeout(scrollTimer);
   }, [initialCapacity, selectedMeetingId]);
@@ -381,11 +378,7 @@ export default function ClassAbsenClient({
     setErrorMsg(null);
     refreshGradeData();
     setTimeout(() => {
-      const el = document.getElementById('pilih-nama-siswa');
-      if (el) {
-        const y = el.getBoundingClientRect().top + window.pageYOffset - 24;
-        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-      }
+      smoothScrollToElement('pilih-nama-siswa', { offset: -24, duration: 750 });
     }, 150);
   };
 
