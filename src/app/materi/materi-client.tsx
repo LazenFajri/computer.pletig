@@ -38,6 +38,22 @@ export default function MateriClient({ initialMaterials }: MateriClientProps) {
     }
   }, [initialMaterials]);
 
+  // Tangkap event pull-to-refresh global
+  useEffect(() => {
+    const handlePull = async () => {
+      try {
+        const { getMaterialsAction } = await import('@/app/actions/material-actions');
+        const fresh = await getMaterialsAction();
+        if (Array.isArray(fresh)) {
+          setMaterials(fresh);
+          saveOfflineData(OFFLINE_KEYS.MATERIALS, fresh);
+        }
+      } catch {}
+    };
+    window.addEventListener('app:pull-to-refresh', handlePull);
+    return () => window.removeEventListener('app:pull-to-refresh', handlePull);
+  }, []);
+
   const filteredMaterials = materials.filter((mat) => {
     // Filter grade
     if (selectedGrade !== 'all') {

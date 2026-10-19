@@ -71,6 +71,27 @@ export default function TugasClient({
   // Submissions state
   const [submissionsList, setSubmissionsList] = useState<SubmissionWithDetails[]>(initialSubmissions);
 
+  useEffect(() => {
+    if (Array.isArray(initialSubmissions)) {
+      setSubmissionsList(initialSubmissions);
+    }
+  }, [initialSubmissions]);
+
+  // Tangkap event pull-to-refresh global
+  useEffect(() => {
+    const handlePull = async () => {
+      try {
+        const { getSubmissionsAction } = await import('@/app/actions/assignment-actions');
+        const freshSubmissions = await getSubmissionsAction();
+        if (Array.isArray(freshSubmissions)) {
+          setSubmissionsList(freshSubmissions);
+        }
+      } catch {}
+    };
+    window.addEventListener('app:pull-to-refresh', handlePull);
+    return () => window.removeEventListener('app:pull-to-refresh', handlePull);
+  }, []);
+
   // Load students when form grade changes
   useEffect(() => {
     let isMounted = true;
