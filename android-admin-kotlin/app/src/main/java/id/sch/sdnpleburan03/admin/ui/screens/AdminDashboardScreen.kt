@@ -550,7 +550,7 @@ fun ActiveSessionCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
-                horizontalAlignment = Alignment.CenterAlignment
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "Belum Ada Sesi Aktif Hari Ini",
