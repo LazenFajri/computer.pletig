@@ -88,6 +88,10 @@ export default function AbsenPortalClient({
 }: AbsenPortalClientProps) {
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel>(initialTodayGrade);
 
+  useEffect(() => {
+    setSelectedGrade(initialTodayGrade);
+  }, [initialTodayGrade]);
+
   const activeMeeting = todayMeetings[selectedGrade];
   const config = GRADE_CONFIG[selectedGrade];
   const rombels = rombelsByGrade[selectedGrade] || [`${selectedGrade}A`, `${selectedGrade}B`];

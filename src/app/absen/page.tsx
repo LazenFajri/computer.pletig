@@ -61,10 +61,11 @@ function findRelevantMeeting(
 }
 
 export default async function AbsenPage({ searchParams }: AbsenPageProps) {
+  let paramGrade: GradeLevel | null = null;
   if (searchParams) {
     const sp = await searchParams;
     if (sp.grade && ['4', '5', '6'].includes(sp.grade)) {
-      redirect(`/absen/kelas/${sp.grade}`);
+      paramGrade = parseInt(sp.grade, 10) as GradeLevel;
     }
   }
 
@@ -103,11 +104,13 @@ export default async function AbsenPage({ searchParams }: AbsenPageProps) {
   }
 
   // Tentukan jenjang aktif hari ini:
-  // 1. Sesi yang sedang dibuka secara manual oleh Admin/Pembina
-  // 2. Jadwal hari ini (Senin = 6, Selasa = 5, Kamis = 4)
-  // 3. Fallback ke Kelas 6
+  // 1. Parameter URL (?grade=4/5/6)
+  // 2. Sesi yang sedang dibuka secara manual oleh Admin/Pembina
+  // 3. Jadwal hari ini (Senin = 6, Selasa = 5, Kamis = 4)
+  // 4. Fallback ke Kelas 6
   const openMeeting = allDbMeetings.find((m) => m.is_open);
   const todayGrade: GradeLevel =
+    paramGrade ||
     (openMeeting?.grade_level as GradeLevel) ||
     (wib.defaultGradeToday as GradeLevel) ||
     6;

@@ -298,7 +298,7 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
           </p>
 
           <Link
-            href={`/absen/kelas/${selectedItem.grade}`}
+            href={`/absen?grade=${selectedItem.grade}`}
             className={`w-full py-2.5 px-3 rounded-xl font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-white shadow-xs ${selectedItem.btnBg}`}
           >
             <span>Buka Presensi Kelas {selectedItem.grade}</span>
@@ -365,7 +365,7 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
               </div>
 
               <Link
-                href={`/absen/kelas/${item.grade}`}
+                href={`/absen?grade=${item.grade}`}
                 className={`w-full py-2.5 px-4 rounded-2xl text-white font-heading font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all hover:opacity-95 hover:shadow-md cursor-pointer ${item.btnBg}`}
               >
                 <span>Buka Presensi Kelas {item.grade}</span>

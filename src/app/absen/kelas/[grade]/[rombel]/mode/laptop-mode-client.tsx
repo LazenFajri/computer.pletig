@@ -74,7 +74,7 @@ export default function LaptopModeClient({
       {/* Top Navbar */}
       <div className="max-w-4xl mx-auto w-full flex items-center justify-between mb-4 sm:mb-6">
         <Link
-          href={`/absen/kelas/${grade}`}
+          href={`/absen?grade=${grade}`}
           className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl border border-slate-200 shadow-xs transition-all hover:-translate-x-0.5 cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

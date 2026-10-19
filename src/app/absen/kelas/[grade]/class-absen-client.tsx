@@ -418,8 +418,8 @@ export default function ClassAbsenClient({
       {/* Navigasi Balik ke Pemilihan Kelas / Rombel */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs">
         <Link
-          href={rombel && rombel !== 'all' ? `/absen/kelas/${grade}` : '/absen'}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-heading font-bold text-slate-700 hover:text-blue-600 transition-colors w-fit group"
+          href={`/absen?grade=${grade}`}
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-heading font-bold text-slate-700 hover:text-blue-600 transition-colors w-fit group cursor-pointer"
         >
           <div className="w-7 h-7 rounded-xl bg-slate-100 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
             <ArrowLeft className="w-4 h-4" />
