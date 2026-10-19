@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   build-apk:
-    name: Build Next.js & Capacitor APK
+    name: Build Next.js & Android APKs
     runs-on: ubuntu-latest
 
     steps:
@@ -68,21 +68,34 @@ jobs:
 
       # 7. Berikan Izin Eksekusi Gradle Wrapper
       - name: Grant Executable Permission for Gradlew
-        run: chmod +x android/gradlew
-
-      # 8. Compile & Build Android APK (Debug / Unaligned Release)
-      - name: Build Android APK with Gradle
         run: |
+          if [ -f "android/gradlew" ]; then
+            chmod +x android/gradlew
+          fi
+          if [ -f "android-admin-kotlin/gradlew" ]; then
+            chmod +x android-admin-kotlin/gradlew
+          fi
+
+      # 8. Compile & Build Android APKs
+      - name: Build Android APKs with Gradle
+        run: |
+          echo "=== 1. Building Capacitor Android (Siswa) ==="
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
           cd ..
+
+          if [ -d "android-admin-kotlin" ]; then
+            echo "=== 2. Building Native Kotlin Android (Admin Offline) ==="
+            cd android-admin-kotlin
+            ./gradlew assembleDebug --no-daemon --stacktrace
+            cd ..
+          fi
 
       # 9. Format & Rename File APK agar Rapi
       - name: Prepare APK Artifacts
         id: prep_apk
         run: |
           mkdir -p release-assets
-          APK_SRC="android/app/build/outputs/apk/debug/app-debug.apk"
           
           # Tentukan label versi
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.release_tag }}" ]; then
@@ -93,24 +106,29 @@ jobs:
             VERSION_TAG="v1.0.${{ github.run_number }}"
           fi
 
-          APK_NAME="computer-pletig-${VERSION_TAG}.apk"
-          
-          if [ -f "$APK_SRC" ]; then
-            cp "$APK_SRC" "release-assets/${APK_NAME}"
-            echo "apk_path=release-assets/${APK_NAME}" >> $GITHUB_OUTPUT
-            echo "version_tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
-            echo "Berhasil menyiapkan ${APK_NAME}"
-          else
-            echo "File APK tidak ditemukan di $APK_SRC"
-            exit 1
+          echo "version_tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
+
+          # Siswa APK
+          APK_SISWA_SRC="android/app/build/outputs/apk/debug/app-debug.apk"
+          if [ -f "$APK_SISWA_SRC" ]; then
+            cp "$APK_SISWA_SRC" "release-assets/computer-pletig-siswa-${VERSION_TAG}.apk"
+            cp "$APK_SISWA_SRC" "release-assets/computer-pletig-${VERSION_TAG}.apk"
+            echo "Berhasil menyiapkan computer-pletig-siswa-${VERSION_TAG}.apk"
           fi
 
-      # 10. Backup File APK ke GitHub Actions Artifacts (Bisa diunduh langsung dari tab Actions)
-      - name: Upload APK to GitHub Artifacts
+          # Admin Kotlin APK (Full Offline-first)
+          APK_ADMIN_SRC="android-admin-kotlin/app/build/outputs/apk/debug/app-debug.apk"
+          if [ -f "$APK_ADMIN_SRC" ]; then
+            cp "$APK_ADMIN_SRC" "release-assets/computer-pletig-admin-offline-${VERSION_TAG}.apk"
+            echo "Berhasil menyiapkan computer-pletig-admin-offline-${VERSION_TAG}.apk"
+          fi
+
+      # 10. Backup File APK ke GitHub Actions Artifacts
+      - name: Upload APKs to GitHub Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.prep_apk.outputs.version_tag }}-apk
-          path: ${{ steps.prep_apk.outputs.apk_path }}
+          name: ${{ steps.prep_apk.outputs.version_tag }}-apks
+          path: release-assets/*.apk
           retention-days: 30
 
       # 11. Publikasikan ke Halaman GitHub Releases (Otomatis saat Tag atau Manual Dispatch)
@@ -123,20 +141,26 @@ jobs:
           body: |
             ## 💻 computer.pletig - Ekstrakurikuler Komputer SDN Pleburan 03
             
-            Versi rilis otomatis aplikasi Android (.APK) yang dibangun menggunakan **Next.js + Capacitor**.
+            Versi rilis resmi aplikasi Android (.APK) SDN Pleburan 03 Semarang:
             
-            ### 📱 Detail Rilis:
+            ### 📦 Aset Rilis Tersedia:
+            1. **`computer-pletig-admin-offline-${{ steps.prep_apk.outputs.version_tag }}.apk`**
+               - Aplikasi Native Kotlin (Jetpack Compose + Room Database).
+               - Khusus Pembina/Guru: Berjalan **Full Offline**, Kontrol Sesi & Acak Token 4-Digit, Matriks Presensi Siswa per Rombel, dan Auto-Sync otomatis saat tersambung ke Wi-Fi lab (BaaS).
+            2. **`computer-pletig-siswa-${{ steps.prep_apk.outputs.version_tag }}.apk`** (atau `computer-pletig-${{ steps.prep_apk.outputs.version_tag }}.apk`)
+               - Aplikasi Siswa: Portal Presensi 1 Laptop 1/2 Orang, Tugas Mingguan, dan Praktikum Komputer SDN Pleburan 03.
+            
+            ### 📱 Detail Versi:
             - **Versi Tag:** `${{ steps.prep_apk.outputs.version_tag }}`
             - **Komit:** `${{ github.sha }}`
-            - **Tipe Build:** `Android APK (Debug/Standalone)`
             
             ### 📥 Panduan Instalasi:
-            1. Unduh file `.apk` di bagian **Assets** di bawah.
-            2. Buka file `.apk` di HP Android / Tablet siswa.
+            1. Unduh file `.apk` sesuai kebutuhan (Admin atau Siswa) di bagian **Assets** di bawah.
+            2. Buka file `.apk` di HP Android / Tablet.
             3. Jika muncul konfirmasi keamanan, aktifkan *"Izinkan penginstalan aplikasi dari sumber ini"*.
-            4. Aplikasi siap digunakan untuk kegiatan praktikum komputer SDN Pleburan 03!
+            4. Aplikasi siap digunakan!
           files: |
-            ${{ steps.prep_apk.outputs.apk_path }}
+            release-assets/*.apk
           draft: false
           prerelease: false
           generate_release_notes: true
