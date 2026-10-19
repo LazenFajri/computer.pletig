@@ -22,6 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import type { Metadata } from 'next';
+import AutoScroll from '@/components/auto-scroll';
 
 export const dynamic = 'force-dynamic';
 
@@ -239,8 +240,11 @@ export default async function GradeRombelPickerPage({ params }: PageProps) {
           </div>
         </div>
 
+        {/* Auto Scroll ke Pilihan Rombel */}
+        <AutoScroll targetId="pilihan-rombel" delay={250} offset={-24} />
+
         {/* Pilihan Kartu Rombel (Misal 4A, 4B) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        <div id="pilihan-rombel" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 scroll-mt-6">
           {distinctRombels.map((rombel) => {
             const studentCount = allStudents.filter((s) => s.class_name === rombel).length;
             const rombelLetter = rombel.replace(String(grade), '').trim() || rombel;
@@ -248,7 +252,7 @@ export default async function GradeRombelPickerPage({ params }: PageProps) {
             return (
               <Link
                 key={rombel}
-                href={`/absen/kelas/${grade}/${rombel}`}
+                href={`/absen/kelas/${grade}/${rombel}/mode`}
                 className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-slate-200 hover:border-blue-500 shadow-md shadow-blue-500/5 hover:shadow-xl hover:scale-[1.02] transition-all flex flex-col justify-between group text-left relative overflow-hidden"
               >
                 <div>
@@ -289,7 +293,7 @@ export default async function GradeRombelPickerPage({ params }: PageProps) {
         {/* Link Alternatif: Gabungan Semua Rombel */}
         <div className="text-center pt-2">
           <Link
-            href={`/absen/kelas/${grade}/all`}
+            href={`/absen/kelas/${grade}/all/mode`}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-blue-600 bg-white hover:bg-blue-50 px-4 py-2 rounded-2xl border border-slate-200 transition-colors"
           >
             <Users className="w-3.5 h-3.5" />

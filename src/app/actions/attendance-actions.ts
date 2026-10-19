@@ -69,13 +69,14 @@ export interface SubmitAttendanceParams {
   studentUserId?: string | null;
   meetingId?: string | null;
   sessionToken?: string | null;
+  laptopCapacity?: number | null;
 }
 
 /**
  * Server Action: Submit Presensi Siswa (1 Kali per Sesi Aktif)
  * Dilengkapi 3 Lapis Proteksi Anti-Titip Absen:
  * 1. Validasi Kode Token Sesi Harian Dinamis
- * 2. Device / Browser Session Locking (Maksimal 2 siswa per laptop)
+ * 2. Device / Browser Session Locking (Menyesuaikan pilihan 1 laptop 1 siswa / 2 siswa)
  * 3. Validasi Waktu Ketat & Status Sesi Sisi Server
  */
 export async function submitAttendanceAction(
@@ -101,7 +102,14 @@ export async function submitAttendanceAction(
       };
     }
 
-    const { gradeLevel, studentName, studentUserId, meetingId: requestedMeetingId, sessionToken } = params;
+    const {
+      gradeLevel,
+      studentName,
+      studentUserId,
+      meetingId: requestedMeetingId,
+      sessionToken,
+      laptopCapacity,
+    } = params;
 
     // 3. Sanitasi Ketat Input Nama Siswa (Hapus XSS, script payload, HTML injection)
     const cleanName = sanitizeStudentName(studentName);
@@ -197,10 +205,12 @@ export async function submitAttendanceAction(
       }
     }
 
-    // LAPIS PROTEKSI 2: Proteksi Browser / Device Session Locking (Maksimal 2 siswa per laptop)
+    // LAPIS PROTEKSI 2: Proteksi Browser / Device Session Locking (Menyesuaikan 1 Laptop 1 Siswa / 2 Siswa)
     let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
     const cookieKey = `pletig_dev_att_${meetingId}`;
+    const capCookieKey = `pletig_dev_cap_${meetingId}`;
     let deviceStudents: string[] = [];
+    let effectiveCapacity = laptopCapacity === 1 ? 1 : 2;
 
     try {
       cookieStore = await cookies();
@@ -211,6 +221,13 @@ export async function submitAttendanceAction(
           deviceStudents = parsed;
         }
       }
+      const rawCap = cookieStore.get(capCookieKey)?.value;
+      if (rawCap === '1' || rawCap === '2') {
+        effectiveCapacity = parseInt(rawCap, 10);
+      }
+      if (laptopCapacity === 1 || laptopCapacity === 2) {
+        effectiveCapacity = laptopCapacity;
+      }
     } catch {
       deviceStudents = [];
     }
@@ -218,10 +235,10 @@ export async function submitAttendanceAction(
     const normCleanName = cleanName.toLowerCase();
     const isAlreadyOnThisDevice = deviceStudents.some((n) => n.toLowerCase() === normCleanName);
 
-    if (deviceStudents.length >= 2 && !isAlreadyOnThisDevice) {
+    if (deviceStudents.length >= effectiveCapacity && !isAlreadyOnThisDevice) {
       return {
         success: false,
-        error: 'Laptop ini sudah dipakai absen 2 orang. Silakan gunakan laptop lain atau minta bantuan Kak Pembina!',
+        error: `Laptop ini telah diatur untuk maksimal ${effectiveCapacity} siswa (${effectiveCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}) dan batas tersebut sudah tercapai. Silakan gunakan laptop lain atau minta bantuan Kak Pembina!`,
       };
     }
 
@@ -281,6 +298,12 @@ export async function submitAttendanceAction(
         cookieStore.set(cookieKey, encodeURIComponent(JSON.stringify(deviceStudents)), {
           httpOnly: false,
           maxAge: 60 * 60 * 12, // Berlaku 12 jam (selama sesi lab hari ini)
+          sameSite: 'lax',
+          path: '/',
+        });
+        cookieStore.set(capCookieKey, String(effectiveCapacity), {
+          httpOnly: false,
+          maxAge: 60 * 60 * 12,
           sameSite: 'lax',
           path: '/',
         });

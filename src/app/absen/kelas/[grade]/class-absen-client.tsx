@@ -53,6 +53,7 @@ interface AttendanceItem {
 interface ClassAbsenClientProps {
   grade: GradeLevel;
   rombel?: string;
+  initialCapacity?: number;
   currentUser: SessionUser | null;
   initialSession?: ActiveSessionResult | null;
   initialStudents?: StudentItem[];
@@ -62,6 +63,7 @@ interface ClassAbsenClientProps {
 export default function ClassAbsenClient({
   grade,
   rombel,
+  initialCapacity,
   currentUser,
   initialSession = null,
   initialStudents = [],
@@ -92,6 +94,7 @@ export default function ClassAbsenClient({
   const [showConfetti, setShowConfetti] = useState(false);
   const [sessionToken, setSessionToken] = useState('');
   const [deviceStudentsCount, setDeviceStudentsCount] = useState<number>(0);
+  const [deviceCapacity, setDeviceCapacity] = useState<number>(initialCapacity || 2);
 
   // Helper Proteksi Lapis 2: Device / Browser Session Locking (Maksimal 2 siswa per laptop)
   const getDeviceStudents = (meetingId?: string | null): string[] => {
@@ -158,6 +161,44 @@ export default function ClassAbsenClient({
       setLoadingSession(false);
     }
   };
+
+  useEffect(() => {
+    // Inisialisasi kapasitas laptop dari prop atau localStorage
+    if (initialCapacity === 1 || initialCapacity === 2) {
+      setDeviceCapacity(initialCapacity);
+      try {
+        localStorage.setItem('pletig_laptop_capacity', String(initialCapacity));
+        if (selectedMeetingId) {
+          localStorage.setItem(`pletig_laptop_capacity_${selectedMeetingId}`, String(initialCapacity));
+        }
+      } catch {}
+    } else {
+      try {
+        const saved = selectedMeetingId
+          ? localStorage.getItem(`pletig_laptop_capacity_${selectedMeetingId}`)
+          : localStorage.getItem('pletig_laptop_capacity');
+        if (saved === '1' || saved === '2') {
+          setDeviceCapacity(Number(saved));
+        }
+      } catch {}
+    }
+
+    // Inisialisasi jumlah siswa yang sudah absen di laptop ini
+    if (selectedMeetingId) {
+      setDeviceStudentsCount(getDeviceStudents(selectedMeetingId).length);
+    }
+
+    // Auto-scroll smooth ke container pilihan nama siswa
+    const scrollTimer = setTimeout(() => {
+      const el = document.getElementById('pilih-nama-siswa');
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 24;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }, 300);
+
+    return () => clearTimeout(scrollTimer);
+  }, [initialCapacity, selectedMeetingId]);
 
   useEffect(() => {
     if (initialStudents && initialStudents.length > 0) {
@@ -259,12 +300,14 @@ export default function ClassAbsenClient({
     }
 
     const finalName = selectedStudent.name;
-    // Proteksi Lapis 2: Maksimal 2 siswa per laptop
+    // Proteksi Lapis 2: Menyesuaikan kapasitas laptop (1 atau 2 siswa)
     const deviceStudents = getDeviceStudents(selectedMeetingId);
     const normFinalName = finalName.toLowerCase();
     const isAlreadyOnThisDevice = deviceStudents.some((n) => n.toLowerCase() === normFinalName);
-    if (deviceStudents.length >= 2 && !isAlreadyOnThisDevice) {
-      setErrorMsg('Laptop ini sudah dipakai absen 2 orang. Silakan gunakan laptop lain atau minta bantuan Kak Pembina!');
+    if (deviceStudents.length >= deviceCapacity && !isAlreadyOnThisDevice) {
+      setErrorMsg(
+        `Laptop ini sudah dipakai absen ${deviceCapacity} orang (${deviceCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}). Silakan gunakan laptop lain atau minta bantuan Kak Pembina!`
+      );
       return;
     }
 
@@ -284,6 +327,7 @@ export default function ClassAbsenClient({
         studentUserId: selectedStudent?.id || null,
         meetingId: selectedMeetingId,
         sessionToken: sessionToken.trim(),
+        laptopCapacity: deviceCapacity,
       });
 
       if (!res.success) {
@@ -336,6 +380,13 @@ export default function ClassAbsenClient({
     setSelectedRombel('all');
     setErrorMsg(null);
     refreshGradeData();
+    setTimeout(() => {
+      const el = document.getElementById('pilih-nama-siswa');
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 24;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }, 150);
   };
 
   // Admin Override
@@ -570,15 +621,15 @@ export default function ClassAbsenClient({
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
                 <Laptop className="w-3.5 h-3.5 text-blue-600" />
                 <span>
-                  Siswa ke-{deviceStudentsCount || 1} di laptop ini (Batas maksimal 2 siswa per laptop)
+                  Siswa ke-{deviceStudentsCount || 1} di laptop ini (Batas {deviceCapacity} siswa per laptop)
                 </span>
               </span>
             </div>
 
             <div className="mt-6">
-              {deviceStudentsCount >= 2 ? (
+              {deviceStudentsCount >= deviceCapacity ? (
                 <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs max-w-sm mx-auto font-medium">
-                  🔒 Kuota presensi laptop ini telah penuh (2/2 siswa). Siswa lain silakan bergantian di laptop berikutnya ya!
+                  🔒 Kuota presensi laptop ini telah selesai ({deviceStudentsCount}/{deviceCapacity} siswa). Selamat mengikuti praktikum komputer!
                 </div>
               ) : (
                 <button
@@ -586,7 +637,7 @@ export default function ClassAbsenClient({
                   onClick={handleResetForNextStudent}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-heading font-bold px-6 py-3 rounded-2xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 mx-auto cursor-pointer"
                 >
-                  <span>Absen untuk Teman Sebangku (Maks 1 orang lagi)</span>
+                  <span>Absen untuk Teman Sebangku (Siswa ke-2)</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
@@ -594,7 +645,7 @@ export default function ClassAbsenClient({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+            <div id="pilih-nama-siswa" className="scroll-mt-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
                 <div>
                   <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -839,9 +890,17 @@ export default function ClassAbsenClient({
                 </div>
 
                 {/* Device locking status badge */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-white border border-amber-200 text-amber-900 shadow-2xs shrink-0">
-                  <Laptop className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Laptop ini: {deviceStudentsCount}/2 Siswa</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-white border border-amber-200 text-amber-900 shadow-2xs shrink-0">
+                    <Laptop className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Laptop ini: {deviceStudentsCount}/{deviceCapacity} Siswa</span>
+                  </div>
+                  <Link
+                    href={`/absen/kelas/${grade}/${rombel || 'all'}/mode`}
+                    className="text-[11px] font-bold text-amber-800 hover:text-amber-950 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded-xl border border-amber-300 transition-colors cursor-pointer"
+                  >
+                    Ganti Mode
+                  </Link>
                 </div>
               </div>
 
@@ -857,11 +916,11 @@ export default function ClassAbsenClient({
                 />
               </div>
 
-              {deviceStudentsCount >= 2 && !getDeviceStudents(selectedMeetingId).some((n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()) && (
+              {deviceStudentsCount >= deviceCapacity && !getDeviceStudents(selectedMeetingId).some((n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()) && (
                 <div className="p-2.5 rounded-xl bg-amber-100/90 text-amber-900 text-[11px] flex items-center gap-2 font-medium">
                   <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
                   <span>
-                    Laptop ini sudah dipakai absen 2 orang. Silakan gunakan laptop lain atau minta bantuan Kak Pembina!
+                    Laptop ini sudah dipakai absen {deviceCapacity} orang ({deviceCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}). Silakan gunakan laptop lain atau minta bantuan Kak Pembina!
                   </span>
                 </div>
               )}
@@ -893,7 +952,7 @@ export default function ClassAbsenClient({
                   !sessionStatus?.isOpen ||
                   !selectedStudent ||
                   isSelectedStudentAttended ||
-                  (deviceStudentsCount >= 2 &&
+                  (deviceStudentsCount >= deviceCapacity &&
                     !getDeviceStudents(selectedMeetingId).some(
                       (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
                     ))
@@ -903,7 +962,7 @@ export default function ClassAbsenClient({
                     ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed select-none shadow-none'
                     : isSelectedStudentAttended
                     ? 'bg-slate-100 text-emerald-800 border-2 border-emerald-300 cursor-not-allowed select-none shadow-none'
-                    : deviceStudentsCount >= 2 &&
+                    : deviceStudentsCount >= deviceCapacity &&
                       !getDeviceStudents(selectedMeetingId).some(
                         (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
                       )
@@ -921,13 +980,13 @@ export default function ClassAbsenClient({
                     <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
                     <span>Sudah Hadir Hari Ini ({selectedStudent.name})</span>
                   </>
-                ) : deviceStudentsCount >= 2 &&
+                ) : deviceStudentsCount >= deviceCapacity &&
                   !getDeviceStudents(selectedMeetingId).some(
                     (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
                   ) ? (
                   <>
                     <Laptop className="w-6 h-6 text-amber-700 shrink-0" />
-                    <span>Laptop Sudah Dipakai 2 Orang</span>
+                    <span>Laptop Sudah Dipakai {deviceCapacity} Orang</span>
                   </>
                 ) : selectedStudent ? (
                   <>

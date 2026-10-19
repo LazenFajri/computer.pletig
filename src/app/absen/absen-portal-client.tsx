@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { GradeLevel, SessionUser } from '@/lib/auth-types';
 import {
@@ -87,6 +87,17 @@ export default function AbsenPortalClient({
 }: AbsenPortalClientProps) {
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel>(initialTodayGrade);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const el = document.getElementById('pilihan-rombel');
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 24;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, []);
+
   const activeMeeting = todayMeetings[selectedGrade];
   const config = GRADE_CONFIG[selectedGrade];
   const rombels = rombelsByGrade[selectedGrade] || [`${selectedGrade}A`, `${selectedGrade}B`];
@@ -162,7 +173,7 @@ export default function AbsenPortalClient({
         {/* ========================================================
             LANGSUNG PILIH ROMBEL (Langsung di atas, mudah dijangkau)
             ======================================================== */}
-        <div className="bg-white rounded-3xl p-5 sm:p-7 border-2 border-purple-200/80 shadow-md shadow-purple-600/5 mb-5 text-center">
+        <div id="pilihan-rombel" className="bg-white rounded-3xl p-5 sm:p-7 border-2 border-purple-200/80 shadow-md shadow-purple-600/5 mb-5 text-center scroll-mt-6">
           <div className="inline-flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold mb-2 border border-purple-200">
             <GraduationCap className="w-3.5 h-3.5 text-purple-600" />
             <span>Presensi Siswa Kelas {selectedGrade} SD</span>
@@ -180,7 +191,7 @@ export default function AbsenPortalClient({
             {rombels.map((rombel) => (
               <Link
                 key={rombel}
-                href={`/absen/kelas/${selectedGrade}/${rombel}`}
+                href={`/absen/kelas/${selectedGrade}/${rombel}/mode`}
                 className="bg-gradient-to-b from-white to-purple-50/40 hover:to-purple-100/60 rounded-3xl p-5 sm:p-7 border-2 border-purple-200 hover:border-purple-600 shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all text-center flex flex-col items-center justify-center gap-2.5 group cursor-pointer"
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-700 text-white font-heading font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg shadow-purple-600/30 group-hover:scale-110 transition-transform">

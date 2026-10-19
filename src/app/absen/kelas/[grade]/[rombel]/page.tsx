@@ -11,7 +11,7 @@ import { db } from '@/db';
 import { meetings } from '@/db/schema';
 import { desc } from 'drizzle-orm';
 import type { GradeLevel } from '@/lib/auth-types';
-import { ArrowLeft, GraduationCap } from 'lucide-react';
+import { ArrowLeft, GraduationCap, Laptop } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +20,10 @@ interface PageProps {
   params: Promise<{
     grade: string;
     rombel: string;
+  }>;
+  searchParams?: Promise<{
+    mode?: string;
+    capacity?: string;
   }>;
 }
 
@@ -53,13 +57,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function RombelAttendancePage({ params }: PageProps) {
+export default async function RombelAttendancePage({ params, searchParams }: PageProps) {
   const { grade: gradeParam, rombel } = await params;
   const gradeNum = parseInt(gradeParam, 10);
 
   if (![4, 5, 6].includes(gradeNum)) {
     redirect('/absen');
   }
+
+  const sp = searchParams ? await searchParams : {};
+  const rawMode = sp.mode || sp.capacity;
+  const initialCapacity = rawMode === '1' ? 1 : rawMode === '2' ? 2 : undefined;
 
   const grade = gradeNum as GradeLevel;
   const currentUser = await getCurrentUser();
@@ -120,9 +128,18 @@ export default async function RombelAttendancePage({ params }: PageProps) {
           <span>Ganti Rombel</span>
         </Link>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold text-slate-600 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-200">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Presensi Rombel {rombel}</span>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/absen/kelas/${grade}/${rombel}/mode`}
+            className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-2xl transition-colors cursor-pointer"
+          >
+            <Laptop className="w-3.5 h-3.5" />
+            <span>Mode: {initialCapacity === 1 ? '1 Laptop 1 Siswa' : initialCapacity === 2 ? '1 Laptop 2 Siswa' : 'Pilih Mode Laptop'}</span>
+          </Link>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold text-slate-600 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-200">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Rombel {rombel}</span>
+          </div>
         </div>
       </div>
 
@@ -145,6 +162,7 @@ export default async function RombelAttendancePage({ params }: PageProps) {
         <ClassAbsenClient
           grade={grade}
           rombel={rombel}
+          initialCapacity={initialCapacity}
           currentUser={currentUser}
           initialSession={initialSession}
           initialStudents={initialStudents}
