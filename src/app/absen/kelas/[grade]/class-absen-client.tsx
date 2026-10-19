@@ -29,6 +29,8 @@ import {
   Filter,
   ArrowLeft,
   GraduationCap,
+  KeyRound,
+  Laptop,
 } from 'lucide-react';
 
 interface StudentItem {
@@ -88,6 +90,42 @@ export default function ClassAbsenClient({
     timeStr: string;
   } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [sessionToken, setSessionToken] = useState('');
+  const [deviceStudentsCount, setDeviceStudentsCount] = useState<number>(0);
+
+  // Helper Proteksi Lapis 2: Device / Browser Session Locking (Maksimal 2 siswa per laptop)
+  const getDeviceStudents = (meetingId?: string | null): string[] => {
+    if (typeof window === 'undefined' || !meetingId) return [];
+    try {
+      const localVal = localStorage.getItem(`pletig_dev_students_${meetingId}`);
+      if (localVal) {
+        const parsed = JSON.parse(localVal);
+        if (Array.isArray(parsed)) return parsed;
+      }
+      const match = document.cookie.match(new RegExp(`(^|;\\s*)pletig_dev_att_${meetingId}=([^;]*)`));
+      if (match && match[2]) {
+        const parsedCookie = JSON.parse(decodeURIComponent(match[2]));
+        if (Array.isArray(parsedCookie)) return parsedCookie;
+      }
+    } catch {
+      return [];
+    }
+    return [];
+  };
+
+  const recordDeviceStudent = (meetingId: string, name: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const existing = getDeviceStudents(meetingId);
+      if (!existing.some((n) => n.toLowerCase() === name.toLowerCase())) {
+        existing.push(name);
+      }
+      localStorage.setItem(`pletig_dev_students_${meetingId}`, JSON.stringify(existing));
+      setDeviceStudentsCount(existing.length);
+    } catch {
+      // non-blocking
+    }
+  };
 
   const [isPendingAdmin, startAdminTransition] = useTransition();
 
@@ -221,6 +259,21 @@ export default function ClassAbsenClient({
     }
 
     const finalName = selectedStudent.name;
+    // Proteksi Lapis 2: Maksimal 2 siswa per laptop
+    const deviceStudents = getDeviceStudents(selectedMeetingId);
+    const normFinalName = finalName.toLowerCase();
+    const isAlreadyOnThisDevice = deviceStudents.some((n) => n.toLowerCase() === normFinalName);
+    if (deviceStudents.length >= 2 && !isAlreadyOnThisDevice) {
+      setErrorMsg('Laptop ini sudah dipakai absen 2 orang. Silakan gunakan laptop lain atau minta bantuan Kak Pembina!');
+      return;
+    }
+
+    // Proteksi Lapis 1: Kode token wajib diisi
+    if (!sessionToken.trim()) {
+      setErrorMsg('Kode Token Sesi wajib diisi! Silakan masukkan 4 angka token yang tertera di layar proyektor / laptop Pembina.');
+      return;
+    }
+
     setErrorMsg(null);
     setIsSubmitting(true);
 
@@ -230,6 +283,7 @@ export default function ClassAbsenClient({
         studentName: finalName,
         studentUserId: selectedStudent?.id || null,
         meetingId: selectedMeetingId,
+        sessionToken: sessionToken.trim(),
       });
 
       if (!res.success) {
@@ -240,6 +294,11 @@ export default function ClassAbsenClient({
 
       playSuccessChime();
       setShowConfetti(true);
+
+      // Rekam di perangkat laptop lokal
+      if (selectedMeetingId) {
+        recordDeviceStudent(selectedMeetingId, finalName);
+      }
 
       const nowTime = new Intl.DateTimeFormat('id-ID', {
         timeZone: 'Asia/Jakarta',
@@ -507,15 +566,30 @@ export default function ClassAbsenClient({
               Kamu resmi hadir pada kegiatan <span className="font-bold text-slate-700">{successData.meetingTitle}</span> di Kelas {successData.grade} pada pukul <span className="font-bold text-emerald-600">{successData.timeStr}</span>.
             </p>
 
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                <Laptop className="w-3.5 h-3.5 text-blue-600" />
+                <span>
+                  Siswa ke-{deviceStudentsCount || 1} di laptop ini (Batas maksimal 2 siswa per laptop)
+                </span>
+              </span>
+            </div>
+
             <div className="mt-6">
-              <button
-                type="button"
-                onClick={handleResetForNextStudent}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-heading font-bold px-6 py-3 rounded-2xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 mx-auto cursor-pointer"
-              >
-                <span>Absen untuk Teman Selanjutnya</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              {deviceStudentsCount >= 2 ? (
+                <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs max-w-sm mx-auto font-medium">
+                  🔒 Kuota presensi laptop ini telah penuh (2/2 siswa). Siswa lain silakan bergantian di laptop berikutnya ya!
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResetForNextStudent}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-heading font-bold px-6 py-3 rounded-2xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 mx-auto cursor-pointer"
+                >
+                  <span>Absen untuk Teman Sebangku (Maks 1 orang lagi)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         ) : (
@@ -744,6 +818,55 @@ export default function ClassAbsenClient({
               </div>
             </div>
 
+            {/* Lapis Proteksi 1 & 2: Token Sesi Dinamis & Device Locking */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50/70 rounded-3xl p-4 sm:p-5 border-2 border-amber-200/90 shadow-xs space-y-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-sm shadow-amber-500/20 shrink-0">
+                    <KeyRound className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-heading font-bold text-slate-900 flex items-center gap-1.5">
+                      <span>Kode Token Sesi Lab</span>
+                      <span className="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full uppercase">
+                        Wajib
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Masukkan 4 angka kode token yang ditampilkan di layar proyektor / laptop Pembina.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Device locking status badge */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-white border border-amber-200 text-amber-900 shadow-2xs shrink-0">
+                  <Laptop className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Laptop ini: {deviceStudentsCount}/2 Siswa</span>
+                </div>
+              </div>
+
+              <div className="relative max-w-xs mx-auto">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="Contoh: 7821"
+                  value={sessionToken}
+                  onChange={(e) => setSessionToken(e.target.value.replace(/[^0-9a-zA-Z]/g, '').toUpperCase())}
+                  className="w-full text-center text-2xl tracking-[0.35em] font-mono font-black py-2.5 px-4 rounded-2xl border-2 border-amber-300 focus:border-amber-600 focus:ring-4 focus:ring-amber-500/15 outline-none uppercase bg-white text-slate-900 shadow-inner placeholder:tracking-normal placeholder:font-sans placeholder:text-sm placeholder:text-slate-400 placeholder:font-normal"
+                />
+              </div>
+
+              {deviceStudentsCount >= 2 && !getDeviceStudents(selectedMeetingId).some((n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()) && (
+                <div className="p-2.5 rounded-xl bg-amber-100/90 text-amber-900 text-[11px] flex items-center gap-2 font-medium">
+                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span>
+                    Laptop ini sudah dipakai absen 2 orang. Silakan gunakan laptop lain atau minta bantuan Kak Pembina!
+                  </span>
+                </div>
+              )}
+            </div>
+
             {/* Error Message Box */}
             {errorMsg && (
               <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs sm:text-sm flex items-start gap-3 animate-in fade-in">
@@ -765,12 +888,26 @@ export default function ClassAbsenClient({
 
               <button
                 type="submit"
-                disabled={isSubmitting || !sessionStatus?.isOpen || !selectedStudent || isSelectedStudentAttended}
+                disabled={
+                  isSubmitting ||
+                  !sessionStatus?.isOpen ||
+                  !selectedStudent ||
+                  isSelectedStudentAttended ||
+                  (deviceStudentsCount >= 2 &&
+                    !getDeviceStudents(selectedMeetingId).some(
+                      (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
+                    ))
+                }
                 className={`w-full py-4 sm:py-5 px-8 rounded-2xl sm:rounded-3xl font-heading font-bold text-lg sm:text-xl shadow-lg transition-all flex items-center justify-center gap-2.5 ${
                   !sessionStatus?.isOpen || !selectedStudent
                     ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed select-none shadow-none'
                     : isSelectedStudentAttended
                     ? 'bg-slate-100 text-emerald-800 border-2 border-emerald-300 cursor-not-allowed select-none shadow-none'
+                    : deviceStudentsCount >= 2 &&
+                      !getDeviceStudents(selectedMeetingId).some(
+                        (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
+                      )
+                    ? 'bg-amber-100 text-amber-800 border border-amber-300 cursor-not-allowed select-none shadow-none'
                     : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30 hover:scale-[1.01] cursor-pointer ring-4 ring-emerald-500/20'
                 }`}
               >
@@ -783,6 +920,14 @@ export default function ClassAbsenClient({
                   <>
                     <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
                     <span>Sudah Hadir Hari Ini ({selectedStudent.name})</span>
+                  </>
+                ) : deviceStudentsCount >= 2 &&
+                  !getDeviceStudents(selectedMeetingId).some(
+                    (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
+                  ) ? (
+                  <>
+                    <Laptop className="w-6 h-6 text-amber-700 shrink-0" />
+                    <span>Laptop Sudah Dipakai 2 Orang</span>
                   </>
                 ) : selectedStudent ? (
                   <>

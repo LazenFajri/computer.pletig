@@ -8,6 +8,8 @@ import {
   toggleMeetingStatusAction,
   updateMeetingAction,
   getAllMeetingsAction,
+  generateOrRotateMeetingTokenAction,
+  closeAllActiveSessionsAction,
   type MeetingItemWithCounts,
 } from '@/app/actions/meeting-actions';
 import {
@@ -73,6 +75,11 @@ import {
   Archive,
   FileDown,
   Loader2,
+  Key,
+  Tv,
+  Sparkles,
+  Copy,
+  Lock,
 } from 'lucide-react';
 import AttendanceChecklistGrid from '@/components/attendance-checklist-grid';
 
@@ -206,6 +213,19 @@ export default function AdminDashboardClient({
   const [loadingRekap, setLoadingRekap] = useState<boolean>(false);
   const [isCleaningStale, setIsCleaningStale] = useState<boolean>(false);
   const [isExportingExcel, setIsExportingExcel] = useState<boolean>(false);
+
+  // Anti-Titip Absen Token Projector & Rotation States
+  const [projectorModal, setProjectorModal] = useState<{
+    isOpen: boolean;
+    meeting: MeetingItemWithCounts | null;
+    copied: boolean;
+  }>({
+    isOpen: false,
+    meeting: null,
+    copied: false,
+  });
+  const [rotatingTokenId, setRotatingTokenId] = useState<string | null>(null);
+  const [isClosingAllSessions, setIsClosingAllSessions] = useState(false);
 
   // Filter grade
   const [filterGrade, setFilterGrade] = useState<GradeLevel | 'all'>('all');
@@ -372,6 +392,78 @@ export default function AdminDashboardClient({
         showNotification('error', res.error || 'Gagal menghapus presensi.');
       }
     });
+  };
+
+  // --- ANTI-TITIP ABSEN: TOKEN & SESI HANDLERS ---
+  const handleRotateToken = async (meetingId: string) => {
+    setRotatingTokenId(meetingId);
+    try {
+      const res = await generateOrRotateMeetingTokenAction(meetingId);
+      if (res.success && res.data?.token) {
+        const tokenVal = res.data.token;
+        showNotification('success', `Kode token berhasil diacak: ${tokenVal}`);
+        setMeetingsList((prev) =>
+          prev.map((m) => (m.id === meetingId ? { ...m, sessionToken: tokenVal } : m))
+        );
+        setProjectorModal((prev) =>
+          prev.meeting?.id === meetingId
+            ? { ...prev, meeting: { ...prev.meeting, sessionToken: tokenVal } }
+            : prev
+        );
+      } else {
+        showNotification('error', res.error || 'Gagal mengacak token sesi.');
+      }
+    } catch {
+      showNotification('error', 'Terjadi kendala saat memperbarui token.');
+    } finally {
+      setRotatingTokenId(null);
+    }
+  };
+
+  const handleCloseAllSessions = () => {
+    if (
+      !window.confirm(
+        'Tutup SEMUA sesi presensi yang sedang aktif sekarang? Siswa tidak akan bisa absen lagi.'
+      )
+    ) {
+      return;
+    }
+    setIsClosingAllSessions(true);
+    startTransition(async () => {
+      try {
+        const res = await closeAllActiveSessionsAction();
+        if (res.success) {
+          showNotification('success', res.message || 'Semua sesi presensi berhasil ditutup.');
+          setMeetingsList((prev) =>
+            prev.map((m) => ({ ...m, isOpen: false, isActive: false }))
+          );
+          setProjectorModal({ isOpen: false, meeting: null, copied: false });
+        } else {
+          showNotification('error', res.error || 'Gagal menutup sesi.');
+        }
+      } catch {
+        showNotification('error', 'Terjadi kesalahan sistem.');
+      } finally {
+        setIsClosingAllSessions(false);
+      }
+    });
+  };
+
+  const handleOpenProjector = (meeting: MeetingItemWithCounts) => {
+    setProjectorModal({
+      isOpen: true,
+      meeting,
+      copied: false,
+    });
+  };
+
+  const handleCopyToken = (token: string) => {
+    navigator.clipboard.writeText(token);
+    setProjectorModal((prev) => ({ ...prev, copied: true }));
+    showNotification('success', `Token "${token}" disalin ke clipboard!`);
+    setTimeout(() => {
+      setProjectorModal((prev) => ({ ...prev, copied: false }));
+    }, 2000);
   };
 
   // --- REKAP PRESENSI & EXCEL EXPORT HANDLERS ---
@@ -546,6 +638,7 @@ export default function AdminDashboardClient({
           endTime: res.data.end_time,
           isOpen: res.data.is_open,
           isActive: res.data.is_active,
+          sessionToken: res.data.session_token || null,
           attendanceCount: 0,
           materialCount: 0,
           assignmentCount: 0,
@@ -637,7 +730,16 @@ export default function AdminDashboardClient({
       if (res.success) {
         showNotification('success', res.message || 'Status sesi berhasil diubah.');
         setMeetingsList(
-          meetingsList.map((m) => (m.id === meetingId ? { ...m, isOpen: nextStatus, isActive: nextStatus } : m))
+          meetingsList.map((m) =>
+            m.id === meetingId
+              ? {
+                  ...m,
+                  isOpen: nextStatus,
+                  isActive: nextStatus,
+                  sessionToken: res.data?.token || m.sessionToken,
+                }
+              : m
+          )
         );
       } else {
         showNotification('error', res.error || 'Gagal mengubah status.');
@@ -1068,6 +1170,10 @@ export default function AdminDashboardClient({
     return m.gradeLevel === filterGrade || m.gradeLevel === null;
   });
 
+  const activeMeeting =
+    meetingsList.find((m) => m.isOpen) || (meetingsList.length > 0 ? meetingsList[0] : null);
+  const isAnyMeetingOpen = meetingsList.some((m) => m.isOpen);
+
   const filteredMaterials = materialsList.filter((mat) => {
     if (filterGrade === 'all') return true;
     return mat.meeting?.gradeLevel === filterGrade || mat.meeting?.gradeLevel === null;
@@ -1319,6 +1425,87 @@ export default function AdminDashboardClient({
             </div>
           </div>
 
+          {/* Banner Proteksi Anti-Titip Absen & Layar Proyektor Token */}
+          <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-4 sm:p-5 text-white shadow-lg shadow-orange-500/15 border border-amber-300/40 relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3 min-w-0">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shrink-0 shadow-inner">
+                  <Key className="w-6 h-6 text-yellow-200" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-black/25 px-2.5 py-0.5 rounded-full border border-white/20">
+                      Proteksi Anti-Titip Absen Lab
+                    </span>
+                    {activeMeeting && isAnyMeetingOpen ? (
+                      <span className="text-[10px] font-bold bg-emerald-400 text-emerald-950 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-950 animate-pulse"></span>
+                        Sesi Aktif: {activeMeeting.gradeLevel ? `Kelas ${activeMeeting.gradeLevel}` : 'Semua Kelas'}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full">
+                        Tidak Ada Sesi Terbuka
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-heading font-bold text-base sm:text-lg mt-1 truncate">
+                    {activeMeeting ? activeMeeting.title : 'Token Sesi Pertemuan Harian'}
+                  </h3>
+                  <p className="text-xs text-amber-100 mt-0.5">
+                    {activeMeeting
+                      ? 'Tampilkan kode 4 digit ini di layar proyektor / laptop pembina agar siswa di lab fisik bisa absen.'
+                      : 'Buka sesi pertemuan di bawah untuk mengaktifkan kode token presensi.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                {activeMeeting && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenProjector(activeMeeting)}
+                      className="px-4 py-2.5 bg-white text-orange-700 hover:bg-orange-50 rounded-2xl text-xs font-heading font-black flex items-center gap-2 shadow-md transition-all cursor-pointer"
+                      title="Buka tampilan fullscreen proyektor kode token"
+                    >
+                      <Tv className="w-4 h-4 text-orange-600" />
+                      <span>Tampilkan Kode Token Hari Ini</span>
+                      <span className="bg-orange-100 text-orange-800 font-mono font-black text-xs px-2 py-0.5 rounded-lg border border-orange-200">
+                        {activeMeeting.sessionToken || '....'}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRotateToken(activeMeeting.id)}
+                      disabled={rotatingTokenId === activeMeeting.id}
+                      className="p-2.5 bg-black/20 hover:bg-black/30 border border-white/30 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      title="Acak ulang kode token baru jika bocor"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${rotatingTokenId === activeMeeting.id ? 'animate-spin' : ''}`} />
+                      <span className="hidden sm:inline">Acak Ulang</span>
+                    </button>
+                  </>
+                )}
+
+                {/* Tombol Tutup Sesi Cepat */}
+                {isAnyMeetingOpen && (
+                  <button
+                    type="button"
+                    onClick={handleCloseAllSessions}
+                    disabled={isClosingAllSessions || isPending}
+                    className="px-3.5 py-2.5 bg-rose-600/90 hover:bg-rose-700 text-white rounded-2xl text-xs font-heading font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+                    title="Tutup seketika semua sesi aktif (kunci request absen)"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>{isClosingAllSessions ? 'Menutup...' : 'Tutup Semua Sesi'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* List Sesi Pertemuan */}
           {filteredMeetings.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400">
@@ -1404,6 +1591,46 @@ export default function AdminDashboardClient({
                       <Clock className="w-3.5 h-3.5 text-blue-600" />
                       {m.startTime} - {m.endTime} WIB
                     </span>
+                  </div>
+
+                  {/* Anti-Titip Absen Token Presensi Sesi */}
+                  <div className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-amber-50/80 border border-amber-200/80 mb-3.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-7 h-7 rounded-xl bg-amber-200/80 text-amber-900 flex items-center justify-center shrink-0">
+                        <Key className="w-3.5 h-3.5" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-amber-800 font-bold uppercase tracking-wider block">
+                          Token Presensi Lab
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-sm font-black tracking-widest text-slate-900 bg-white px-2 py-0.5 rounded-lg border border-amber-200 shadow-xs">
+                            {m.sessionToken || 'Belum Ada'}
+                          </span>
+                          <span className="text-[10px] text-amber-700 font-medium hidden sm:inline">• 4 Digit</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenProjector(m)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        title="Tampilkan di Layar Proyektor"
+                      >
+                        <Tv className="w-3.5 h-3.5" />
+                        <span>Proyektor</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRotateToken(m.id)}
+                        disabled={rotatingTokenId === m.id}
+                        className="p-1.5 rounded-xl bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 transition-all cursor-pointer disabled:opacity-50"
+                        title="Acak Ulang Token Sesi Ini"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${rotatingTokenId === m.id ? 'animate-spin' : ''}`} />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Badges count & Toggle - Responsive wrap to prevent mobile overflow */}
@@ -3787,6 +4014,104 @@ export default function AdminDashboardClient({
                 className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-heading font-bold rounded-xl transition-all cursor-pointer"
               >
                 Selesai
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================
+          MODAL: TAMPILAN PROYEKTOR TOKEN SESI (LAYAR PEMBINA)
+          ======================================================== */}
+      {projectorModal.isOpen && projectorModal.meeting && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-400 animate-in zoom-in-95 relative overflow-hidden text-center">
+            {/* Top decorative badge */}
+            <div className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 border border-amber-300 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+              <Key className="w-4 h-4 text-amber-600" />
+              Kode Token Presensi Lab Komputer
+            </div>
+
+            <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900 leading-tight">
+              {projectorModal.meeting.title}
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              SDN Pleburan 03 Semarang • {projectorModal.meeting.gradeLevel ? `Kelas ${projectorModal.meeting.gradeLevel} SD` : 'Semua Kelas'}
+            </p>
+
+            {/* Huge 4-digit code cards */}
+            <div className="my-6">
+              <div className="flex items-center justify-center gap-2.5 sm:gap-4">
+                {(projectorModal.meeting.sessionToken || '1234')
+                  .slice(0, 4)
+                  .split('')
+                  .map((digit, idx) => (
+                    <div
+                      key={idx}
+                      className="w-16 h-20 sm:w-24 sm:h-28 rounded-3xl bg-gradient-to-b from-purple-600 to-indigo-700 text-white font-heading font-black text-4xl sm:text-6xl flex items-center justify-center shadow-xl shadow-purple-600/30 border-2 border-white/40 tracking-tight"
+                    >
+                      {digit}
+                    </div>
+                  ))}
+              </div>
+              <p className="text-xs sm:text-sm font-bold text-slate-700 mt-3">
+                Wajib dimasukkan oleh siswa di form presensi saat berada di lab fisik.
+              </p>
+            </div>
+
+            {/* Proteksi Device Info Box */}
+            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-left text-xs text-slate-600 space-y-1 mb-6">
+              <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                <Laptop className="w-4 h-4 text-purple-600" />
+                <span>Aturan Perangkat Lab (Anti-Borongan):</span>
+              </div>
+              <p>• Maksimal <strong>2 siswa</strong> per laptop/browser dalam satu sesi.</p>
+              <p>• Siswa ke-3 pada laptop yang sama akan otomatis ditolak oleh sistem proteksi device.</p>
+            </div>
+
+            {/* Controls */}
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => handleCopyToken(projectorModal.meeting?.sessionToken || '')}
+                className="px-4 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-purple-200"
+              >
+                {projectorModal.copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                <span>{projectorModal.copied ? 'Tersalin!' : 'Salin Token'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleRotateToken(projectorModal.meeting!.id)}
+                disabled={rotatingTokenId === projectorModal.meeting!.id}
+                className="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-amber-300 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${rotatingTokenId === projectorModal.meeting!.id ? 'animate-spin' : ''}`} />
+                <span>Acak Ulang Token</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleToggleMeetingStatus(projectorModal.meeting!.id, projectorModal.meeting!.isOpen);
+                  setProjectorModal({ isOpen: false, meeting: null, copied: false });
+                }}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                  projectorModal.meeting.isOpen
+                    ? 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                }`}
+              >
+                <Lock className="w-4 h-4" />
+                <span>{projectorModal.meeting.isOpen ? 'Tutup Sesi Ini' : 'Buka Sesi Ini'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setProjectorModal({ isOpen: false, meeting: null, copied: false })}
+                className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Tutup Layar
               </button>
             </div>
           </div>

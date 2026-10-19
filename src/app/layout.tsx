@@ -38,7 +38,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={`${fredoka.variable} ${plusJakarta.variable}`}>
-      <body className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-amber-300 selection:text-slate-900 overflow-x-hidden">
+      <body className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-amber-300 selection:text-slate-900 overflow-x-hidden overflow-y-auto">
         <PwaRegister />
         <PullToRefresh />
         {children}

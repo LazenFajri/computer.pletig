@@ -98,7 +98,8 @@ export const meetings = sqliteTable('meetings', {
   is_active: integer('is_active', { mode: 'boolean' })
     .notNull()
     .default(false), // Status pertemuan aktif
-  attendance_token: text('attendance_token'), // token presensi opsional
+  session_token: text('session_token'), // Kode Token Sesi Harian Dinamis (Anti-Titip Absen)
+  attendance_token: text('attendance_token'), // token presensi opsional / kompatibilitas
   created_at: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

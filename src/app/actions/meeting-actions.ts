@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 import { meetings, attendance, materials, assignments } from '@/db/schema';
-import { eq, desc, asc, and, count } from 'drizzle-orm';
+import { eq, desc, asc, and, or, count } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 import type { ActionState, GradeLevel } from '@/lib/auth-types';
 import { revalidatePath } from 'next/cache';
@@ -30,6 +30,7 @@ export interface MeetingItemWithCounts {
   endTime: string;
   isOpen: boolean;
   isActive: boolean;
+  sessionToken?: string | null;
   attendanceCount: number;
   materialCount: number;
   assignmentCount: number;
@@ -71,6 +72,7 @@ export async function getAllMeetingsAction(
         endTime: m.end_time,
         isOpen: m.is_open,
         isActive: m.is_active,
+        sessionToken: m.session_token || m.attendance_token || null,
         attendanceCount: attCount,
         materialCount: matCount,
         assignmentCount: assCount,
@@ -134,6 +136,8 @@ export async function createMeetingAction(
       day: '2-digit',
     }).format(new Date());
 
+    const sessionToken = Math.floor(1000 + Math.random() * 9000).toString();
+
     const inserted = await db
       .insert(meetings)
       .values({
@@ -146,6 +150,8 @@ export async function createMeetingAction(
         end_time: endTime.trim() || '14:00',
         is_open: isOpen,
         is_active: isOpen,
+        session_token: sessionToken,
+        attendance_token: sessionToken,
       })
       .returning();
 
@@ -314,7 +320,7 @@ export async function deleteMeetingAction(meetingId: string): Promise<ActionStat
 export async function toggleMeetingStatusAction(
   meetingId: string,
   isOpen: boolean
-): Promise<ActionState> {
+): Promise<ActionState<{ token?: string }>> {
   try {
     const originCheck = await verifyRequestOrigin();
     if (!originCheck.valid) {
@@ -326,11 +332,22 @@ export async function toggleMeetingStatusAction(
       return { success: false, error: 'Hanya Pembina yang berhak mengubah status sesi.' };
     }
 
+    const target = await db.query.meetings.findFirst({
+      where: eq(meetings.id, meetingId),
+    });
+
+    let tokenToSet = target?.session_token || target?.attendance_token;
+    if (isOpen && !tokenToSet) {
+      tokenToSet = Math.floor(1000 + Math.random() * 9000).toString();
+    }
+
     await db
       .update(meetings)
       .set({
         is_open: isOpen,
         is_active: isOpen,
+        session_token: tokenToSet,
+        attendance_token: tokenToSet,
         updated_at: new Date(),
       })
       .where(eq(meetings.id, meetingId));
@@ -345,10 +362,100 @@ export async function toggleMeetingStatusAction(
 
     return {
       success: true,
+      data: { token: tokenToSet || undefined },
       message: `Sesi pertemuan berhasil ${isOpen ? 'diaktifkan (dibuka)' : 'ditutup'}.`,
     };
   } catch (error) {
     console.error('Error toggling meeting status:', error);
     return { success: false, error: 'Gagal mengubah status sesi pertemuan.' };
+  }
+}
+
+/**
+ * Server Action (Admin): Acak / Generate Token Sesi Baru (Anti-Titip Absen)
+ */
+export async function generateOrRotateMeetingTokenAction(
+  meetingId: string
+): Promise<ActionState<{ token: string }>> {
+  try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
+    const user = await getCurrentUser();
+    if (!user || user.role !== 'superadmin') {
+      return { success: false, error: 'Hanya Pembina yang berhak mengubah token sesi.' };
+    }
+
+    const newToken = Math.floor(1000 + Math.random() * 9000).toString();
+
+    await db
+      .update(meetings)
+      .set({
+        session_token: newToken,
+        attendance_token: newToken,
+        updated_at: new Date(),
+      })
+      .where(eq(meetings.id, meetingId));
+
+    try {
+      revalidatePath('/absen');
+      revalidatePath('/admin/dashboard');
+      revalidatePath('/');
+    } catch {
+      // ignore
+    }
+
+    return {
+      success: true,
+      data: { token: newToken },
+      message: `Kode token sesi baru berhasil digenerate: ${newToken}`,
+    };
+  } catch (error) {
+    console.error('Error rotating meeting token:', error);
+    return { success: false, error: 'Gagal mengacak kode token sesi.' };
+  }
+}
+
+/**
+ * Server Action (Admin): Tutup Semua Sesi Aktif Seketika
+ */
+export async function closeAllActiveSessionsAction(): Promise<ActionState> {
+  try {
+    const originCheck = await verifyRequestOrigin();
+    if (!originCheck.valid) {
+      return { success: false, error: 'Permintaan ditolak: Mismatched Origin.' };
+    }
+
+    const user = await getCurrentUser();
+    if (!user || user.role !== 'superadmin') {
+      return { success: false, error: 'Hanya Pembina yang berhak menutup sesi.' };
+    }
+
+    await db
+      .update(meetings)
+      .set({
+        is_open: false,
+        is_active: false,
+        updated_at: new Date(),
+      })
+      .where(or(eq(meetings.is_open, true), eq(meetings.is_active, true)));
+
+    try {
+      revalidatePath('/absen');
+      revalidatePath('/admin/dashboard');
+      revalidatePath('/');
+    } catch {
+      // ignore
+    }
+
+    return {
+      success: true,
+      message: 'Semua sesi presensi berhasil ditutup dan dikunci.',
+    };
+  } catch (error) {
+    console.error('Error closing all sessions:', error);
+    return { success: false, error: 'Gagal menutup semua sesi.' };
   }
 }

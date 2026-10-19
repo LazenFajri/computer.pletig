@@ -54,12 +54,17 @@ export default function PullToRefresh() {
     if (typeof window === 'undefined') return;
 
     // ==========================================
-    // 1. TOUCH EVENT (HP, Tablet, WebView APK Android)
+    // 1. TOUCH EVENT (Hanya untuk Mobile Touch, tidak mengganggu Desktop / Touchpad)
     // ==========================================
+    const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    if (!isTouchDevice) return;
+
     const handleTouchStart = (e: TouchEvent) => {
-      if (getScrollTop() <= 5 && !isRefreshing && e.touches.length === 1) {
+      if (getScrollTop() <= 0 && !isRefreshing && e.touches.length === 1) {
         startYRef.current = e.touches[0].clientY;
         isDraggingTouchRef.current = true;
+      } else {
+        isDraggingTouchRef.current = false;
       }
     };
 
@@ -69,14 +74,25 @@ export default function PullToRefresh() {
       const currentY = e.touches[0].clientY;
       const diff = currentY - startYRef.current;
 
-      if (diff > 0 && getScrollTop() <= 5) {
-        const boundedY = Math.min(diff * 0.55, MAX_PULL);
+      // Jika user menggeser ke atas (scroll ke bawah), segera batalkan pull-to-refresh
+      if (diff <= 0) {
+        isDraggingTouchRef.current = false;
+        setPullY(0);
+        return;
+      }
+
+      // Hanya visual feedback jika benar-benar berada di paling atas halaman
+      if (diff > 0 && getScrollTop() <= 0) {
+        const boundedY = Math.min(diff * 0.45, MAX_PULL);
         setPullY(boundedY);
 
-        if (diff > 12 && e.cancelable) {
+        // Jangan pernah panggil e.preventDefault() kecuali sudah ditarik cukup dalam
+        // agar tidak mematikan gesture scrolling alami mobile
+        if (diff > 35 && e.cancelable) {
           e.preventDefault();
         }
       } else {
+        isDraggingTouchRef.current = false;
         setPullY(0);
       }
     };
@@ -92,91 +108,16 @@ export default function PullToRefresh() {
       }
     };
 
-    // ==========================================
-    // 2. WHEEL EVENT (Touchpad Laptop 2 Jari / Scroll di bagian atas)
-    // ==========================================
-    const handleWheel = (e: WheelEvent) => {
-      if (isRefreshing) return;
-
-      if (getScrollTop() <= 5 && e.deltaY < 0) {
-        const added = Math.abs(e.deltaY) * 0.45;
-        wheelAccumulatorRef.current = Math.min(wheelAccumulatorRef.current + added, MAX_PULL);
-        setPullY(wheelAccumulatorRef.current);
-
-        if (wheelResetTimerRef.current) {
-          clearTimeout(wheelResetTimerRef.current);
-        }
-
-        if (wheelAccumulatorRef.current >= PULL_THRESHOLD) {
-          wheelResetTimerRef.current = setTimeout(() => {
-            triggerRefresh();
-          }, 150);
-        } else {
-          wheelResetTimerRef.current = setTimeout(() => {
-            wheelAccumulatorRef.current = 0;
-            setPullY(0);
-          }, 300);
-        }
-      } else if (e.deltaY > 0 && !isRefreshing) {
-        wheelAccumulatorRef.current = 0;
-        setPullY(0);
-      }
-    };
-
-    // ==========================================
-    // 3. MOUSE DRAG EVENT (Klik & Tarik di Desktop)
-    // ==========================================
-    const handleMouseDown = (e: MouseEvent) => {
-      if (getScrollTop() <= 5 && e.clientY <= 80 && !isRefreshing && e.button === 0) {
-        startYRef.current = e.clientY;
-        isDraggingMouseRef.current = true;
-      }
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingMouseRef.current || isRefreshing) return;
-      const diff = e.clientY - startYRef.current;
-      if (diff > 0 && getScrollTop() <= 5) {
-        setPullY(Math.min(diff * 0.55, MAX_PULL));
-      } else {
-        setPullY(0);
-      }
-    };
-
-    const handleMouseUp = () => {
-      if (!isDraggingMouseRef.current) return;
-      isDraggingMouseRef.current = false;
-      if (pullY >= PULL_THRESHOLD && !isRefreshing) {
-        triggerRefresh();
-      } else {
-        setPullY(0);
-      }
-    };
-
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchend', handleTouchEnd);
-    window.addEventListener('touchcancel', handleTouchEnd);
-
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', handleTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('touchcancel', handleTouchEnd);
-
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-
-      if (wheelResetTimerRef.current) {
-        clearTimeout(wheelResetTimerRef.current);
-      }
     };
   }, [isRefreshing, pullY, triggerRefresh]);
 

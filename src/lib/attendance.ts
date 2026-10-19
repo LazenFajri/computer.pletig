@@ -230,6 +230,7 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
       if (!scheduledMeeting) {
         const countAll = await db.query.meetings.findMany();
         const newNum = countAll.length + 1;
+        const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
         const inserted = await db
           .insert(meetings)
           .values({
@@ -242,9 +243,19 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
             end_time: '14:00',
             is_open: true,
             is_active: true,
+            session_token: randomToken,
+            attendance_token: randomToken,
           })
           .returning();
         scheduledMeeting = inserted[0];
+      } else if (!scheduledMeeting.session_token && !scheduledMeeting.attendance_token) {
+        const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
+        await db
+          .update(meetings)
+          .set({ session_token: randomToken, attendance_token: randomToken })
+          .where(eq(meetings.id, scheduledMeeting.id));
+        scheduledMeeting.session_token = randomToken;
+        scheduledMeeting.attendance_token = randomToken;
       }
 
       return {
