@@ -38,8 +38,8 @@ object DatabaseInitializer {
                             id = dto.id,
                             name = dto.name,
                             username = dto.username,
-                            gradeLevel = dto.gradeLevel,
-                            className = dto.className,
+                            gradeLevel = dto.gradeLevel ?: 4,
+                            className = dto.className ?: "4A",
                             avatarUrl = dto.avatarUrl
                         )
                     }
