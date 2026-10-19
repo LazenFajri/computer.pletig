@@ -227,8 +227,16 @@ export default function AdminDashboardClient({
   const [rotatingTokenId, setRotatingTokenId] = useState<string | null>(null);
   const [isClosingAllSessions, setIsClosingAllSessions] = useState(false);
 
-  // Filter grade
+  // Filter grade & Filter Minggu Pertemuan
   const [filterGrade, setFilterGrade] = useState<GradeLevel | 'all'>('all');
+  const [filterMeetingNumber, setFilterMeetingNumber] = useState<number | 'all'>(() => {
+    const openM = initialMeetings.find((m) => m.isOpen);
+    if (openM) return openM.meetingNumber;
+    if (initialMeetings.length > 0) {
+      return Math.min(...initialMeetings.map((m) => m.meetingNumber));
+    }
+    return 1;
+  });
 
   // Modal / Form state: Sesi Pertemuan Baru
   const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
@@ -1164,10 +1172,20 @@ export default function AdminDashboardClient({
     });
   };
 
-  // Filtered lists
+  // Ekstrak daftar minggu pertemuan yang tersedia
+  const availableMeetingNumbers = Array.from(
+    new Set(meetingsList.map((m) => m.meetingNumber))
+  ).sort((a, b) => a - b);
+
+  // Filtered lists (berdasarkan Filter Kelas & Dropdown Minggu)
   const filteredMeetings = meetingsList.filter((m) => {
-    if (filterGrade === 'all') return true;
-    return m.gradeLevel === filterGrade || m.gradeLevel === null;
+    if (filterGrade !== 'all') {
+      if (m.gradeLevel !== filterGrade && m.gradeLevel !== null) return false;
+    }
+    if (filterMeetingNumber !== 'all') {
+      if (m.meetingNumber !== filterMeetingNumber) return false;
+    }
+    return true;
   });
 
   const activeMeeting =
@@ -1175,18 +1193,37 @@ export default function AdminDashboardClient({
   const isAnyMeetingOpen = meetingsList.some((m) => m.isOpen);
 
   const filteredMaterials = materialsList.filter((mat) => {
-    if (filterGrade === 'all') return true;
-    return mat.meeting?.gradeLevel === filterGrade || mat.meeting?.gradeLevel === null;
+    if (filterGrade !== 'all') {
+      if (mat.meeting?.gradeLevel !== filterGrade && mat.meeting?.gradeLevel !== null) return false;
+    }
+    if (filterMeetingNumber !== 'all') {
+      const mNum = mat.meeting?.meetingNumber ?? (mat.meeting as any)?.meeting_number;
+      if (mNum !== undefined && mNum !== filterMeetingNumber) return false;
+    }
+    return true;
   });
 
   const filteredAssignments = assignmentsList.filter((ass) => {
-    if (filterGrade === 'all') return true;
-    return ass.meeting?.gradeLevel === filterGrade || ass.meeting?.gradeLevel === null;
+    if (filterGrade !== 'all') {
+      if (ass.meeting?.gradeLevel !== filterGrade && ass.meeting?.gradeLevel !== null) return false;
+    }
+    if (filterMeetingNumber !== 'all') {
+      const mNum = ass.meeting?.meetingNumber ?? (ass.meeting as any)?.meeting_number;
+      if (mNum !== undefined && mNum !== filterMeetingNumber) return false;
+    }
+    return true;
   });
 
   const filteredSubmissions = submissionsList.filter((sub) => {
-    if (filterGrade === 'all') return true;
-    return sub.gradeLevel === filterGrade;
+    if (filterGrade !== 'all') {
+      if (sub.gradeLevel !== filterGrade) return false;
+    }
+    if (filterMeetingNumber !== 'all') {
+      const parentAss = assignmentsList.find((a) => a.id === sub.assignmentId);
+      const mNum = parentAss?.meeting?.meetingNumber ?? (parentAss?.meeting as any)?.meeting_number;
+      if (mNum !== undefined && mNum !== filterMeetingNumber) return false;
+    }
+    return true;
   });
 
   return (
@@ -1364,13 +1401,34 @@ export default function AdminDashboardClient({
           </button>
         </div>
 
-        {/* Filter Kelas */}
-        <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-between sm:justify-end px-1 pt-1.5 xl:pt-0 border-t xl:border-t-0 border-slate-100">
-          <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
-            <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span>Filter Kelas:</span>
+        {/* Filter Controls: Dropdown Minggu Pertemuan & Filter Kelas */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap justify-between sm:justify-end px-1 pt-1.5 xl:pt-0 border-t xl:border-t-0 border-slate-100">
+          {/* Dropdown Minggu Pertemuan */}
+          <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-xl border border-slate-200">
+            <span className="text-[11px] text-slate-500 font-bold hidden sm:inline">Minggu:</span>
+            <select
+              value={filterMeetingNumber}
+              onChange={(e) =>
+                setFilterMeetingNumber(e.target.value === 'all' ? 'all' : Number(e.target.value))
+              }
+              className="text-xs font-heading font-bold bg-white text-purple-900 border border-purple-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer shadow-xs transition-colors"
+              title="Pilih minggu pertemuan untuk memfilter sesi, materi, tugas, dan nilai"
+            >
+              <option value="all">Semua Minggu</option>
+              {availableMeetingNumbers.map((num) => (
+                <option key={num} value={num}>
+                  Minggu ke-{num} (Pertemuan {num})
+                </option>
+              ))}
+            </select>
           </div>
+
+          {/* Filter Kelas */}
           <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
+              <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span>Kelas:</span>
+            </div>
             {(['all', 4, 5, 6] as const).map((grade) => (
               <button
                 key={grade}
@@ -1400,9 +1458,28 @@ export default function AdminDashboardClient({
                 <CalendarCheck className="w-5 h-5 text-purple-600" />
                 <span>Daftar Sesi Pertemuan Ekstrakurikuler</span>
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Jam operasional standar: <span className="font-bold text-slate-700">12.30 s.d 14.00 WIB</span>. Buat sesi baru atau hapus sesi kapan saja sesuai kebutuhan.
-              </p>
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                <p className="text-xs text-slate-500">
+                  Jam operasional standar: <span className="font-bold text-slate-700">12.30 s.d 14.00 WIB</span>.
+                </p>
+                {filterMeetingNumber !== 'all' ? (
+                  <span className="text-[10px] font-bold bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full border border-purple-200 inline-flex items-center gap-1">
+                    <span>Minggu ke-{filterMeetingNumber} ({filteredMeetings.length} Sesi)</span>
+                    <button
+                      type="button"
+                      onClick={() => setFilterMeetingNumber('all')}
+                      className="text-purple-600 hover:text-purple-900 font-bold ml-1 cursor-pointer"
+                      title="Lihat semua minggu"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                    Semua Minggu ({filteredMeetings.length} Sesi)
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -1508,10 +1585,23 @@ export default function AdminDashboardClient({
 
           {/* List Sesi Pertemuan */}
           {filteredMeetings.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400">
-              <Calendar className="w-12 h-12 mx-auto text-slate-300 mb-2" />
-              <p className="font-semibold text-slate-600">Belum ada sesi pertemuan untuk kelas ini.</p>
-              <p className="text-xs text-slate-400 mt-1">Klik tombol &quot;Buat Sesi Pertemuan Baru&quot; di atas untuk memulai.</p>
+            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
+              <Calendar className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+              <p className="font-semibold text-slate-700 text-sm">
+                Belum ada sesi pertemuan untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {filterGrade !== 'all' ? `Kelas ${filterGrade}` : ''}.
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Pilih minggu lain di dropdown atas atau klik tombol &quot;Buat Sesi Pertemuan Baru&quot;.
+              </p>
+              {filterMeetingNumber !== 'all' && (
+                <button
+                  type="button"
+                  onClick={() => setFilterMeetingNumber('all')}
+                  className="mt-3 text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl border border-purple-200 transition-colors cursor-pointer"
+                >
+                  Tampilkan Semua Minggu
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1707,9 +1797,28 @@ export default function AdminDashboardClient({
                 <BookOpen className="w-5 h-5 text-blue-600" />
                 <span>Materi Praktikum Komputer SDN Pleburan 03</span>
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Tambahkan modul PDF, materi Canva, link Google Drive, atau tutorial video untuk siswa.
-              </p>
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                <p className="text-xs text-slate-500">
+                  Tambahkan modul PDF, materi Canva, link Google Drive, atau tutorial video untuk siswa.
+                </p>
+                {filterMeetingNumber !== 'all' ? (
+                  <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full border border-blue-200 inline-flex items-center gap-1">
+                    <span>Minggu ke-{filterMeetingNumber} ({filteredMaterials.length} Modul)</span>
+                    <button
+                      type="button"
+                      onClick={() => setFilterMeetingNumber('all')}
+                      className="text-blue-600 hover:text-blue-900 font-bold ml-1 cursor-pointer"
+                      title="Lihat semua minggu"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                    Semua Minggu ({filteredMaterials.length} Modul)
+                  </span>
+                )}
+              </div>
             </div>
 
             <button
@@ -1723,10 +1832,23 @@ export default function AdminDashboardClient({
           </div>
 
           {filteredMaterials.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400">
-              <BookOpen className="w-12 h-12 mx-auto text-slate-300 mb-2" />
-              <p className="font-semibold text-slate-600">Belum ada materi pembelajaran untuk kelas ini.</p>
-              <p className="text-xs text-slate-400 mt-1">Klik tombol &quot;Tambah Materi Baru&quot; di atas untuk mengunggah materi pertama.</p>
+            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
+              <BookOpen className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+              <p className="font-semibold text-slate-700 text-sm">
+                Belum ada materi pembelajaran untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {filterGrade !== 'all' ? `Kelas ${filterGrade}` : ''}.
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Pilih minggu lain di dropdown atas atau klik tombol &quot;Tambah Materi Baru&quot;.
+              </p>
+              {filterMeetingNumber !== 'all' && (
+                <button
+                  type="button"
+                  onClick={() => setFilterMeetingNumber('all')}
+                  className="mt-3 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors cursor-pointer"
+                >
+                  Tampilkan Semua Minggu
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1824,10 +1946,29 @@ export default function AdminDashboardClient({
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
             <div>
-              <h2 className="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-amber-600" />
-                <span>Kelola Tugas & Praktik Siswa</span>
-              </h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-amber-600" />
+                  <span>Kelola Tugas & Praktik Siswa</span>
+                </h2>
+                {filterMeetingNumber !== 'all' ? (
+                  <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                    Minggu ke-{filterMeetingNumber} ({filteredAssignments.length} Tugas)
+                    <button
+                      type="button"
+                      onClick={() => setFilterMeetingNumber('all')}
+                      className="text-amber-700 hover:text-amber-950 font-bold ml-1 cursor-pointer"
+                      title="Lihat semua minggu"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                    Semua Minggu ({filteredAssignments.length} Tugas)
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 Buat instruksi latihan mengetik, gambar digital, atau project Scratch untuk dikerjakan siswa.
               </p>
@@ -1844,10 +1985,23 @@ export default function AdminDashboardClient({
           </div>
 
           {filteredAssignments.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400">
-              <FileText className="w-12 h-12 mx-auto text-slate-300 mb-2" />
-              <p className="font-semibold text-slate-600">Belum ada tugas praktikum untuk kelas ini.</p>
-              <p className="text-xs text-slate-400 mt-1">Klik tombol &quot;Buat Tugas Baru&quot; di atas untuk memberikan tugas pertama.</p>
+            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
+              <FileText className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+              <p className="font-semibold text-slate-700 text-sm">
+                Belum ada tugas praktikum untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {filterGrade !== 'all' ? `Kelas ${filterGrade}` : ''}.
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Pilih minggu lain di dropdown atas atau klik tombol &quot;Buat Tugas Baru&quot;.
+              </p>
+              {filterMeetingNumber !== 'all' && (
+                <button
+                  type="button"
+                  onClick={() => setFilterMeetingNumber('all')}
+                  className="mt-3 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl border border-amber-200 transition-colors cursor-pointer"
+                >
+                  Tampilkan Semua Minggu
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1946,21 +2100,55 @@ export default function AdminDashboardClient({
           ======================================================== */}
       {activeTab === 'submissions' && (
         <div className="space-y-4">
-          <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
-            <h2 className="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
-              <Award className="w-5 h-5 text-emerald-600" />
-              <span>Daftar Pengumpulan Tugas & Penilaian Siswa</span>
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Periksa link/karya siswa, berikan nilai (0 - 100), dan ketik pesan motivasi ceria untuk anak.
-            </p>
+          <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-emerald-600" />
+                  <span>Daftar Pengumpulan Tugas & Penilaian Siswa</span>
+                </h2>
+                {filterMeetingNumber !== 'all' ? (
+                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                    Minggu ke-{filterMeetingNumber} ({filteredSubmissions.length} Dikumpulkan)
+                    <button
+                      type="button"
+                      onClick={() => setFilterMeetingNumber('all')}
+                      className="text-emerald-700 hover:text-emerald-950 font-bold ml-1 cursor-pointer"
+                      title="Lihat semua minggu"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                    Semua Minggu ({filteredSubmissions.length} Dikumpulkan)
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Periksa link/karya siswa, berikan nilai (0 - 100), dan ketik pesan motivasi ceria untuk anak.
+              </p>
+            </div>
           </div>
 
           {filteredSubmissions.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400">
-              <Award className="w-12 h-12 mx-auto text-slate-300 mb-2" />
-              <p className="font-semibold text-slate-600">Belum ada pengumpulan tugas dari siswa.</p>
-              <p className="text-xs text-slate-400 mt-1">Siswa dapat mengumpulkan tugas lewat halaman &quot;Tugas Praktikum&quot; di portal siswa.</p>
+            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
+              <Award className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+              <p className="font-semibold text-slate-700 text-sm">
+                Belum ada pengumpulan tugas siswa untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {filterGrade !== 'all' ? `Kelas ${filterGrade}` : ''}.
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Pilih minggu lain di dropdown atas atau tunggu siswa mengumpulkan tugas praktikum.
+              </p>
+              {filterMeetingNumber !== 'all' && (
+                <button
+                  type="button"
+                  onClick={() => setFilterMeetingNumber('all')}
+                  className="mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors cursor-pointer"
+                >
+                  Tampilkan Semua Minggu
+                </button>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
