@@ -442,7 +442,6 @@ export async function toggleAttendanceCellAction(
 
     try {
       revalidatePath('/admin/dashboard');
-      revalidatePath('/guru/dashboard');
       revalidatePath('/');
     } catch {
       // ignore revalidate errors

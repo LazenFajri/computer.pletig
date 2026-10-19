@@ -101,10 +101,8 @@ export default function AbsenPortalClient({
         <Link
           href={
             currentUser
-              ? currentUser.role === 'superadmin'
+              ? currentUser.role === 'superadmin' || currentUser.role === 'guru'
                 ? '/admin/dashboard'
-                : currentUser.role === 'guru'
-                ? '/guru/dashboard'
                 : '/siswa/dashboard'
               : '/'
           }

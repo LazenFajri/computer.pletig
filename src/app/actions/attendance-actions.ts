@@ -293,7 +293,6 @@ export async function submitAttendanceAction(
       revalidatePath('/absen');
       revalidatePath('/siswa/dashboard');
       revalidatePath('/admin/dashboard');
-      revalidatePath('/guru/dashboard');
       revalidatePath('/');
     } catch {
       // Invariant error saat dijalankan di luar context server action Next.js

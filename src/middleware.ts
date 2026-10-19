@@ -126,7 +126,12 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(NextResponse.next());
   }
 
-  // Siswa dan guru tidak dibebani login, rute lain terbuka bebas dengan security headers
+  // 5. Rute legacy /guru/* dialihkan langsung ke /admin/dashboard
+  if (pathname.startsWith('/guru')) {
+    return applySecurityHeaders(NextResponse.redirect(new URL('/admin/dashboard', request.url)));
+  }
+
+  // Siswa tidak dibebani login, rute lain terbuka bebas dengan security headers
   return applySecurityHeaders(NextResponse.next());
 }
 
