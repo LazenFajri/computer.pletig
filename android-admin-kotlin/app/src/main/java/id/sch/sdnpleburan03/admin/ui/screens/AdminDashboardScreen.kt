@@ -191,6 +191,25 @@ fun AdminDashboardScreen(
                     }
                 },
                 actions = {
+                    // Tombol Buka Web Admin
+                    IconButton(
+                        onClick = {
+                            try {
+                                val intent = android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse("https://computer-pletig.vercel.app/admin/dashboard")
+                                )
+                                context.startActivity(intent)
+                            } catch (_: Exception) {}
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shield,
+                            contentDescription = "Buka Web Admin",
+                            tint = PurplePrimary
+                        )
+                    }
+
                     // Tombol Manual Sync dengan status animasi
                     IconButton(
                         onClick = { viewModel.syncNow() },
@@ -198,8 +217,8 @@ fun AdminDashboardScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Sync Sekarang",
-                            tint = if (state.networkState.isWifi) EmeraldSuccess else AmberWarning,
+                            contentDescription = "Sync Online Sekarang",
+                            tint = if (state.networkState.isOnline) EmeraldSuccess else AmberWarning,
                             modifier = if (state.isSyncing) Modifier.rotate(spinAngle) else Modifier
                         )
                     }
@@ -208,7 +227,7 @@ fun AdminDashboardScreen(
                     IconButton(onClick = { showServerConfigDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Pengaturan BaaS",
+                            contentDescription = "Pengaturan Server",
                             tint = SlateTextMuted
                         )
                     }
@@ -384,20 +403,21 @@ fun ConnectionStatusBanner(
     unsyncedCount: Int,
     onSyncClick: () -> Unit
 ) {
-    val bgBrush = if (isWifi) {
+    val isConnected = isOnline || isWifi
+    val bgBrush = if (isConnected) {
         Brush.horizontalGradient(listOf(Color(0xFF065F46), Color(0xFF047857)))
     } else {
         Brush.horizontalGradient(listOf(Color(0xFF78350F), Color(0xFF92400E)))
     }
 
-    val icon = if (isWifi) Icons.Default.Wifi else Icons.Default.WifiOff
-    val title = if (isWifi) "Wi-Fi Lab Aktif (BaaS Online)" else "Mode Full Offline"
-    val subtitle = if (isWifi) {
-        if (unsyncedCount > 0) "$unsyncedCount data lokal siap disinkronkan otomatis"
-        else "Semua data presensi & token sinkron dengan server"
+    val icon = if (isConnected) Icons.Default.Wifi else Icons.Default.WifiOff
+    val title = if (isConnected) "Server Cloud Online" else "Mode Offline Lokal"
+    val subtitle = if (isConnected) {
+        if (unsyncedCount > 0) "$unsyncedCount data lokal sedang disinkronkan ke server"
+        else "Terhubung ke computer-pletig.vercel.app (Real-Time)"
     } else {
-        if (unsyncedCount > 0) "$unsyncedCount perubahan disimpan lokal di HP (Aman)"
-        else "Data tersimpan di perangkat lokal. Otomatis sync saat ada Wi-Fi"
+        if (unsyncedCount > 0) "$unsyncedCount perubahan tersimpan di HP (Aman)"
+        else "Sinyal terputus: Data tersimpan lokal & siap sync saat online"
     }
 
     Box(

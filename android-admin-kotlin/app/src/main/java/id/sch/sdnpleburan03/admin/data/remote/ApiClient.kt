@@ -12,8 +12,8 @@ object ApiClient {
     private const val PREFS_NAME = "computer_pletig_admin_prefs"
     private const val KEY_BASE_URL = "backend_base_url"
     
-    // Default URL untuk koneksi Wi-Fi lab atau dev emulator
-    const val DEFAULT_BASE_URL = "http://10.0.2.2:3000/"
+    // Default URL produksi online Vercel (Langsung jalan online tanpa perlu setting manual)
+    const val DEFAULT_BASE_URL = "https://computer-pletig.vercel.app/"
 
     private var currentRetrofit: Retrofit? = null
     private var currentBaseUrl: String = ""

@@ -60,7 +60,7 @@ fun ServerConfigDialog(
                     value = urlText,
                     onValueChange = { urlText = it },
                     label = { Text("Base URL Server / BaaS") },
-                    placeholder = { Text("http://192.168.1.100:3000/") },
+                    placeholder = { Text("https://computer-pletig.vercel.app/") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
@@ -84,7 +84,7 @@ fun ServerConfigDialog(
                             modifier = Modifier.padding(top = 2.dp)
                         )
                         Text(
-                            text = "Aplikasi bekerja 100% offline secara default. Saat terhubung ke Wi-Fi yang sama dengan server atau internet, data akan disinkronkan otomatis di latar belakang.",
+                            text = "Aplikasi otomatis terhubung langsung secara online ke server cloud https://computer-pletig.vercel.app/. Jika koneksi internet terputus, fitur tetap berjalan offline dan tersimpan aman di HP.",
                             style = MaterialTheme.typography.bodySmall,
                             lineHeight = 16.sp
                         )

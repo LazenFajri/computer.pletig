@@ -26,12 +26,11 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
     val uiState: StateFlow<AdminDashboardState> = _uiState.asStateFlow()
 
     init {
-        // 1. Observe Network state (Wi-Fi, Cellular, Offline)
+        // 1. Observe Network state & Otomatis sync online real-time saat terhubung ke internet/Wi-Fi
         viewModelScope.launch {
             networkMonitor.networkState.collectLatest { netState ->
                 _uiState.update { it.copy(networkState = netState) }
-                // Jika koneksi beralih ke Wi-Fi dan ada data belum sync, jalankan auto-sync
-                if (netState.isWifi && _uiState.value.unsyncedCount > 0 && !_uiState.value.isSyncing) {
+                if (netState.isOnline && !_uiState.value.isSyncing) {
                     syncNow()
                 }
             }
@@ -67,6 +66,9 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
 
         // 5. Initial load of students
         loadFilteredStudents()
+
+        // 6. Tarik data terbaru dari server online saat pertama kali app terbuka
+        syncNow()
     }
 
     private fun loadAttendancesForMeeting(meetingId: String) {
@@ -92,7 +94,6 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
         val className = _uiState.value.selectedClass
 
         viewModelScope.launch {
-            // Update available distinct classes
             if (grade != null) {
                 repository.getDistinctClasses(grade).collectLatest { classes ->
                     _uiState.update { it.copy(availableClasses = classes) }
@@ -115,23 +116,29 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    // Toggle Sesi Buka/Tutup
+    // Toggle Sesi Buka/Tutup (Optimistic Local + Instant Online Push)
     fun toggleMeetingStatus(isOpen: Boolean) {
         val current = _uiState.value.primaryMeeting ?: return
         viewModelScope.launch {
             repository.toggleMeetingStatusOffline(current.id, isOpen)
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
         }
     }
 
-    // Acak Token Sesi Lab Baru
+    // Acak Token Sesi Lab Baru (Optimistic Local + Instant Online Push)
     fun generateNewToken() {
         val current = _uiState.value.primaryMeeting ?: return
         viewModelScope.launch {
             repository.generateNewTokenOffline(current.id)
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
         }
     }
 
-    // Catat Presensi Siswa Offline
+    // Catat Presensi Siswa (Optimistic Local + Instant Online Push)
     fun recordAttendance(student: StudentEntity, status: String) {
         val current = _uiState.value.primaryMeeting ?: return
         viewModelScope.launch {
@@ -140,10 +147,13 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
                 student = student,
                 status = status
             )
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
         }
     }
 
-    // Buat Pertemuan Baru Secara Offline
+    // Buat Pertemuan Baru (Optimistic Local + Instant Online Push)
     fun createMeeting(title: String, grade: Int?, start: String, end: String, desc: String?) {
         viewModelScope.launch {
             val created = repository.createMeetingOffline(
@@ -155,26 +165,31 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
             )
             _uiState.update { it.copy(primaryMeeting = created) }
             loadAttendancesForMeeting(created.id)
+            if (_uiState.value.networkState.isOnline) {
+                syncNow()
+            }
         }
     }
 
-    // Manual Wi-Fi Sync Now
+    // Manual / Auto Real-Time Online Sync
     fun syncNow() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSyncing = true, syncMessage = "Sedang menyinkronkan dengan BaaS...") }
+            _uiState.update { it.copy(isSyncing = true) }
             val result = repository.performTwoWaySync()
             if (result.isSuccess) {
                 _uiState.update {
                     it.copy(
                         isSyncing = false,
-                        syncMessage = result.getOrNull() ?: "Sinkronisasi berhasil!"
+                        syncMessage = result.getOrNull() ?: "Online: Data tersinkron dengan cloud"
                     )
                 }
             } else {
                 _uiState.update {
                     it.copy(
                         isSyncing = false,
-                        syncMessage = "Sinkronisasi offline: ${result.exceptionOrNull()?.localizedMessage ?: "Gagal terhubung ke server"}"
+                        syncMessage = if (it.networkState.isOnline) {
+                            "Online status: ${result.exceptionOrNull()?.localizedMessage ?: "Gagal terhubung"}"
+                        } else null
                     )
                 }
             }

@@ -36,7 +36,7 @@ class AdminSyncWorker(
          */
         fun scheduleWifiPeriodicSync(context: Context) {
             val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.UNMETERED) // Khusus jaringan Wi-Fi (tanpa kuota meteran)
+                .setRequiredNetworkType(NetworkType.CONNECTED) // Online via Wi-Fi maupun Paket Data HP
                 .build()
 
             val periodicRequest = PeriodicWorkRequestBuilder<AdminSyncWorker>(
