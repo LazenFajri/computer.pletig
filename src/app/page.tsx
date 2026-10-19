@@ -9,7 +9,6 @@ import {
   Laptop,
   CalendarCheck,
   ShieldCheck,
-  BookOpen,
   Clock,
   ArrowRight,
   CheckCircle2,
@@ -99,14 +98,6 @@ export default async function HomePage() {
             </Link>
 
             <Link
-              href="/materi"
-              className="text-slate-700 hover:text-purple-600 hover:bg-purple-50 text-xs sm:text-sm font-heading font-bold px-3 py-2 rounded-2xl border border-slate-200 transition-all flex items-center gap-1.5"
-            >
-              <BookOpen className="w-4 h-4 text-purple-600" />
-              <span>Materi</span>
-            </Link>
-
-            <Link
               href="/tugas"
               className="text-slate-700 hover:text-amber-600 hover:bg-amber-50 text-xs sm:text-sm font-heading font-bold px-3 py-2 rounded-2xl border border-slate-200 transition-all flex items-center gap-1.5"
             >
@@ -179,7 +170,7 @@ export default async function HomePage() {
       {/* QUICK ACTION APP GRID (Khas Aplikasi: Teks Lengkap Tanpa Terpotong Titik-Titik) */}
       <section className="py-2 sm:py-4 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
             {/* Action 1: Presensi */}
             <Link
               href="/absen"
@@ -198,25 +189,7 @@ export default async function HomePage() {
               </div>
             </Link>
 
-            {/* Action 2: Materi */}
-            <Link
-              href="/materi"
-              className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3.5 active:scale-95 group text-left"
-            >
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-heading font-bold text-xs sm:text-sm text-slate-900 leading-tight">
-                  Materi Belajar
-                </h4>
-                <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-tight">
-                  Modul & tutorial
-                </p>
-              </div>
-            </Link>
-
-            {/* Action 3: Tugas */}
+            {/* Action 2: Tugas */}
             <Link
               href="/tugas"
               className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3.5 active:scale-95 group text-left"
@@ -234,7 +207,7 @@ export default async function HomePage() {
               </div>
             </Link>
 
-            {/* Action 4: Jadwal */}
+            {/* Action 3: Jadwal */}
             <a
               href="#jadwal"
               className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3.5 active:scale-95 group text-left"
@@ -304,15 +277,15 @@ export default async function HomePage() {
               </div>
 
               <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3 sm:block">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 sm:mb-3">
-                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 sm:mb-3">
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
                   <h4 className="font-heading font-bold text-xs sm:text-base text-slate-900">
-                    Materi Praktik SD
+                    Tugas & Latihan Praktik
                   </h4>
                   <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed">
-                    Panduan mengetik 10 jari dan trik komputer mudah dipahami.
+                    Pengumpulan hasil latihan mengetik, gambar digital, dan proyek Scratch.
                   </p>
                 </div>
               </div>

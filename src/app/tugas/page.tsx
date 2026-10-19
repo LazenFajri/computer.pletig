@@ -61,14 +61,6 @@ export default async function TugasPage() {
               <CalendarCheck className="w-3.5 h-3.5" />
               <span>Presensi Siswa</span>
             </Link>
-
-            <Link
-              href="/materi"
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-heading font-bold px-3.5 py-2 rounded-2xl shadow-xs transition-all flex items-center gap-1.5"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Materi Belajar</span>
-            </Link>
           </div>
         </div>
       </header>

@@ -3,13 +3,12 @@ import { redirect } from 'next/navigation';
 import LogoutButton from '@/components/logout-button';
 import Link from 'next/link';
 import { db } from '@/db';
-import { attendance, materials, assignments } from '@/db/schema';
+import { attendance, assignments } from '@/db/schema';
 import { eq, and, or } from 'drizzle-orm';
 import { checkActiveSession } from '@/lib/attendance';
 import type { GradeLevel } from '@/lib/auth-types';
 import {
   Laptop,
-  BookOpen,
   Award,
   Upload,
   CalendarCheck,
@@ -60,14 +59,7 @@ export default async function SiswaDashboardPage() {
     myAttendanceRecord = records[0] || null;
   }
 
-  // Ambil materi & tugas yang terkait dengan sesi pertemuan aktif
-  const sessionMaterials = activeMeeting
-    ? await db.query.materials.findMany({
-        where: eq(materials.meeting_id, activeMeeting.id),
-        limit: 3,
-      })
-    : [];
-
+  // Ambil tugas yang terkait dengan sesi pertemuan aktif
   const sessionAssignments = activeMeeting
     ? await db.query.assignments.findMany({
         where: eq(assignments.meeting_id, activeMeeting.id),
@@ -128,7 +120,7 @@ export default async function SiswaDashboardPage() {
               <Smile className="w-6 h-6 text-yellow-300" />
             </h1>
             <p className="text-emerald-50 text-xs sm:text-sm leading-relaxed">
-              Selamat datang di portal lab komputer SDN Pleburan 03. Pantau sesi pertemuan aktif, isi presensi, dan pelajari materi praktikum di bawah ini.
+              Selamat datang di portal lab komputer SDN Pleburan 03. Pantau sesi pertemuan aktif, isi presensi, dan kerjakan latihan praktikum di bawah ini.
             </p>
           </div>
         </div>
@@ -242,50 +234,27 @@ export default async function SiswaDashboardPage() {
                   )}
                 </div>
 
-                {/* Modul Materi & Tugas Terkait Sesi Ini (Jika Ada) */}
-                {(sessionMaterials.length > 0 || sessionAssignments.length > 0) && (
-                  <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {sessionMaterials.length > 0 && (
-                      <div className="bg-purple-50/70 p-3.5 rounded-2xl border border-purple-100">
-                        <div className="text-xs font-bold text-purple-900 mb-2 flex items-center gap-1.5">
-                          <BookOpen className="w-4 h-4 text-purple-600" />
-                          <span>Modul Materi Sesi Ini ({sessionMaterials.length}):</span>
-                        </div>
-                        <div className="space-y-1.5">
-                          {sessionMaterials.map((mat) => (
-                            <Link
-                              key={mat.id}
-                              href="/materi"
-                              className="text-xs font-semibold text-purple-800 hover:text-purple-950 bg-white p-2 rounded-xl border border-purple-200/60 flex items-center gap-1.5 truncate"
-                            >
-                              <BookOpen className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                              <span className="truncate">{mat.title}</span>
-                            </Link>
-                          ))}
-                        </div>
+                {/* Tugas Terkait Sesi Ini (Jika Ada) */}
+                {sessionAssignments.length > 0 && (
+                  <div className="pt-3 border-t border-slate-100">
+                    <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-100">
+                      <div className="text-xs font-bold text-amber-900 mb-2 flex items-center gap-1.5">
+                        <FileText className="w-4 h-4 text-amber-600" />
+                        <span>Tugas Praktikum Sesi Ini ({sessionAssignments.length}):</span>
                       </div>
-                    )}
-
-                    {sessionAssignments.length > 0 && (
-                      <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-100">
-                        <div className="text-xs font-bold text-amber-900 mb-2 flex items-center gap-1.5">
-                          <FileText className="w-4 h-4 text-amber-600" />
-                          <span>Tugas Praktikum Sesi Ini ({sessionAssignments.length}):</span>
-                        </div>
-                        <div className="space-y-1.5">
-                          {sessionAssignments.map((ass) => (
-                            <Link
-                              key={ass.id}
-                              href="/tugas"
-                              className="text-xs font-semibold text-amber-800 hover:text-amber-950 bg-white p-2 rounded-xl border border-amber-200/60 flex items-center gap-1.5 truncate"
-                            >
-                              <FileText className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                              <span className="truncate">{ass.title}</span>
-                            </Link>
-                          ))}
-                        </div>
+                      <div className="space-y-1.5">
+                        {sessionAssignments.map((ass) => (
+                          <Link
+                            key={ass.id}
+                            href="/tugas"
+                            className="text-xs font-semibold text-amber-800 hover:text-amber-950 bg-white p-2 rounded-xl border border-amber-200/60 flex items-center gap-1.5 truncate"
+                          >
+                            <FileText className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span className="truncate">{ass.title}</span>
+                          </Link>
+                        ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -298,15 +267,15 @@ export default async function SiswaDashboardPage() {
                   Belum Ada Sesi Pertemuan Khusus yang Dibuka
                 </h4>
                 <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-                  Pembina lab belum membuat sesi khusus untuk kelas kamu. Silakan pantau jadwal praktikum reguler atau buka materi belajar di bawah.
+                  Pembina lab belum membuat sesi khusus untuk kelas kamu. Silakan pantau jadwal praktikum reguler atau buka tugas latihan praktikum di bawah.
                 </p>
               </div>
             )}
           </div>
         </section>
 
-        {/* 4 Menu Pintasan Utama Siswa */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* 3 Menu Pintasan Utama Siswa */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {/* Card 1: Presensi Siswa */}
           <Link
             href={`/absen?grade=${studentGrade}`}
@@ -330,28 +299,7 @@ export default async function SiswaDashboardPage() {
             </div>
           </Link>
 
-          {/* Card 2: Materi Pembelajaran */}
-          <Link
-            href="/materi"
-            className="bg-white p-5 rounded-3xl border-2 border-blue-100 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
-          >
-            <div>
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                <BookOpen className="w-6 h-6" />
-              </div>
-              <h3 className="font-heading font-bold text-slate-900 text-lg group-hover:text-blue-700 transition-colors">
-                Materi Belajar
-              </h3>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Pelajari tutorial mengetik 10 jari, trik shortcut, dan panduan praktikum digital.
-              </p>
-            </div>
-            <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-blue-600 flex items-center gap-1">
-              <span>Buka Materi</span> →
-            </div>
-          </Link>
-
-          {/* Card 3: Kirim Tugas */}
+          {/* Card 2: Kirim Tugas */}
           <Link
             href="/tugas"
             className="bg-white p-5 rounded-3xl border-2 border-amber-100 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
@@ -372,7 +320,7 @@ export default async function SiswaDashboardPage() {
             </div>
           </Link>
 
-          {/* Card 4: Nilai & Bintang */}
+          {/* Card 3: Nilai & Bintang */}
           <Link
             href="/tugas"
             className="bg-white p-5 rounded-3xl border-2 border-purple-100 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"

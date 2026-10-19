@@ -50,6 +50,24 @@ export default function TugasClient({
   const [activeTab, setActiveTab] = useState<'assignments' | 'results'>('assignments');
   const [isPending, startTransition] = useTransition();
 
+  // Extract all meeting numbers from assignments
+  const availableMeetingNumbers = Array.from(
+    new Set(
+      initialAssignments
+        .map((a) => a.meeting?.meetingNumber ?? (a as any).meeting_number)
+        .filter((n): n is number => typeof n === 'number' && n > 0)
+    )
+  ).sort((a, b) => a - b);
+
+  const displayMeetingNumbers = availableMeetingNumbers.length > 0 ? availableMeetingNumbers : [1, 2, 3, 4];
+
+  const [filterMeetingNumber, setFilterMeetingNumber] = useState<number | 'all'>(() => {
+    if (availableMeetingNumbers.length > 0) {
+      return availableMeetingNumbers[0];
+    }
+    return 1;
+  });
+
   // Submission Form Modal
   const [selectedAssignment, setSelectedAssignment] = useState<AssignmentWithDetails | null>(null);
   const [formGrade, setFormGrade] = useState<GradeLevel>(4);
@@ -232,12 +250,25 @@ export default function TugasClient({
         return false;
       }
     }
+    if (filterMeetingNumber !== 'all') {
+      const assMeetingNum = ass.meeting?.meetingNumber ?? (ass as any).meeting_number;
+      if (assMeetingNum !== undefined && assMeetingNum !== filterMeetingNumber) {
+        return false;
+      }
+    }
     return true;
   });
 
   const filteredSubmissions = submissionsList.filter((sub) => {
     if (selectedGrade !== 'all') {
       if (sub.gradeLevel !== selectedGrade) return false;
+    }
+    if (filterMeetingNumber !== 'all') {
+      const parentAss = initialAssignments.find((a) => a.id === sub.assignmentId);
+      const meetingNum = parentAss?.meeting?.meetingNumber ?? (parentAss as any)?.meeting_number;
+      if (meetingNum !== undefined && meetingNum !== filterMeetingNumber) {
+        return false;
+      }
     }
     return true;
   });
@@ -247,57 +278,83 @@ export default function TugasClient({
       <ConfettiCelebration active={showConfetti} onFinish={() => setShowConfetti(false)} />
 
       {/* Navigation Filter Bar */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4">
         {/* Tab Selection */}
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setActiveTab('assignments')}
-            className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'assignments'
                 ? 'bg-amber-600 text-white shadow-sm'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             <FileText className="w-4 h-4" />
-            <span>Daftar Tugas Praktik ({filteredAssignments.length})</span>
+            <span>Daftar Tugas ({filteredAssignments.length})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('results')}
-            className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'results'
                 ? 'bg-emerald-600 text-white shadow-sm'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             <Award className="w-4 h-4" />
-            <span>Karya Terkumpul & Nilai ({filteredSubmissions.length})</span>
+            <span>Nilai Saya ({filteredSubmissions.length})</span>
           </button>
         </div>
 
-        {/* Grade Filter */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mr-1">
-            <GraduationCap className="w-4 h-4 text-amber-600" />
-            Kelas:
-          </span>
-
-          {(['all', 4, 5, 6] as const).map((grade) => (
-            <button
-              key={grade}
-              type="button"
-              onClick={() => setSelectedGrade(grade as any)}
-              className={`text-xs px-3 py-1.5 rounded-2xl font-heading font-bold transition-all cursor-pointer ${
-                selectedGrade === grade
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+        {/* Meeting / Week Dropdown & Grade Filter */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Dropdown Minggu Pertemuan */}
+          <div className="flex items-center gap-1.5 bg-amber-50/80 px-2.5 py-1 rounded-2xl border border-amber-200">
+            <span className="text-xs font-bold text-amber-900 flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-amber-600" />
+              <span>Minggu:</span>
+            </span>
+            <select
+              value={filterMeetingNumber}
+              onChange={(e) =>
+                setFilterMeetingNumber(e.target.value === 'all' ? 'all' : Number(e.target.value))
+              }
+              className="text-xs font-heading font-bold bg-white text-amber-950 border border-amber-300 rounded-xl px-2 py-1 focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-xs transition-colors"
+              title="Pilih minggu pertemuan untuk memfilter tugas praktikum siswa"
             >
-              {grade === 'all' ? 'Semua' : `Kelas ${grade} SD`}
-            </button>
-          ))}
+              <option value="all">Semua Minggu</option>
+              {displayMeetingNumbers.map((num) => (
+                <option key={num} value={num}>
+                  Minggu ke-{num} (Pertemuan {num})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Grade Filter */}
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mr-1">
+              <GraduationCap className="w-4 h-4 text-amber-600" />
+              Kelas:
+            </span>
+
+            {(['all', 4, 5, 6] as const).map((grade) => (
+              <button
+                key={grade}
+                type="button"
+                onClick={() => setSelectedGrade(grade as any)}
+                className={`text-xs px-2.5 sm:px-3 py-1.5 rounded-2xl font-heading font-bold transition-all cursor-pointer ${
+                  selectedGrade === grade
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {grade === 'all' ? 'Semua' : `Kls ${grade}`}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -307,10 +364,23 @@ export default function TugasClient({
       {activeTab === 'assignments' && (
         <>
           {filteredAssignments.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400">
+            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
               <FileText className="w-12 h-12 mx-auto text-slate-300 mb-2" />
-              <p className="font-semibold text-slate-600 text-base">Belum ada tugas praktikum aktif untuk kelas ini.</p>
-              <p className="text-xs text-slate-400 mt-1">Silakan ikuti materi pembelajaran terlebih dahulu bersama Kak Pembina.</p>
+              <p className="font-semibold text-slate-700 text-base">
+                Belum ada tugas praktikum untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {selectedGrade !== 'all' ? `Kelas ${selectedGrade} SD` : ''}.
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Silakan tunggu arahan tugas latihan praktikum dari Kak Pembina di lab komputer.
+              </p>
+              {filterMeetingNumber !== 'all' && (
+                <button
+                  type="button"
+                  onClick={() => setFilterMeetingNumber('all')}
+                  className="mt-3 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl border border-amber-200 transition-colors cursor-pointer"
+                >
+                  Tampilkan Semua Minggu
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -387,10 +457,21 @@ export default function TugasClient({
       {activeTab === 'results' && (
         <div className="space-y-3">
           {filteredSubmissions.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400">
+            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
               <Award className="w-12 h-12 mx-auto text-slate-300 mb-2" />
-              <p className="font-semibold text-slate-600 text-base">Belum ada tugas yang dikumpulkan.</p>
+              <p className="font-semibold text-slate-700 text-base">
+                Belum ada tugas yang dikumpulkan untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {selectedGrade !== 'all' ? `Kelas ${selectedGrade} SD` : ''}.
+              </p>
               <p className="text-xs text-slate-400 mt-1">Selesaikan tugas praktikum dan tekan tombol &quot;Kirim Tugas Saya&quot;.</p>
+              {filterMeetingNumber !== 'all' && (
+                <button
+                  type="button"
+                  onClick={() => setFilterMeetingNumber('all')}
+                  className="mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors cursor-pointer"
+                >
+                  Tampilkan Semua Minggu
+                </button>
+              )}
             </div>
           ) : (
             filteredSubmissions.map((sub) => (

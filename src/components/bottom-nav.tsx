@@ -2,14 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, CalendarCheck, BookOpen, FileCheck } from 'lucide-react';
+import { Home, CalendarCheck, FileCheck } from 'lucide-react';
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   const isHome = pathname === '/';
   const isAbsen = pathname.startsWith('/absen') || pathname.startsWith('/siswa/absen');
-  const isMateri = pathname.startsWith('/materi');
   const isTugas = pathname.startsWith('/tugas');
 
   const navItems = [
@@ -33,15 +32,6 @@ export default function BottomNav() {
       highlight: true,
     },
     {
-      label: 'Materi',
-      href: '/materi',
-      icon: BookOpen,
-      isActive: isMateri,
-      activeColor: 'text-purple-600',
-      activeBg: 'bg-purple-50',
-      indicatorColor: 'bg-purple-600',
-    },
-    {
       label: 'Tugas',
       href: '/tugas',
       icon: FileCheck,
@@ -57,7 +47,7 @@ export default function BottomNav() {
       aria-label="Navigasi Bawah Ponsel"
       className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
     >
-      <div className="grid grid-cols-4 items-center justify-around max-w-md mx-auto">
+      <div className="grid grid-cols-3 items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
