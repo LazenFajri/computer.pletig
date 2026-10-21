@@ -1444,7 +1444,7 @@ export default function AdminDashboardClient({
               </h2>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 <p className="text-xs text-slate-500">
-                  Jam operasional standar: <span className="font-bold text-slate-700">12.30 s.d 14.00 WIB</span>.
+                  Sesi praktikum otomatis: <span className="font-bold text-slate-700">12:45 s.d 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)</span>. Token ditampilkan langsung di layar siswa.
                 </p>
                 {filterMeetingNumber !== 'all' ? (
                   <span className="text-[10px] font-bold bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full border border-purple-200 inline-flex items-center gap-1">

@@ -44,7 +44,7 @@ const DEFAULT_CONFIG: Record<number, ConfigItem> = {
   4: {
     grade: 4,
     day: 'Hari Kamis',
-    time: '12.30 - 14.00 WIB',
+    time: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)',
     title: 'Pengenalan Komputer & Mouse',
     description:
       'Pengenalan perangkat keras komputer, cara memegang mouse yang benar, etika lab, dan latihan mengetik baris dasar.',
@@ -61,7 +61,7 @@ const DEFAULT_CONFIG: Record<number, ConfigItem> = {
   5: {
     grade: 5,
     day: 'Hari Selasa',
-    time: '12.30 - 14.00 WIB',
+    time: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)',
     title: 'Latihan Mengetik 10 Jari',
     description:
       'Latihan mengetik 10 jari, format teks kreatif, menyisipkan gambar, dan pembuatan dokumen tugas sekolah.',
@@ -78,7 +78,7 @@ const DEFAULT_CONFIG: Record<number, ConfigItem> = {
   6: {
     grade: 6,
     day: 'Hari Senin',
-    time: '12.30 - 14.00 WIB',
+    time: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)',
     title: 'Mengetik Cepat & Logika Komputer',
     description:
       'Latihan mengetik cepat, pengolahan dokumen tingkat lanjut, dan pengenalan dasar logika komputer.',

@@ -64,7 +64,7 @@ export default async function HomePage() {
           <div className="flex items-center gap-1.5 text-blue-100 text-[11px] sm:text-xs shrink-0">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span className="hidden sm:inline">Jam Absen:</span>
-            <span className="font-semibold text-white">12.30 - 14.00 WIB</span>
+            <span className="font-semibold text-white">12:45 - 13:55 WIB</span>
           </div>
         </div>
       </div>
@@ -239,7 +239,7 @@ export default async function HomePage() {
               Jadwal Kelas 4, 5, dan 6
             </h3>
             <p className="text-slate-500 text-xs mt-0.5">
-              Presensi otomatis dibuka pukul 12.30 s.d 14.00 WIB.
+              Presensi otomatis dibuka pukul 12:45 s.d 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55).
             </p>
           </div>
 

@@ -50,7 +50,7 @@ const GRADE_CONFIG: Record<number, {
 }> = {
   4: {
     dayName: 'Kamis',
-    timeDisplay: '12.30 - 14.00 WIB',
+    timeDisplay: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)',
     defaultTitle: 'Pengenalan Komputer & Mouse',
     colorGradient: 'from-sky-600 via-blue-600 to-indigo-700',
     badgeBg: 'bg-sky-100 text-sky-900 border-sky-300',
@@ -59,7 +59,7 @@ const GRADE_CONFIG: Record<number, {
   },
   5: {
     dayName: 'Selasa',
-    timeDisplay: '12.30 - 14.00 WIB',
+    timeDisplay: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)',
     defaultTitle: 'Latihan Mengetik 10 Jari & Word',
     colorGradient: 'from-emerald-600 via-teal-600 to-emerald-800',
     badgeBg: 'bg-emerald-100 text-emerald-900 border-emerald-300',
@@ -68,7 +68,7 @@ const GRADE_CONFIG: Record<number, {
   },
   6: {
     dayName: 'Senin',
-    timeDisplay: '12.30 - 14.00 WIB',
+    timeDisplay: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)',
     defaultTitle: 'Presentasi Kreatif & Logika Komputer',
     colorGradient: 'from-purple-700 via-indigo-600 to-purple-900',
     badgeBg: 'bg-amber-100 text-amber-900 border-amber-300',
@@ -157,7 +157,7 @@ export default function AbsenPortalClient({
             </h1>
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-white/90 mt-1.5 font-medium">
-              <span>Jam Praktikum: 12.30 - 14.00 WIB</span>
+              <span>Jam Praktikum: 12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)</span>
               <span>•</span>
               <span>SDN Pleburan 03 Semarang</span>
             </div>

@@ -151,40 +151,31 @@ export async function submitAttendanceAction(
       };
     }
 
-    // LAPIS PROTEKSI 3: Validasi Status Sesi & Rentang Waktu Ketat
-    if (!meetingRecord.is_active && !meetingRecord.is_open) {
-      return {
-        success: false,
-        error: 'Sesi presensi sedang ditutup oleh Pembina. Pengisian absen terkunci.',
-      };
-    }
-
     const wib = getWIBInfo();
-    const startMin = parseTimeToMinutes(meetingRecord.start_time || '12:30');
-    const endMin = parseTimeToMinutes(meetingRecord.end_time || '14:00');
+    const startMin = parseTimeToMinutes(meetingRecord.start_time || '12:45');
+    const endMin = parseTimeToMinutes(meetingRecord.end_time || '13:55');
 
-    if (wib.dateStr !== meetingRecord.date && !meetingRecord.is_open) {
-      return {
-        success: false,
-        error: `Sesi presensi bukan untuk hari ini (${meetingRecord.date}).`,
-      };
-    }
+    // LAPIS PROTEKSI 3: Validasi Waktu Sesi (12:45 - 13:55 WIB Otomatis Buka)
+    const isWithinPracticalHours = wib.currentMinutes >= startMin && wib.currentMinutes <= endMin;
+    const isSessionAllowed = meetingRecord.is_open || meetingRecord.is_active || isWithinPracticalHours;
 
-    // Jika admin tidak membuka secara override, cek rentang waktu 12:30 - 14:00 WIB
-    if (!meetingRecord.is_open) {
+    if (!isSessionAllowed) {
       if (wib.currentMinutes < startMin) {
         return {
           success: false,
-          error: `Sesi presensi belum dibuka (Jadwal mulai pukul ${meetingRecord.start_time || '12:30'} WIB).`,
+          error: `Sesi presensi belum dibuka (Sesi 1 otomatis dibuka pukul ${meetingRecord.start_time || '12:45'} WIB).`,
         };
       }
-
       if (wib.currentMinutes > endMin) {
         return {
           success: false,
-          error: `Sesi presensi telah berakhir pada pukul ${meetingRecord.end_time || '14:00'} WIB.`,
+          error: `Sesi presensi hari ini telah otomatis ditutup pada pukul ${meetingRecord.end_time || '13:55'} WIB.`,
         };
       }
+      return {
+        success: false,
+        error: 'Sesi presensi sedang ditutup oleh Pembina.',
+      };
     }
 
     // LAPIS PROTEKSI 1: Validasi Kode Token Sesi Dinamis (Anti-Titip Absen)

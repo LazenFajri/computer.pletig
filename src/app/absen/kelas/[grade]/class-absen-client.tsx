@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   checkActiveSessionAction,
@@ -93,9 +93,10 @@ export default function ClassAbsenClient({
     timeStr: string;
   } | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [sessionToken, setSessionToken] = useState('');
+  const [sessionToken, setSessionToken] = useState(initialSession?.sessionToken || '');
   const [deviceStudentsCount, setDeviceStudentsCount] = useState<number>(0);
   const [deviceCapacity, setDeviceCapacity] = useState<number>(initialCapacity || 2);
+  const isSubmittingRef = useRef(false);
 
   // Helper Proteksi Lapis 2: Device / Browser Session Locking (Maksimal 2 siswa per laptop)
   const getDeviceStudents = (meetingId?: string | null): string[] => {
@@ -254,50 +255,29 @@ export default function ClassAbsenClient({
       }).format(new Date(selectedStudentAttendance.checked_in_at)) + ' WIB'
     : '';
 
-  const handleSelectStudent = (student: StudentItem) => {
-    setSelectedStudent(student);
-    setSearchQuery(student.name);
-    setErrorMsg(null);
-  };
+  // Eksekusi Submit Presensi (Dukungan Auto-Submit Saat Token Terisi)
+  const executeSubmit = async (targetStudent: StudentItem, tokenToUse: string) => {
+    if (isSubmittingRef.current) return;
 
-  const handleClearSelectedStudent = () => {
-    setSelectedStudent(null);
-    setSearchQuery('');
-    setErrorMsg(null);
-  };
-
-  // Filter siswa berdasarkan rombel & pencarian
-  const filteredStudents = studentsList.filter((s) => {
-    if (selectedRombel !== 'all' && s.class_name !== selectedRombel) {
-      return false;
-    }
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase().trim();
-    return (
-      s.name.toLowerCase().includes(q) ||
-      s.username.toLowerCase().includes(q) ||
-      (s.class_name || '').toLowerCase().includes(q)
-    );
-  });
-
-  // Submit presensi
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!selectedStudent) {
+    if (!targetStudent) {
       setErrorMsg('Kamu belum memilih namamu! Silakan cari & klik namamu pada daftar siswa di bawah.');
       return;
     }
 
-    if (isSelectedStudentAttended) {
+    const attRecord = getStudentAttendanceRecord(targetStudent);
+    if (attRecord) {
+      const timeFormatted = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date(attRecord.checked_in_at)) + ' WIB';
       setErrorMsg(
-        `Nama "${selectedStudent.name}" sudah tercatat hadir pada pertemuan ini (${attendedTimeString}). Kamu tidak bisa absen dua kali ya!`
+        `Nama "${targetStudent.name}" sudah tercatat hadir pada pertemuan ini (${timeFormatted}). Kamu tidak perlu absen lagi ya!`
       );
       return;
     }
 
-    const finalName = selectedStudent.name;
-    // Proteksi Lapis 2: Menyesuaikan kapasitas laptop (1 atau 2 siswa)
+    const finalName = targetStudent.name;
     const deviceStudents = getDeviceStudents(selectedMeetingId);
     const normFinalName = finalName.toLowerCase();
     const isAlreadyOnThisDevice = deviceStudents.some((n) => n.toLowerCase() === normFinalName);
@@ -308,35 +288,36 @@ export default function ClassAbsenClient({
       return;
     }
 
-    // Proteksi Lapis 1: Kode token wajib diisi
-    if (!sessionToken.trim()) {
-      setErrorMsg('Kode Token Sesi wajib diisi! Silakan masukkan 4 angka token yang tertera di layar proyektor / laptop Pembina.');
+    const cleanToken = tokenToUse.trim();
+    if (!cleanToken) {
+      setErrorMsg('Kode Token Sesi wajib diisi! Masukkan 4 angka token yang ditampilkan di layar.');
       return;
     }
 
     setErrorMsg(null);
     setIsSubmitting(true);
+    isSubmittingRef.current = true;
 
     try {
       const res = await submitAttendanceAction({
         gradeLevel: grade,
         studentName: finalName,
-        studentUserId: selectedStudent?.id || null,
+        studentUserId: targetStudent.id || null,
         meetingId: selectedMeetingId,
-        sessionToken: sessionToken.trim(),
+        sessionToken: cleanToken,
         laptopCapacity: deviceCapacity,
       });
 
       if (!res.success) {
         setErrorMsg(res.error || 'Presensi gagal dicatat.');
         setIsSubmitting(false);
+        isSubmittingRef.current = false;
         return;
       }
 
       playSuccessChime();
       setShowConfetti(true);
 
-      // Rekam di perangkat laptop lokal
       if (selectedMeetingId) {
         recordDeviceStudent(selectedMeetingId, finalName);
       }
@@ -366,7 +347,78 @@ export default function ClassAbsenClient({
       setErrorMsg('Terjadi kendala jaringan. Coba tekan tombol sekali lagi.');
     } finally {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
     }
+  };
+
+  const handleTokenChange = (val: string) => {
+    const formatted = val.replace(/[^0-9a-zA-Z]/g, '').toUpperCase();
+    setSessionToken(formatted);
+    setErrorMsg(null);
+
+    // Otomatis Submit: Saat token 4 karakter terisi & siswa sudah dipilih
+    if (formatted.length === 4 && selectedStudent && !isSelectedStudentAttended) {
+      executeSubmit(selectedStudent, formatted);
+    }
+  };
+
+  const handleAutoFillToken = (tokenVal: string) => {
+    if (!tokenVal) return;
+    const clean = tokenVal.trim().toUpperCase();
+    setSessionToken(clean);
+    setErrorMsg(null);
+
+    // Otomatis Submit jika siswa sudah dipilih
+    if (selectedStudent && !isSelectedStudentAttended) {
+      executeSubmit(selectedStudent, clean);
+    }
+  };
+
+  const handleSelectStudent = (student: StudentItem) => {
+    setSelectedStudent(student);
+    setSearchQuery(student.name);
+    setErrorMsg(null);
+
+    const attRecord = getStudentAttendanceRecord(student);
+    // Otomatis Submit: Jika siswa dipilih dan token sudah terisi (>= 4 karakter)
+    const effectiveToken = sessionToken.trim() || sessionStatus?.sessionToken || '';
+    if (!attRecord && effectiveToken.length >= 4) {
+      if (!sessionToken.trim()) {
+        setSessionToken(effectiveToken);
+      }
+      executeSubmit(student, effectiveToken);
+    }
+  };
+
+  const handleClearSelectedStudent = () => {
+    setSelectedStudent(null);
+    setSearchQuery('');
+    setErrorMsg(null);
+  };
+
+  // Filter siswa berdasarkan rombel & pencarian
+  const filteredStudents = studentsList.filter((s) => {
+    if (selectedRombel !== 'all' && s.class_name !== selectedRombel) {
+      return false;
+    }
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      s.name.toLowerCase().includes(q) ||
+      s.username.toLowerCase().includes(q) ||
+      (s.class_name || '').toLowerCase().includes(q)
+    );
+  });
+
+  // Submit presensi manual (fallback dari tombol "Saya Hadir!")
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudent) {
+      setErrorMsg('Kamu belum memilih namamu! Silakan cari & klik namamu pada daftar siswa di bawah.');
+      return;
+    }
+    const tokenToUse = sessionToken.trim() || sessionStatus?.sessionToken || '';
+    executeSubmit(selectedStudent, tokenToUse);
   };
 
   const handleResetForNextStudent = () => {
@@ -406,10 +458,10 @@ export default function ClassAbsenClient({
 
   const gradeScheduleInfo =
     grade === 4
-      ? { day: 'Kamis', time: '12.30 - 14.00 WIB', color: 'sky' }
+      ? { day: 'Kamis', time: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)', color: 'sky' }
       : grade === 5
-      ? { day: 'Selasa', time: '12.30 - 14.00 WIB', color: 'emerald' }
-      : { day: 'Senin', time: '12.30 - 14.00 WIB', color: 'amber' };
+      ? { day: 'Selasa', time: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)', color: 'emerald' }
+      : { day: 'Senin', time: '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)', color: 'amber' };
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -556,7 +608,7 @@ export default function ClassAbsenClient({
                   Sesi Presensi Belum Dibuka atau Sudah Selesai
                 </h4>
                 <p className="text-xs sm:text-sm text-amber-800 mt-1 leading-relaxed">
-                  Presensi mandiri dibuka saat jam kegiatan ekstrakurikuler (pukul 12.30 s.d 14.00 WIB) sesuai jadwal kelasmu, atau jika Kak Pembina mengaktifkan sesi secara manual di lab.
+                  Presensi otomatis dibuka saat jam kegiatan ekstrakurikuler (pukul 12:45 s.d 13:55 WIB: Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55) sesuai jadwal kelasmu, atau jika dibuka manual oleh Pembina di lab.
                 </p>
 
                 <div className="mt-3 inline-flex items-center gap-2 text-xs font-bold bg-amber-100 text-amber-900 px-3 py-1.5 rounded-xl border border-amber-200">
@@ -863,21 +915,26 @@ export default function ClassAbsenClient({
             </div>
 
             {/* Lapis Proteksi 1 & 2: Token Sesi Dinamis & Device Locking */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50/70 rounded-3xl p-4 sm:p-5 border-2 border-amber-200/90 shadow-xs space-y-3">
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50/70 rounded-3xl p-4 sm:p-5 border-2 border-amber-300 shadow-sm space-y-3.5">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-sm shadow-amber-500/20 shrink-0">
                     <KeyRound className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-heading font-bold text-slate-900 flex items-center gap-1.5">
+                    <h3 className="text-xs sm:text-sm font-heading font-bold text-slate-900 flex items-center gap-1.5 flex-wrap">
                       <span>Kode Token Sesi Lab</span>
-                      <span className="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full uppercase">
+                      <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full uppercase">
                         Wajib
                       </span>
+                      {sessionStatus?.activeShiftLabel && (
+                        <span className="text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full">
+                          {sessionStatus.activeShiftLabel}
+                        </span>
+                      )}
                     </h3>
                     <p className="text-[11px] text-slate-500">
-                      Masukkan 4 angka kode token yang ditampilkan di layar proyektor / laptop Pembina.
+                      Token aktif ditampilkan di bawah. Kamu bisa langsung ketik atau klik tombol isi otomatis!
                     </p>
                   </div>
                 </div>
@@ -897,17 +954,41 @@ export default function ClassAbsenClient({
                 </div>
               </div>
 
+              {/* Banner Tampilan Token Aktif untuk Siswa (Guest Mode Friendly) */}
+              {sessionStatus?.sessionToken && (
+                <div className="p-3 bg-white/90 border-2 border-amber-300/80 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-2.5 shadow-xs">
+                  <div className="flex items-center gap-2 text-center sm:text-left">
+                    <span className="text-xs font-bold text-slate-600">Kode Token Sesi Ini:</span>
+                    <span className="font-mono text-2xl font-black tracking-widest text-amber-900 bg-amber-50 px-3 py-1 rounded-xl border border-amber-300 shadow-inner">
+                      {sessionStatus.sessionToken}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAutoFillToken(sessionStatus.sessionToken || '')}
+                    className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 active:scale-95 text-white rounded-xl text-xs font-heading font-black shadow-md shadow-orange-500/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Zap className="w-4 h-4 fill-current" />
+                    <span>⚡ Klik Isi Token Otomatis</span>
+                  </button>
+                </div>
+              )}
+
               <div className="relative max-w-xs mx-auto">
                 <input
                   type="text"
                   inputMode="numeric"
                   maxLength={6}
-                  placeholder="Contoh: 7821"
+                  placeholder={sessionStatus?.sessionToken ? `Ketik: ${sessionStatus.sessionToken}` : 'Contoh: 7821'}
                   value={sessionToken}
-                  onChange={(e) => setSessionToken(e.target.value.replace(/[^0-9a-zA-Z]/g, '').toUpperCase())}
-                  className="w-full text-center text-2xl tracking-[0.35em] font-mono font-black py-2.5 px-4 rounded-2xl border-2 border-amber-300 focus:border-amber-600 focus:ring-4 focus:ring-amber-500/15 outline-none uppercase bg-white text-slate-900 shadow-inner placeholder:tracking-normal placeholder:font-sans placeholder:text-sm placeholder:text-slate-400 placeholder:font-normal"
+                  onChange={(e) => handleTokenChange(e.target.value)}
+                  className="w-full text-center text-3xl tracking-[0.35em] font-mono font-black py-3 px-4 rounded-2xl border-2 border-amber-400 focus:border-amber-600 focus:ring-4 focus:ring-amber-500/15 outline-none uppercase bg-white text-slate-900 shadow-inner placeholder:tracking-normal placeholder:font-sans placeholder:text-sm placeholder:text-slate-400 placeholder:font-normal"
                 />
               </div>
+
+              <p className="text-center text-[11px] text-amber-800 font-medium">
+                ⚡ <strong>Otomatis Hadir:</strong> Saat 4 angka token terisi dan namamu dipilih, presensi langsung tersimpan otomatis tanpa perlu menekan tombol lagi.
+              </p>
 
               {deviceStudentsCount >= deviceCapacity && !getDeviceStudents(selectedMeetingId).some((n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()) && (
                 <div className="p-2.5 rounded-xl bg-amber-100/90 text-amber-900 text-[11px] flex items-center gap-2 font-medium">
@@ -924,6 +1005,14 @@ export default function ClassAbsenClient({
               <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs sm:text-sm flex items-start gap-3 animate-in fade-in">
                 <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                 <div>{errorMsg}</div>
+              </div>
+            )}
+
+            {/* Status Auto-Submitting Indicator */}
+            {isSubmitting && (
+              <div className="p-4 bg-emerald-50 border-2 border-emerald-400 rounded-2xl text-xs sm:text-sm text-emerald-900 font-bold flex items-center justify-center gap-2.5 animate-pulse shadow-sm">
+                <span className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
+                <span>Mencatat kehadiran otomatis untuk {selectedStudent?.name || 'Siswa'}...</span>
               </div>
             )}
 

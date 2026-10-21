@@ -113,8 +113,8 @@ export default async function RombelAttendancePage({ params, searchParams }: Pag
   const defaultDay = grade === 4 ? 'Kamis' : grade === 5 ? 'Selasa' : 'Senin';
   const scheduleDay = dateDetails ? `${dateDetails.dayName}, ${dateDetails.formattedDate}` : defaultDay;
   const scheduleTime = relevantMeeting
-    ? `${relevantMeeting.start_time || '12:30'} - ${relevantMeeting.end_time || '14:00'} WIB`
-    : '12.30 - 14.00 WIB';
+    ? `${relevantMeeting.start_time || '12:45'} - ${relevantMeeting.end_time || '13:55'} WIB`
+    : '12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)';
 
   return (
     <div className="min-h-screen bg-playful-grid flex flex-col justify-between p-3 sm:p-6 md:p-8 pb-24 sm:pb-8 overflow-x-hidden">
@@ -175,7 +175,7 @@ export default async function RombelAttendancePage({ params, searchParams }: Pag
         <div className="flex items-center gap-1.5">
           <span>SDN Pleburan 03 Semarang</span>
         </div>
-        <div>Portal computer.pletig • Jam Praktikum: 12.30 - 14.00 WIB</div>
+        <div>Portal computer.pletig • Jam Praktikum: 12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)</div>
       </footer>
     </div>
   );

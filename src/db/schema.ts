@@ -90,8 +90,8 @@ export const meetings = sqliteTable('meetings', {
   title: text('title').notNull(), // misal: 'Pertemuan 1 - Pengenalan Mouse & Keyboard'
   description: text('description'),
   date: text('date').notNull(), // Format YYYY-MM-DD
-  start_time: text('start_time').notNull().default('12:30'),
-  end_time: text('end_time').notNull().default('14:00'),
+  start_time: text('start_time').notNull().default('12:45'),
+  end_time: text('end_time').notNull().default('13:55'),
   is_open: integer('is_open', { mode: 'boolean' })
     .notNull()
     .default(false), // Toggle manual admin untuk override jadwal

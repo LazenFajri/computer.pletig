@@ -227,7 +227,7 @@ export default async function SiswaDashboardPage() {
                       <div>
                         <div className="font-bold text-slate-700">Sesi Presensi Belum Dibuka</div>
                         <p className="text-[11px] text-slate-500 mt-0.5">
-                          Presensi otomatis dibuka sesuai jam jadwal praktikum (12.30 - 14.00 WIB) atau saat Pembina mengaktifkan sesi.
+                          Presensi otomatis dibuka sesuai jadwal praktikum (12:45 - 13:55 WIB: Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55).
                         </p>
                       </div>
                     </div>

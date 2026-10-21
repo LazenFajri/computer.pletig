@@ -11,12 +11,18 @@ export interface WIBInfo {
   currentMinutes: number; // hour * 60 + minute
   dayOfWeek: number; // 1=Senin, 2=Selasa, 3=Rabu, 4=Kamis, 5=Jumat, 6=Sabtu, 0=Minggu
   dayName: string; // 'Senin', 'Selasa', dst.
-  isWithinDefaultTime: boolean; // 12:30 - 14:00 WIB
+  isWithinDefaultTime: boolean; // 12:45 - 13:55 WIB
+  activeShift: 1 | 2 | null; // Sesi 1: 12:45 - 13:20, Sesi 2: 13:20 - 13:55
+  activeShiftLabel: string; // 'Sesi 1 (12:45 - 13:20 WIB)' atau 'Sesi 2 (13:20 - 13:55 WIB)'
   defaultGradeToday: GradeLevel | null; // Senin: 6, Selasa: 5, Kamis: 4
 }
 
 /**
  * Menghitung waktu WIB (Asia/Jakarta, UTC+7) secara akurat dari server
+ * Jam Praktikum Terbagi Menjadi 2 Sesi:
+ * - Sesi 1: 12:45 s/d 13:20 WIB (765 s/d 800 menit)
+ * - Sesi 2: 13:20 s/d 13:55 WIB (800 s/d 835 menit)
+ * Total rentang jam praktikum: 12:45 s/d 13:55 WIB
  */
 export function getWIBInfo(customDate = new Date()): WIBInfo {
   const formatter = new Intl.DateTimeFormat('id-ID', {
@@ -67,11 +73,21 @@ export function getWIBInfo(customDate = new Date()): WIBInfo {
     dayOfWeek = 6;
   }
 
-  // Rentang jam 12.30 s.d 14.00 WIB
-  // 12:30 = 12 * 60 + 30 = 750 menit
-  // 14:00 = 14 * 60 = 840 menit
+  // 12:45 = 12 * 60 + 45 = 765 menit
+  // 13:20 = 13 * 60 + 20 = 800 menit
+  // 13:55 = 13 * 60 + 55 = 835 menit
   const currentMinutes = hour * 60 + minute;
-  const isWithinDefaultTime = currentMinutes >= 750 && currentMinutes <= 840;
+  const isWithinDefaultTime = currentMinutes >= 765 && currentMinutes <= 835;
+
+  let activeShift: 1 | 2 | null = null;
+  let activeShiftLabel = '';
+  if (currentMinutes >= 765 && currentMinutes < 800) {
+    activeShift = 1;
+    activeShiftLabel = 'Sesi 1 (12:45 - 13:20 WIB)';
+  } else if (currentMinutes >= 800 && currentMinutes <= 835) {
+    activeShift = 2;
+    activeShiftLabel = 'Sesi 2 (13:20 - 13:55 WIB)';
+  }
 
   return {
     dateStr,
@@ -82,6 +98,8 @@ export function getWIBInfo(customDate = new Date()): WIBInfo {
     dayOfWeek,
     dayName: map.weekday || 'Hari Ini',
     isWithinDefaultTime,
+    activeShift,
+    activeShiftLabel,
     defaultGradeToday: defaultGrade,
   };
 }
@@ -106,11 +124,15 @@ export interface ActiveSessionResult {
   allMeetingsForGrade: (typeof meetings.$inferSelect)[];
   wibInfo: WIBInfo;
   timeStatus?: 'not_started' | 'active' | 'ended' | 'no_schedule_today';
+  activeShift?: 1 | 2 | null;
+  activeShiftLabel?: string;
+  sessionToken?: string | null;
 }
 
 /**
- * Cek apakah sesi presensi sedang dibuka untuk kelas tertentu (Kelas 4, 5, atau 6)
- * Mematuhi batas waktu jam mulai (start_time) dan jam selesai (end_time) secara ketat.
+ * Cek apakah sesi presensi sedang dibuka untuk kelas tertentu (Kelas 4, 5, atau 6).
+ * OTOMATIS BUKA pada jam 12:45 WIB dan OTOMATIS TUTUP pada jam 13:55 WIB
+ * Pembina tidak perlu membuka sesi manual di dashboard!
  */
 export async function checkActiveSession(gradeLevel: GradeLevel): Promise<ActiveSessionResult> {
   const wib = getWIBInfo();
@@ -121,10 +143,13 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
     orderBy: [desc(meetings.meeting_number), desc(meetings.created_at)],
   });
 
-  // 2. Bersihkan/tutup otomatis pertemuan hari lalu yang masih tertulis is_open = true
+  // 2. Bersihkan/tutup otomatis pertemuan hari lalu yang sudah kedaluwarsa
   try {
     const expiredMeetings = allMeetingsForGrade.filter(
-      (m) => (m.date < wib.dateStr || (m.date === wib.dateStr && wib.currentMinutes > parseTimeToMinutes(m.end_time || '14:00'))) && m.is_open
+      (m) =>
+        (m.date < wib.dateStr ||
+          (m.date === wib.dateStr && wib.currentMinutes > parseTimeToMinutes(m.end_time || '13:55'))) &&
+        m.is_open
     );
     for (const exp of expiredMeetings) {
       await db
@@ -132,57 +157,75 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
         .set({ is_open: false, is_active: false })
         .where(eq(meetings.id, exp.id));
     }
-  } catch (err) {
+  } catch {
     // Non-blocking cleanup
   }
 
-  // 3. Cek apakah ada sesi khusus yang dibuat untuk HARI INI
+  // 3. Cek apakah ada sesi yang dijadwalkan untuk HARI INI
   const todayMeetings = allMeetingsForGrade.filter((m) => m.date === wib.dateStr);
 
   if (todayMeetings.length > 0) {
-    // Cari pertemuan yang sedang dalam rentang jam aktif saat ini
     const activeMeetingsNow: (typeof meetings.$inferSelect)[] = [];
-    let latestMeeting = todayMeetings[0];
+    const latestMeeting = todayMeetings[0];
 
     for (const m of todayMeetings) {
-      const startMin = parseTimeToMinutes(m.start_time || '12:30');
-      const endMin = parseTimeToMinutes(m.end_time || '14:00');
+      const startMin = parseTimeToMinutes(m.start_time || '12:45');
+      const endMin = parseTimeToMinutes(m.end_time || '13:55');
 
       const isWithinTime = wib.currentMinutes >= startMin && wib.currentMinutes <= endMin;
 
-      if (m.is_open && isWithinTime) {
+      // OTOMATIS BUKA: Jika dalam jam praktikum (12:45 - 13:55 WIB) atau jika admin override buka manual
+      if (isWithinTime || m.is_open) {
+        if (!m.session_token && !m.attendance_token) {
+          const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
+          m.session_token = randomToken;
+          m.attendance_token = randomToken;
+          try {
+            await db
+              .update(meetings)
+              .set({ session_token: randomToken, attendance_token: randomToken })
+              .where(eq(meetings.id, m.id));
+          } catch {}
+        }
         activeMeetingsNow.push(m);
       }
     }
 
     if (activeMeetingsNow.length > 0) {
       const primary = activeMeetingsNow[0];
+      const shiftName = wib.activeShiftLabel || (primary.start_time ? `${primary.start_time} - ${primary.end_time} WIB` : 'Sesi Aktif');
+      const token = primary.session_token || primary.attendance_token || '4432';
+
       return {
         isOpen: true,
-        reason: 'admin_override',
-        message: `Sesi dibuka: ${primary.title} (${primary.start_time} - ${primary.end_time} WIB)`,
+        reason: primary.is_open ? 'admin_override' : 'scheduled',
+        message: `Sesi presensi otomatis dibuka: ${primary.title} (${shiftName})`,
         meeting: primary,
         openMeetings: activeMeetingsNow,
         allMeetingsForGrade,
         wibInfo: wib,
         timeStatus: 'active',
+        activeShift: wib.activeShift,
+        activeShiftLabel: wib.activeShiftLabel,
+        sessionToken: token,
       };
     }
 
-    // Jika ada pertemuan hari ini tapi di luar jam aktif:
-    const startMin = parseTimeToMinutes(latestMeeting.start_time || '12:30');
-    const endMin = parseTimeToMinutes(latestMeeting.end_time || '14:00');
+    // Jika ada pertemuan hari ini tapi waktu sebelum jam mulai
+    const startMin = parseTimeToMinutes(latestMeeting.start_time || '12:45');
+    const endMin = parseTimeToMinutes(latestMeeting.end_time || '13:55');
 
     if (wib.currentMinutes < startMin) {
       return {
         isOpen: false,
         reason: 'closed',
-        message: `Sesi presensi belum dibuka. Sesi dibuka pukul ${latestMeeting.start_time} WIB (Jadwal: ${latestMeeting.start_time} - ${latestMeeting.end_time} WIB).`,
+        message: `Sesi presensi belum dimulai. Sesi 1 otomatis dibuka pukul 12:45 WIB (Jadwal: Sesi 1: 12:45 - 13:20 • Sesi 2: 13:20 - 13:55 WIB).`,
         meeting: latestMeeting,
         openMeetings: [],
         allMeetingsForGrade,
         wibInfo: wib,
         timeStatus: 'not_started',
+        sessionToken: latestMeeting.session_token,
       };
     }
 
@@ -190,123 +233,140 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
       return {
         isOpen: false,
         reason: 'closed',
-        message: `Sesi presensi hari ini telah berakhir pada pukul ${latestMeeting.end_time} WIB.`,
+        message: `Sesi presensi hari ini telah otomatis ditutup pada pukul 13:55 WIB.`,
         meeting: latestMeeting,
         openMeetings: [],
         allMeetingsForGrade,
         wibInfo: wib,
         timeStatus: 'ended',
+        sessionToken: latestMeeting.session_token,
       };
     }
-
-    // Jika jam masuk tapi is_open diset false oleh pembina
-    return {
-      isOpen: false,
-      reason: 'closed',
-      message: `Sesi presensi sedang ditutup sementara oleh Pembina.`,
-      meeting: latestMeeting,
-      openMeetings: [],
-      allMeetingsForGrade,
-      wibInfo: wib,
-      timeStatus: 'ended',
-    };
   }
 
-  // 4. Jika tidak ada pertemuan khusus yang dibuat untuk hari ini, periksa Jadwal Rutin Sekolah
+  // 4. Jadwal Praktikum: Otomatis Buka Saat 12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55)
   const isCorrectDayForGrade = wib.defaultGradeToday === gradeLevel;
   const gradeScheduleDay =
     gradeLevel === 4 ? 'Kamis' : gradeLevel === 5 ? 'Selasa' : 'Senin';
 
-  if (isCorrectDayForGrade) {
-    if (wib.isWithinDefaultTime) {
-      // Dalam jam 12:30 - 14:00 WIB pada hari kegiatan kelas tersebut
-      let scheduledMeeting = await db.query.meetings.findFirst({
-        where: and(
-          eq(meetings.date, wib.dateStr),
-          or(eq(meetings.grade_level, gradeLevel), isNull(meetings.grade_level))
-        ),
-      });
+  // OTOMATIS BUKA: Jika saat ini berada di rentang jam praktikum (12:45 - 13:55 WIB)
+  if (wib.isWithinDefaultTime) {
+    let scheduledMeeting = await db.query.meetings.findFirst({
+      where: and(
+        eq(meetings.date, wib.dateStr),
+        or(eq(meetings.grade_level, gradeLevel), isNull(meetings.grade_level))
+      ),
+    });
 
-      if (!scheduledMeeting) {
-        const countAll = await db.query.meetings.findMany();
-        const newNum = countAll.length + 1;
-        const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
-        const inserted = await db
-          .insert(meetings)
-          .values({
-            meeting_number: newNum,
-            grade_level: gradeLevel,
-            title: `Pertemuan Rutin Kelas ${gradeLevel} (${wib.dayName})`,
-            description: `Sesi terjadwal otomatis ekstrakurikuler komputer hari ${wib.dayName} pukul 12.30 - 14.00 WIB.`,
-            date: wib.dateStr,
-            start_time: '12:30',
-            end_time: '14:00',
-            is_open: true,
-            is_active: true,
-            session_token: randomToken,
-            attendance_token: randomToken,
-          })
-          .returning();
-        scheduledMeeting = inserted[0];
-      } else if (!scheduledMeeting.session_token && !scheduledMeeting.attendance_token) {
-        const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
-        await db
-          .update(meetings)
-          .set({ session_token: randomToken, attendance_token: randomToken })
-          .where(eq(meetings.id, scheduledMeeting.id));
-        scheduledMeeting.session_token = randomToken;
-        scheduledMeeting.attendance_token = randomToken;
-      }
-
-      return {
-        isOpen: true,
-        reason: 'scheduled',
-        message: `Sesi aktif sesuai jadwal rutin Kelas ${gradeLevel} (${wib.dayName}, 12.30 - 14.00 WIB)`,
-        meeting: scheduledMeeting,
-        openMeetings: [scheduledMeeting],
-        allMeetingsForGrade: [scheduledMeeting, ...allMeetingsForGrade],
-        wibInfo: wib,
-        timeStatus: 'active',
-      };
+    if (!scheduledMeeting) {
+      const countAll = await db.query.meetings.findMany();
+      const newNum = countAll.length + 1;
+      const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
+      const inserted = await db
+        .insert(meetings)
+        .values({
+          meeting_number: newNum,
+          grade_level: gradeLevel,
+          title: `Praktikum Komputer Kelas ${gradeLevel} (${wib.dayName})`,
+          description: `Sesi praktikum otomatis dibuka pukul 12:45 - 13:55 WIB (${wib.activeShiftLabel || 'Sesi Aktif'}).`,
+          date: wib.dateStr,
+          start_time: '12:45',
+          end_time: '13:55',
+          is_open: true,
+          is_active: true,
+          session_token: randomToken,
+          attendance_token: randomToken,
+        })
+        .returning();
+      scheduledMeeting = inserted[0];
+    } else if (!scheduledMeeting.session_token && !scheduledMeeting.attendance_token) {
+      const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
+      await db
+        .update(meetings)
+        .set({ session_token: randomToken, attendance_token: randomToken, is_open: true, is_active: true })
+        .where(eq(meetings.id, scheduledMeeting.id));
+      scheduledMeeting.session_token = randomToken;
+      scheduledMeeting.attendance_token = randomToken;
     }
 
-    if (wib.currentMinutes < 750) {
-      // Sebelum jam 12:30 WIB pada hari yang sama
+    const token = scheduledMeeting.session_token || scheduledMeeting.attendance_token || '4432';
+
+    return {
+      isOpen: true,
+      reason: 'scheduled',
+      message: `Sesi presensi otomatis dibuka: Kelas ${gradeLevel} (${wib.dayName}, ${wib.activeShiftLabel || '12:45 - 13:55 WIB'})`,
+      meeting: scheduledMeeting,
+      openMeetings: [scheduledMeeting],
+      allMeetingsForGrade: [scheduledMeeting, ...allMeetingsForGrade],
+      wibInfo: wib,
+      timeStatus: 'active',
+      activeShift: wib.activeShift,
+      activeShiftLabel: wib.activeShiftLabel,
+      sessionToken: token,
+    };
+  }
+
+  // 5. Cek jika ada pertemuan yang dibuka manual oleh admin (override)
+  const manualOpenMeeting = allMeetingsForGrade.find((m) => m.is_open);
+  if (manualOpenMeeting) {
+    const token = manualOpenMeeting.session_token || manualOpenMeeting.attendance_token || '4432';
+    return {
+      isOpen: true,
+      reason: 'admin_override',
+      message: `Sesi dibuka manual oleh Pembina: ${manualOpenMeeting.title}`,
+      meeting: manualOpenMeeting,
+      openMeetings: [manualOpenMeeting],
+      allMeetingsForGrade,
+      wibInfo: wib,
+      timeStatus: 'active',
+      activeShift: wib.activeShift,
+      activeShiftLabel: wib.activeShiftLabel,
+      sessionToken: token,
+    };
+  }
+
+  // 6. Jika di luar jam praktikum pada hari kegiatan kelas ini
+  if (isCorrectDayForGrade) {
+    if (wib.currentMinutes < 765) {
+      // Sebelum jam 12:45 WIB pada hari yang sama
       return {
         isOpen: false,
         reason: 'closed',
-        message: `Sesi presensi Kelas ${gradeLevel} dibuka nanti pukul 12.30 WIB sesuai jadwal rutin hari ${gradeScheduleDay}.`,
+        message: `Sesi presensi Kelas ${gradeLevel} otomatis dibuka pukul 12:45 WIB (Sesi 1: 12:45 - 13:20 • Sesi 2: 13:20 - 13:55 WIB).`,
         meeting: null,
         openMeetings: [],
         allMeetingsForGrade,
         wibInfo: wib,
         timeStatus: 'not_started',
+        sessionToken: null,
       };
     }
 
-    // Lewat jam 14:00 WIB pada hari yang sama (misal jam 17:00 sore)
+    // Lewat jam 13:55 WIB pada hari yang sama
     return {
       isOpen: false,
       reason: 'closed',
-      message: `Sesi presensi Kelas ${gradeLevel} hari ini telah selesai pada pukul 14.00 WIB.`,
+      message: `Sesi presensi Kelas ${gradeLevel} hari ini telah otomatis ditutup pada pukul 13:55 WIB.`,
       meeting: null,
       openMeetings: [],
       allMeetingsForGrade,
       wibInfo: wib,
       timeStatus: 'ended',
+      sessionToken: null,
     };
   }
 
-  // 5. Bukan hari jadwal kelas ini (misal hari Jumat, Sabtu, Minggu, atau Rabu)
+  // 7. Jika di luar hari jadwal reguler dan di luar jam praktikum
   return {
     isOpen: false,
     reason: 'closed',
-    message: `Hari ini (${wib.dayName}) tidak ada jadwal praktikum komputer untuk Kelas ${gradeLevel}. Jadwal rutin adalah hari ${gradeScheduleDay} pukul 12.30 - 14.00 WIB.`,
+    message: `Hari ini (${wib.dayName}) tidak ada jadwal praktikum komputer untuk Kelas ${gradeLevel}. Jadwal rutin adalah hari ${gradeScheduleDay} pukul 12:45 - 13:55 WIB (Sesi 1: 12:45-13:20 • Sesi 2: 13:20-13:55).`,
     meeting: null,
     openMeetings: [],
     allMeetingsForGrade,
     wibInfo: wib,
     timeStatus: 'no_schedule_today',
+    sessionToken: null,
   };
 }
 
