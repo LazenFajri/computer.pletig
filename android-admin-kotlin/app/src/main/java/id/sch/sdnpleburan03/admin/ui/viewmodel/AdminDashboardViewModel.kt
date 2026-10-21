@@ -110,6 +110,26 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
 
         // 10. Sync awal saat app dibuka
         syncNow()
+
+        // 11. Real-time Live Ticker: Polling data real-time dari database Turso setiap 4 detik saat app aktif
+        viewModelScope.launch {
+            while (true) {
+                kotlinx.coroutines.delay(4000)
+                if (_uiState.value.networkState.isOnline && !_uiState.value.isSyncing) {
+                    val result = repository.performTwoWaySync()
+                    if (result.isSuccess) {
+                        _uiState.update {
+                            it.copy(
+                                isRealtimeConnected = true,
+                                lastRealtimeSyncTime = System.currentTimeMillis()
+                            )
+                        }
+                    } else {
+                        _uiState.update { it.copy(isRealtimeConnected = false) }
+                    }
+                }
+            }
+        }
     }
 
     fun setTab(tab: AdminTab) {
@@ -175,7 +195,6 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
             }
 
             studentFlow.collectLatest { list ->
-                // Jika search query aktif dengan filter grade/class, filter in-memory
                 val filtered = list.filter { st ->
                     (grade == null || st.gradeLevel == grade) &&
                     (className == null || st.className.equals(className, ignoreCase = true))
@@ -185,27 +204,23 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    // Toggle Sesi Buka/Tutup
+    // Toggle Sesi Buka/Tutup Realtime Turso
     fun toggleMeetingStatus(isOpen: Boolean) {
         val current = _uiState.value.primaryMeeting ?: return
         viewModelScope.launch {
-            repository.toggleMeetingStatusOffline(current.id, isOpen)
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            repository.toggleMeetingStatus(current.id, isOpen)
+            syncNow()
         }
     }
 
     fun toggleMeetingStatus(meetingId: String, isOpen: Boolean) {
         viewModelScope.launch {
-            repository.toggleMeetingStatusOffline(meetingId, isOpen)
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            repository.toggleMeetingStatus(meetingId, isOpen)
+            syncNow()
         }
     }
 
-    // Acak Token Sesi Lab Baru (Anti-Titip Absen)
+    // Acak Token Sesi Lab Baru Realtime Turso
     fun generateNewToken() {
         val current = _uiState.value.primaryMeeting ?: return
         generateNewTokenForMeeting(current.id)
@@ -213,34 +228,28 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
 
     fun generateNewTokenForMeeting(meetingId: String) {
         viewModelScope.launch {
-            repository.generateNewTokenOffline(meetingId)
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            repository.generateNewToken(meetingId)
+            syncNow()
         }
     }
 
-    // Tutup Semua Sesi (Emergency Lock)
+    // Tutup Semua Sesi Realtime Turso
     fun closeAllMeetings() {
         viewModelScope.launch {
-            repository.closeAllMeetingsOffline()
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            repository.closeAllMeetings()
+            syncNow()
         }
     }
 
-    // Hapus Sesi Pertemuan
+    // Hapus Sesi Pertemuan Realtime Turso
     fun deleteMeeting(meetingId: String) {
         viewModelScope.launch {
-            repository.deleteMeetingOffline(meetingId)
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            repository.deleteMeeting(meetingId)
+            syncNow()
         }
     }
 
-    // Quick Check-in Presensi (Hadir, Izin, Sakit, Alpa) 1-tap
+    // Quick Check-in Presensi Realtime Turso
     fun quickCheckIn(student: StudentEntity, status: String) {
         val meeting = _uiState.value.selectedMeetingForMatrix ?: _uiState.value.primaryMeeting ?: return
         viewModelScope.launch {
@@ -249,31 +258,27 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
                 student = student,
                 status = status
             )
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            syncNow()
         }
     }
 
-    // Catat Presensi Siswa Biasa
+    // Catat Presensi Siswa Realtime Turso
     fun recordAttendance(student: StudentEntity, status: String) {
         val current = _uiState.value.primaryMeeting ?: return
         viewModelScope.launch {
-            repository.recordAttendanceOffline(
+            repository.recordAttendance(
                 meetingId = current.id,
                 student = student,
                 status = status
             )
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            syncNow()
         }
     }
 
-    // Buat Pertemuan Baru
+    // Buat Pertemuan Baru Realtime Turso
     fun createMeeting(title: String, grade: Int?, start: String, end: String, desc: String?) {
         viewModelScope.launch {
-            val created = repository.createMeetingOffline(
+            val created = repository.createMeeting(
                 title = title,
                 gradeLevel = grade,
                 startTime = start,
@@ -287,13 +292,11 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
                 )
             }
             loadAttendancesForMeeting(created.id)
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            syncNow()
         }
     }
 
-    // Dialog Penilaian Tugas
+    // Dialog Penilaian Tugas Realtime Turso
     fun openGradeDialog(submission: SubmissionEntity) {
         _uiState.update { it.copy(selectedSubmissionForGrading = submission) }
     }
@@ -304,32 +307,36 @@ class AdminDashboardViewModel(application: Application) : AndroidViewModel(appli
 
     fun submitGrade(submissionId: String, score: Int, feedback: String?) {
         viewModelScope.launch {
-            repository.gradeSubmissionOffline(submissionId, score, feedback)
+            repository.gradeSubmission(submissionId, score, feedback)
             closeGradeDialog()
-            if (_uiState.value.networkState.isOnline) {
-                syncNow()
-            }
+            syncNow()
         }
     }
 
-    // Manual / Auto Real-Time Online Sync
+    // Manual / Auto Real-Time Online Sync dengan Ping Latency Turso
     fun syncNow() {
         viewModelScope.launch {
             _uiState.update { it.copy(isSyncing = true) }
+            val (pingOk, latency) = repository.pingTurso()
             val result = repository.performTwoWaySync()
             if (result.isSuccess) {
                 _uiState.update {
                     it.copy(
                         isSyncing = false,
-                        syncMessage = result.getOrNull() ?: "Online: Data tersinkron dengan cloud Turso"
+                        isRealtimeConnected = true,
+                        tursoLatencyMs = if (pingOk) latency else null,
+                        lastRealtimeSyncTime = System.currentTimeMillis(),
+                        syncMessage = "Turso Realtime Active: Data tersinkron langsung (${if (pingOk) "${latency}ms" else "cloud"})"
                     )
                 }
             } else {
                 _uiState.update {
                     it.copy(
                         isSyncing = false,
+                        isRealtimeConnected = pingOk,
+                        tursoLatencyMs = if (pingOk) latency else null,
                         syncMessage = if (it.networkState.isOnline) {
-                            "Online status: ${result.exceptionOrNull()?.localizedMessage ?: "Gagal terhubung"}"
+                            "Status Turso: ${result.exceptionOrNull()?.localizedMessage ?: "Reconnecting..."}"
                         } else null
                     )
                 }

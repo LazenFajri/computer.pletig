@@ -33,8 +33,8 @@ fun CreateMeetingDialog(
 ) {
     var title by remember { mutableStateOf("") }
     var selectedGrade by remember { mutableStateOf<Int?>(null) }
-    var startTime by remember { mutableStateOf("12:30") }
-    var endTime by remember { mutableStateOf("14:00") }
+    var startTime by remember { mutableStateOf("12:45") }
+    var endTime by remember { mutableStateOf("13:55") }
     var description by remember { mutableStateOf("") }
 
     AlertDialog(
@@ -131,7 +131,7 @@ fun CreateMeetingDialog(
                 colors = ButtonDefaults.buttonColors(containerColor = PurplePrimary),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Simpan Sesi (Offline)")
+                Text("Simpan ke Database Turso")
             }
         },
         dismissButton = {

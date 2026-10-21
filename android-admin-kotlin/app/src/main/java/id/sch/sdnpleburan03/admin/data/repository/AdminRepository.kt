@@ -64,19 +64,25 @@ class AdminRepository(private val context: Context) {
 
     fun getUnsyncedCount(): Flow<Int> = attendanceDao.getUnsyncedCount()
 
-    // 2. Offline-First Mutators
-    suspend fun createMeetingOffline(
+    // Ping test direct ke database Turso
+    suspend fun pingTurso(): Pair<Boolean, Long> = TursoClient.pingTurso(context)
+
+    // 2. Real-Time Turso Database Mutators (Optimistic Local Cache + Direct Cloud Execution)
+    suspend fun createMeeting(
         title: String,
         gradeLevel: Int?,
-        startTime: String = "12:30",
-        endTime: String = "14:00",
+        startTime: String = "12:45",
+        endTime: String = "13:55",
         description: String? = null
     ): MeetingEntity = withContext(Dispatchers.IO) {
         val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val randomToken = (1000..9999).random().toString()
+        val meetingId = UUID.randomUUID().toString()
+        val meetingNum = ((meetingDao.getUnsyncedMeetings().size) + 1)
+
         val newMeeting = MeetingEntity(
-            id = UUID.randomUUID().toString(),
-            meetingNumber = ((meetingDao.getUnsyncedMeetings().size) + 1),
+            id = meetingId,
+            meetingNumber = meetingNum,
             gradeLevel = gradeLevel,
             title = title,
             description = description,
@@ -89,11 +95,33 @@ class AdminRepository(private val context: Context) {
             syncStatus = SyncStatus.PENDING_INSERT,
             updatedAt = System.currentTimeMillis()
         )
+        // A. Simpan lokal instan (UI responsive)
         meetingDao.insertOrUpdate(newMeeting)
+
+        // B. Eksekusi realtime langsung ke database Turso
+        val safeTitle = title.replace("'", "''")
+        val safeDesc = (description ?: "").replace("'", "''")
+        val gradeVal = gradeLevel?.toString() ?: "NULL"
+        val sql = "INSERT INTO meetings (id, meeting_number, grade_level, title, description, date, start_time, end_time, is_open, is_active, session_token, attendance_token, created_at) " +
+                  "VALUES ('$meetingId', $meetingNum, $gradeVal, '$safeTitle', '$safeDesc', '$todayStr', '$startTime', '$endTime', 1, 1, '$randomToken', '$randomToken', ${System.currentTimeMillis()})"
+        val directSuccess = TursoClient.executeSql(context, sql)
+        if (directSuccess) {
+            meetingDao.markAsSynced(listOf(meetingId))
+        }
+
         newMeeting
     }
 
-    suspend fun toggleMeetingStatusOffline(meetingId: String, isOpen: Boolean) = withContext(Dispatchers.IO) {
+    // Alias untuk kompatibilitas
+    suspend fun createMeetingOffline(
+        title: String,
+        gradeLevel: Int?,
+        startTime: String = "12:45",
+        endTime: String = "13:55",
+        description: String? = null
+    ) = createMeeting(title, gradeLevel, startTime, endTime, description)
+
+    suspend fun toggleMeetingStatus(meetingId: String, isOpen: Boolean) = withContext(Dispatchers.IO) {
         val existing = meetingDao.getMeetingById(meetingId) ?: return@withContext
         val token = if (isOpen && existing.sessionToken == null) {
             (1000..9999).random().toString()
@@ -107,27 +135,52 @@ class AdminRepository(private val context: Context) {
             token = token,
             syncStatus = SyncStatus.PENDING_UPDATE
         )
+
+        // Realtime Turso
+        val openInt = if (isOpen) 1 else 0
+        val tokenSql = if (token != null) "'$token'" else "NULL"
+        val sql = "UPDATE meetings SET is_open = $openInt, is_active = $openInt, session_token = $tokenSql, attendance_token = $tokenSql WHERE id = '$meetingId'"
+        val ok = TursoClient.executeSql(context, sql)
+        if (ok) meetingDao.markAsSynced(listOf(meetingId))
     }
 
-    suspend fun generateNewTokenOffline(meetingId: String): String = withContext(Dispatchers.IO) {
+    suspend fun toggleMeetingStatusOffline(meetingId: String, isOpen: Boolean) = toggleMeetingStatus(meetingId, isOpen)
+
+    suspend fun generateNewToken(meetingId: String): String = withContext(Dispatchers.IO) {
         val newToken = (1000..9999).random().toString()
         meetingDao.updateToken(
             id = meetingId,
             token = newToken,
             syncStatus = SyncStatus.PENDING_UPDATE
         )
+
+        // Realtime Turso
+        val sql = "UPDATE meetings SET session_token = '$newToken', attendance_token = '$newToken' WHERE id = '$meetingId'"
+        val ok = TursoClient.executeSql(context, sql)
+        if (ok) meetingDao.markAsSynced(listOf(meetingId))
+
         newToken
     }
 
-    suspend fun closeAllMeetingsOffline() = withContext(Dispatchers.IO) {
+    suspend fun generateNewTokenOffline(meetingId: String): String = generateNewToken(meetingId)
+
+    suspend fun closeAllMeetings() = withContext(Dispatchers.IO) {
         meetingDao.closeAllMeetings()
+        val sql = "UPDATE meetings SET is_open = 0, is_active = 0 WHERE is_open = 1"
+        TursoClient.executeSql(context, sql)
     }
 
-    suspend fun deleteMeetingOffline(meetingId: String) = withContext(Dispatchers.IO) {
+    suspend fun closeAllMeetingsOffline() = closeAllMeetings()
+
+    suspend fun deleteMeeting(meetingId: String) = withContext(Dispatchers.IO) {
         meetingDao.deleteById(meetingId)
+        val sql = "DELETE FROM meetings WHERE id = '$meetingId'"
+        TursoClient.executeSql(context, sql)
     }
 
-    suspend fun recordAttendanceOffline(
+    suspend fun deleteMeetingOffline(meetingId: String) = deleteMeeting(meetingId)
+
+    suspend fun recordAttendance(
         meetingId: String,
         student: StudentEntity,
         status: String = "hadir",
@@ -135,6 +188,7 @@ class AdminRepository(private val context: Context) {
         notes: String? = null
     ) = withContext(Dispatchers.IO) {
         val existing = attendanceDao.findAttendanceForStudent(meetingId, student.id, student.name)
+        val attId = existing?.id ?: UUID.randomUUID().toString()
         val attendance = if (existing != null) {
             existing.copy(
                 status = status,
@@ -145,7 +199,7 @@ class AdminRepository(private val context: Context) {
             )
         } else {
             AttendanceEntity(
-                id = UUID.randomUUID().toString(),
+                id = attId,
                 meetingId = meetingId,
                 userId = student.id,
                 studentName = student.name,
@@ -158,42 +212,50 @@ class AdminRepository(private val context: Context) {
             )
         }
         attendanceDao.insertOrUpdate(attendance)
+
+        // Realtime Turso
+        val safeName = student.name.replace("'", "''")
+        val safeNotes = (notes ?: "").replace("'", "''")
+        val sql = "INSERT INTO attendance (id, meeting_id, user_id, student_name, grade_level, status, notes, checked_in_at) " +
+                  "VALUES ('$attId', '$meetingId', '${student.id}', '$safeName', ${student.gradeLevel}, '$status', '$safeNotes', ${System.currentTimeMillis()}) " +
+                  "ON CONFLICT(id) DO UPDATE SET status = '$status', notes = '$safeNotes', checked_in_at = ${System.currentTimeMillis()}"
+        val ok = TursoClient.executeSql(context, sql)
+        if (ok) attendanceDao.markAsSynced(listOf(attId))
     }
+
+    suspend fun recordAttendanceOffline(
+        meetingId: String,
+        student: StudentEntity,
+        status: String = "hadir",
+        stationNumber: String? = null,
+        notes: String? = null
+    ) = recordAttendance(meetingId, student, status, stationNumber, notes)
 
     suspend fun quickCheckInAttendance(
         meetingId: String,
         student: StudentEntity,
         status: String
+    ) = recordAttendance(meetingId, student, status)
+
+    suspend fun gradeSubmission(
+        submissionId: String,
+        score: Int,
+        feedback: String?
     ) = withContext(Dispatchers.IO) {
-        val existing = attendanceDao.findAttendanceForStudent(meetingId, student.id, student.name)
-        val toSave = if (existing != null) {
-            existing.copy(
-                status = status,
-                checkInTime = System.currentTimeMillis(),
-                syncStatus = SyncStatus.PENDING_UPDATE
-            )
-        } else {
-            AttendanceEntity(
-                id = UUID.randomUUID().toString(),
-                meetingId = meetingId,
-                userId = student.id,
-                studentName = student.name,
-                gradeLevel = student.gradeLevel,
-                status = status,
-                checkInTime = System.currentTimeMillis(),
-                syncStatus = SyncStatus.PENDING_INSERT
-            )
-        }
-        attendanceDao.insertOrUpdate(toSave)
+        submissionDao.gradeSubmission(submissionId, score, feedback, SyncStatus.PENDING_UPDATE)
+
+        // Realtime Turso
+        val safeFb = (feedback ?: "").replace("'", "''")
+        val sql = "UPDATE submissions SET score = $score, feedback = '$safeFb', status = 'graded', graded_by = 'Guru Pembina', graded_at = ${System.currentTimeMillis()} WHERE id = '$submissionId'"
+        val ok = TursoClient.executeSql(context, sql)
+        if (ok) submissionDao.markAsSynced(listOf(submissionId))
     }
 
     suspend fun gradeSubmissionOffline(
         submissionId: String,
         score: Int,
         feedback: String?
-    ) = withContext(Dispatchers.IO) {
-        submissionDao.gradeSubmission(submissionId, score, feedback, SyncStatus.PENDING_UPDATE)
-    }
+    ) = gradeSubmission(submissionId, score, feedback)
 
     // 3. Two-Way BaaS Synchronization
     suspend fun performTwoWaySync(): kotlin.Result<String> = withContext(Dispatchers.IO) {

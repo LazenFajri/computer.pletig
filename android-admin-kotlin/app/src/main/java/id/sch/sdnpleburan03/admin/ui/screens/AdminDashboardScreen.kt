@@ -115,26 +115,36 @@ fun AdminDashboardScreen(
                                 color = White
                             )
                             Spacer(Modifier.width(8.dp))
-                            // Status Online / BaaS direct badge
+                            // Status Realtime Turso Cloud DB badge
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
-                                    .background(if (state.networkState.isOnline) EmeraldSuccess.copy(alpha = 0.2f) else SlateBorder)
+                                    .background(
+                                        if (state.isRealtimeConnected) EmeraldSuccess.copy(alpha = 0.2f)
+                                        else if (state.networkState.isOnline) IndigoAccent.copy(alpha = 0.2f)
+                                        else SlateBorder
+                                    )
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = if (state.networkState.isOnline) Icons.Default.Wifi else Icons.Default.WifiOff,
+                                        imageVector = if (state.isRealtimeConnected) Icons.Default.CloudDone else if (state.networkState.isOnline) Icons.Default.Wifi else Icons.Default.WifiOff,
                                         contentDescription = null,
                                         modifier = Modifier.size(10.dp),
-                                        tint = if (state.networkState.isOnline) EmeraldSuccess else SlateTextMuted
+                                        tint = if (state.isRealtimeConnected) EmeraldSuccess else if (state.networkState.isOnline) IndigoAccent else SlateTextMuted
                                     )
                                     Spacer(Modifier.width(4.dp))
                                     Text(
-                                        text = if (state.networkState.isOnline) "ONLINE CLOUD" else "OFFLINE",
+                                        text = if (state.isRealtimeConnected) {
+                                            if (state.tursoLatencyMs != null) "TURSO REALTIME (${state.tursoLatencyMs}ms)" else "TURSO REALTIME"
+                                        } else if (state.networkState.isOnline) {
+                                            "TURSO SYNCING..."
+                                        } else {
+                                            "CACHE OFFLINE"
+                                        },
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = if (state.networkState.isOnline) EmeraldSuccess else SlateTextMuted
+                                        color = if (state.isRealtimeConnected) EmeraldSuccess else if (state.networkState.isOnline) IndigoAccent else SlateTextMuted
                                     )
                                 }
                             }
@@ -338,10 +348,12 @@ fun AdminDashboardScreen(
         )
     }
 
-    // Dialog Pengaturan URL Server
+    // Dialog Pengaturan URL Server & Database
     if (showServerConfigDialog) {
         ServerConfigDialog(
             currentUrl = state.serverBaseUrl,
+            isRealtimeConnected = state.isRealtimeConnected,
+            tursoLatencyMs = state.tursoLatencyMs,
             onDismiss = { showServerConfigDialog = false },
             onSave = { newUrl ->
                 viewModel.updateServerUrl(newUrl)

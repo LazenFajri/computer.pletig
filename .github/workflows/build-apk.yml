@@ -117,10 +117,13 @@ jobs:
           fi
 
           # Admin Kotlin APK (Full Offline-first)
+          # Admin Kotlin APK (Realtime Turso DB + Offline-Speed UI)
           APK_ADMIN_SRC="android-admin-kotlin/app/build/outputs/apk/debug/app-debug.apk"
           if [ -f "$APK_ADMIN_SRC" ]; then
+            cp "$APK_ADMIN_SRC" "release-assets/computer-pletig-admin-realtime-${VERSION_TAG}.apk"
+            cp "$APK_ADMIN_SRC" "release-assets/computer-pletig-admin-${VERSION_TAG}.apk"
             cp "$APK_ADMIN_SRC" "release-assets/computer-pletig-admin-offline-${VERSION_TAG}.apk"
-            echo "Berhasil menyiapkan computer-pletig-admin-offline-${VERSION_TAG}.apk"
+            echo "Berhasil menyiapkan computer-pletig-admin-realtime-${VERSION_TAG}.apk"
           fi
 
       # 10. Backup File APK ke GitHub Actions Artifacts
@@ -144,11 +147,11 @@ jobs:
             Versi rilis resmi aplikasi Android (.APK) SDN Pleburan 03 Semarang:
             
             ### 📦 Aset Rilis Tersedia:
-            1. **`computer-pletig-admin-offline-${{ steps.prep_apk.outputs.version_tag }}.apk`**
-               - Aplikasi Native Kotlin (Jetpack Compose + Room Database).
-               - Khusus Pembina/Guru: Berjalan **Full Offline**, Kontrol Sesi & Acak Token 4-Digit, Matriks Presensi Siswa per Rombel, dan Auto-Sync otomatis saat tersambung ke Wi-Fi lab (BaaS).
+            1. **`computer-pletig-admin-realtime-${{ steps.prep_apk.outputs.version_tag }}.apk`** (atau `computer-pletig-admin-${{ steps.prep_apk.outputs.version_tag }}.apk`)
+               - Aplikasi Native Kotlin (Jetpack Compose + Turso Cloud Realtime DB + Room SQLite Cache).
+               - Khusus Pembina/Guru: Desain UI secepat Offline (0ms latency Room cache) terintegrasi langsung dua arah secara Realtime dengan Database Turso Cloud AWS Tokyo. Kontrol Sesi Otomatis & Acak Token 4-Digit, Matriks Presensi Siswa per Rombel, dan Penilaian Tugas.
             2. **`computer-pletig-siswa-${{ steps.prep_apk.outputs.version_tag }}.apk`** (atau `computer-pletig-${{ steps.prep_apk.outputs.version_tag }}.apk`)
-               - Aplikasi Siswa: Portal Presensi 1 Laptop 1/2 Orang, Tugas Mingguan, dan Praktikum Komputer SDN Pleburan 03.
+               - Aplikasi Siswa: Portal Presensi 1 Laptop 1/2 Orang, Token Otomatis Presensi, Tugas Mingguan, dan Praktikum Komputer SDN Pleburan 03.
             
             ### 📱 Detail Versi:
             - **Versi Tag:** `${{ steps.prep_apk.outputs.version_tag }}`

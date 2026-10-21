@@ -35,6 +35,9 @@ data class AdminDashboardState(
     val selectedAssignmentForFilter: AssignmentEntity? = null,
     val selectedSubmissionForGrading: SubmissionEntity? = null,
     val isSyncing: Boolean = false,
+    val isRealtimeConnected: Boolean = false,
+    val tursoLatencyMs: Long? = null,
+    val lastRealtimeSyncTime: Long? = null,
     val syncMessage: String? = null,
     val serverBaseUrl: String = ""
 )

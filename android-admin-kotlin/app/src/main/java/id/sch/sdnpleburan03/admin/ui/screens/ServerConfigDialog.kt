@@ -5,11 +5,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,12 +35,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import id.sch.sdnpleburan03.admin.ui.theme.EmeraldSuccess
 import id.sch.sdnpleburan03.admin.ui.theme.IndigoAccent
 import id.sch.sdnpleburan03.admin.ui.theme.PurplePrimary
+import id.sch.sdnpleburan03.admin.ui.theme.SlateBorder
+import id.sch.sdnpleburan03.admin.ui.theme.SlateTextMuted
 
 @Composable
 fun ServerConfigDialog(
     currentUrl: String,
+    isRealtimeConnected: Boolean = true,
+    tursoLatencyMs: Long? = null,
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
 ) {
@@ -43,11 +54,20 @@ fun ServerConfigDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(
-                text = "Pengaturan BaaS / Server Sync",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Storage,
+                    contentDescription = null,
+                    tint = PurplePrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Konfigurasi Database & Server",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         },
         text = {
             Column(
@@ -56,10 +76,47 @@ fun ServerConfigDialog(
                     .padding(vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
+                // Info Turso Realtime Cloud DB
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isRealtimeConnected) EmeraldSuccess.copy(alpha = 0.1f)
+                            else MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        .padding(12.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.CloudDone,
+                                contentDescription = null,
+                                tint = if (isRealtimeConnected) EmeraldSuccess else SlateTextMuted,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "Turso Realtime Database (AWS Tokyo)",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isRealtimeConnected) EmeraldSuccess else SlateTextMuted
+                            )
+                        }
+                        Text(
+                            text = "Host: computerpletig-lazenfajri.aws-ap-northeast-1.turso.io\n" +
+                                    "Endpoint: /v2/pipeline (libSQL HTTP)\n" +
+                                    "Status: ${if (isRealtimeConnected) "Terhubung Realtime (${tursoLatencyMs ?: 0}ms)" else "Mencoba Reconnect..."}",
+                            style = MaterialTheme.typography.bodySmall,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
                 OutlinedTextField(
                     value = urlText,
                     onValueChange = { urlText = it },
-                    label = { Text("Base URL Server / BaaS") },
+                    label = { Text("Base URL Server Web / API Gateway") },
                     placeholder = { Text("https://computer-pletig.vercel.app/") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -84,7 +141,7 @@ fun ServerConfigDialog(
                             modifier = Modifier.padding(top = 2.dp)
                         )
                         Text(
-                            text = "Aplikasi otomatis terhubung langsung secara online ke server cloud https://computer-pletig.vercel.app/. Jika koneksi internet terputus, fitur tetap berjalan offline dan tersimpan aman di HP.",
+                            text = "Aplikasi mengadopsi UI Native berkecepatan instan (Room Cache) yang terintegrasi langsung dua arah dengan Turso Cloud Database secara realtime. Setiap perubahan sesi/nilai langsung tersimpan di cloud dan web.",
                             style = MaterialTheme.typography.bodySmall,
                             lineHeight = 16.sp
                         )
@@ -111,7 +168,7 @@ fun ServerConfigDialog(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Batal")
+                Text("Tutup")
             }
         },
         shape = RoundedCornerShape(24.dp)
