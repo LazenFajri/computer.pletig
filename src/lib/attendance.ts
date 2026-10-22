@@ -137,10 +137,10 @@ export interface ActiveSessionResult {
 export async function checkActiveSession(gradeLevel: GradeLevel): Promise<ActiveSessionResult> {
   const wib = getWIBInfo();
 
-  // 1. Ambil semua daftar pertemuan untuk kelas ini atau semua kelas
+  // 1. Ambil semua daftar pertemuan untuk kelas ini atau semua kelas (urutkan dari Minggu 1, 2, dst)
   const allMeetingsForGrade = await db.query.meetings.findMany({
     where: or(eq(meetings.grade_level, gradeLevel), isNull(meetings.grade_level)),
-    orderBy: [desc(meetings.meeting_number), desc(meetings.created_at)],
+    orderBy: [asc(meetings.meeting_number), asc(meetings.date)],
   });
 
   // 2. Tutup otomatis pertemuan masa lalu (sebelum hari ini) yang masih terbuka
@@ -196,22 +196,23 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
 
   // OTOMATIS BUKA: Jika saat ini berada di rentang jam praktikum (12:45 - 13:55 WIB) & hari kegiatan kelas ini
   if (wib.isWithinDefaultTime && isCorrectDayForGrade) {
-    // Cari sesi yang SUDAH ADA untuk kelas ini (utamakan sesi hari ini, atau sesi yang sudah dibuat oleh pembina)
-    const existingMeeting =
-      allMeetingsForGrade.find((m) => m.date === wib.dateStr) ||
-      (allMeetingsForGrade.length > 0 ? allMeetingsForGrade[0] : null);
+    // Cari sesi yang SESUAI untuk hari ini secara berurutan:
+    // 1. Utamakan sesi yang tanggalnya persis hari ini (misal: Minggu 1 di 2026-10-22, Minggu 2 di 2026-10-29)
+    // 2. Jika tidak ada tanggal hari ini, cari sesi mendatang (date >= today) yang belum terlaksana
+    const todayMeeting = allMeetingsForGrade.find((m) => m.date === wib.dateStr);
+    const existingMeeting = todayMeeting || allMeetingsForGrade.find((m) => m.date >= wib.dateStr);
 
     const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
 
     if (existingMeeting) {
-      // BUKA SESI YANG SUDAH ADA! JANGAN PERNAH BUAT SESI BARU DUPLIKAT!
+      // BUKA SESI YANG SUDAH ADA SESUAI MINGGU TERSEBUT! JANGAN PERNAH OVERWRITE SESI LAIN!
       const token = existingMeeting.session_token || existingMeeting.attendance_token || randomToken;
       await db
         .update(meetings)
         .set({
           is_open: true,
           is_active: true,
-          date: wib.dateStr,
+          date: existingMeeting.date || wib.dateStr,
           start_time: '12:45',
           end_time: '13:55',
           session_token: token,
@@ -222,14 +223,13 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
 
       existingMeeting.is_open = true;
       existingMeeting.is_active = true;
-      existingMeeting.date = wib.dateStr;
       existingMeeting.session_token = token;
       existingMeeting.attendance_token = token;
 
       return {
         isOpen: true,
         reason: 'scheduled',
-        message: `Sesi presensi otomatis dibuka: ${existingMeeting.title} (Kelas ${gradeLevel}, ${wib.activeShiftLabel || '12:45 - 13:55 WIB'})`,
+        message: `Sesi presensi otomatis dibuka: ${existingMeeting.title} (Minggu ke-${existingMeeting.meeting_number || 1}, Kelas ${gradeLevel})`,
         meeting: existingMeeting,
         openMeetings: [existingMeeting],
         allMeetingsForGrade,
@@ -240,16 +240,20 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
         sessionToken: token,
       };
     } else {
-      // Hanya jika benar-benar belum pernah ada sesi apapun di database untuk kelas ini:
-      const countAll = await db.query.meetings.findMany();
-      const newNum = countAll.length + 1;
+      // Jika semua sesi yang ada sudah selesai di minggu-minggu lalu:
+      // Buat sesi otomatis berurutan untuk minggu berikutnya (Minggu ke-1 -> Minggu ke-2 -> Minggu ke-3 dst)!
+      const maxMeetingNum = allMeetingsForGrade.length > 0
+        ? Math.max(...allMeetingsForGrade.map((m) => m.meeting_number || 1))
+        : 0;
+      const nextNum = maxMeetingNum + 1;
+
       const inserted = await db
         .insert(meetings)
         .values({
-          meeting_number: newNum,
+          meeting_number: nextNum,
           grade_level: gradeLevel,
-          title: `Praktikum Komputer Kelas ${gradeLevel} (${wib.dayName})`,
-          description: `Sesi praktikum otomatis dibuka pukul 12:45 - 13:55 WIB (${wib.activeShiftLabel || 'Sesi Aktif'}).`,
+          title: `Praktikum Komputer Kelas ${gradeLevel} (Minggu ke-${nextNum})`,
+          description: `Sesi praktikum otomatis Minggu ke-${nextNum} dibuka pukul 12:45 - 13:55 WIB (${wib.activeShiftLabel || 'Sesi Aktif'}).`,
           date: wib.dateStr,
           start_time: '12:45',
           end_time: '13:55',
@@ -264,7 +268,7 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
       return {
         isOpen: true,
         reason: 'scheduled',
-        message: `Sesi presensi otomatis dibuka: Kelas ${gradeLevel} (${wib.dayName}, ${wib.activeShiftLabel || '12:45 - 13:55 WIB'})`,
+        message: `Sesi presensi otomatis dibuka: ${createdMeeting.title} (${wib.dayName}, ${wib.activeShiftLabel || '12:45 - 13:55 WIB'})`,
         meeting: createdMeeting,
         openMeetings: [createdMeeting],
         allMeetingsForGrade: [createdMeeting, ...allMeetingsForGrade],

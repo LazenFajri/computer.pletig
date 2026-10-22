@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 import { meetings, attendance, materials, assignments } from '@/db/schema';
-import { eq, desc, asc, and, or, count } from 'drizzle-orm';
+import { eq, desc, asc, and, or, count, isNull } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 import type { ActionState, GradeLevel } from '@/lib/auth-types';
 import { revalidatePath } from 'next/cache';
@@ -119,12 +119,14 @@ export async function createMeetingAction(
       return { success: false, error: 'Judul pertemuan wajib diisi.' };
     }
 
-    // Tentukan nomor pertemuan
+    // Tentukan nomor pertemuan berurutan (per-jenjang kelas jika dispesifikasikan)
     let finalMeetingNum = meetingNumber;
     if (!finalMeetingNum || finalMeetingNum < 1) {
-      const existingMeetings = await db.query.meetings.findMany();
+      const existingMeetings = await db.query.meetings.findMany({
+        where: gradeLevel ? or(eq(meetings.grade_level, gradeLevel), isNull(meetings.grade_level)) : undefined,
+      });
       finalMeetingNum = existingMeetings.length > 0 
-        ? Math.max(...existingMeetings.map((m) => m.meeting_number)) + 1 
+        ? Math.max(...existingMeetings.map((m) => m.meeting_number || 1)) + 1 
         : 1;
     }
 

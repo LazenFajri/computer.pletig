@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 import { meetings, attendance, users } from '@/db/schema';
-import { eq, and, sql, or, isNull, desc } from 'drizzle-orm';
+import { eq, and, sql, or, isNull, desc, asc } from 'drizzle-orm';
 import {
   checkActiveSession,
   getStudentsByGrade,
@@ -406,23 +406,28 @@ export async function openQuickSessionForGradeAction(
   const safeTitle = title ? sanitizeText(title, 100) : undefined;
   const wib = getWIBInfo();
 
-  // Cari sesi yang sudah ada untuk kelas ini (utamakan sesi hari ini atau sesi terakhir kelas ini)
-  const existingMeeting = await db.query.meetings.findFirst({
+  // Cari sesi yang sudah ada untuk kelas ini secara berurutan (Minggu 1, Minggu 2, dst)
+  const allMeetingsForGrade = await db.query.meetings.findMany({
     where: or(eq(meetings.grade_level, gradeLevel), isNull(meetings.grade_level)),
-    orderBy: [desc(meetings.date), desc(meetings.meeting_number), desc(meetings.created_at)],
+    orderBy: [asc(meetings.meeting_number), asc(meetings.date)],
   });
+
+  // 1. Utamakan sesi yang tanggalnya hari ini
+  // 2. Jika tidak ada, ambil sesi mendatang yang belum selesai
+  const todayMeeting = allMeetingsForGrade.find((m) => m.date === wib.dateStr);
+  const existingMeeting = todayMeeting || allMeetingsForGrade.find((m) => m.date >= wib.dateStr);
 
   const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
 
   if (existingMeeting) {
-    // Buka sesi yang sudah ada, JANGAN buat sesi baru!
+    // Buka sesi yang sudah ada sesuai minggu yang sedang berjalan, JANGAN buat sesi baru!
     const token = existingMeeting.session_token || existingMeeting.attendance_token || randomToken;
     await db
       .update(meetings)
       .set({
         is_open: true,
         is_active: true,
-        date: wib.dateStr,
+        date: existingMeeting.date || wib.dateStr,
         start_time: '12:45',
         end_time: '13:55',
         session_token: token,
@@ -436,18 +441,20 @@ export async function openQuickSessionForGradeAction(
     revalidatePath('/admin/dashboard');
     return {
       success: true,
-      message: `Sesi "${existingMeeting.title}" berhasil dibuka untuk Kelas ${gradeLevel} (Kode Token: ${token})!`,
+      message: `Sesi "${existingMeeting.title}" (Minggu ke-${existingMeeting.meeting_number || 1}) berhasil dibuka untuk Kelas ${gradeLevel} (Kode Token: ${token})!`,
     };
   }
 
-  // Hanya jika benar-benar belum ada sesi sama sekali di database:
-  const allM = await db.query.meetings.findMany();
-  const nextNum = allM.length + 1;
+  // Jika semua sesi minggu lalu sudah lewat, buat sesi baru berurutan untuk minggu berikutnya:
+  const maxNum = allMeetingsForGrade.length > 0
+    ? Math.max(...allMeetingsForGrade.map((m) => m.meeting_number || 1))
+    : 0;
+  const nextNum = maxNum + 1;
 
   await db.insert(meetings).values({
     meeting_number: nextNum,
     grade_level: gradeLevel,
-    title: safeTitle || `Pertemuan ${nextNum} - Praktikum Komputer Kelas ${gradeLevel}`,
+    title: safeTitle || `Praktikum Komputer Kelas ${gradeLevel} (Minggu ke-${nextNum})`,
     description: `Sesi dibuka manual oleh Pembina pada ${wib.dayName}, ${wib.dateStr}.`,
     date: wib.dateStr,
     start_time: '12:45',
