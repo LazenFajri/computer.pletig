@@ -61,10 +61,12 @@ export default async function SiswaDashboardPage() {
 
   // Ambil tugas yang terkait dengan sesi pertemuan aktif
   const sessionAssignments = activeMeeting
-    ? await db.query.assignments.findMany({
-        where: eq(assignments.meeting_id, activeMeeting.id),
-        limit: 3,
-      })
+    ? await db.query.assignments
+        .findMany({
+          where: eq(assignments.meeting_id, activeMeeting.id),
+          limit: 3,
+        })
+        .catch(() => [])
     : [];
 
   return (

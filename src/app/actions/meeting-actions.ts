@@ -43,44 +43,49 @@ export interface MeetingItemWithCounts {
 export async function getAllMeetingsAction(
   filterGrade?: GradeLevel | null
 ): Promise<MeetingItemWithCounts[]> {
-  const allMeetings = await db.query.meetings.findMany({
-    orderBy: [desc(meetings.meeting_number), desc(meetings.date)],
-  });
-
-  const allAttendance = await db.query.attendance.findMany();
-  const allMaterials = await db.query.materials.findMany();
-  const allAssignments = await db.query.assignments.findMany();
-
-  const results: MeetingItemWithCounts[] = allMeetings
-    .filter((m) => {
-      if (!filterGrade) return true;
-      return m.grade_level === filterGrade || m.grade_level === null;
-    })
-    .map((m) => {
-      const attCount = allAttendance.filter((a) => a.meeting_id === m.id).length;
-      const matCount = allMaterials.filter((mat) => mat.meeting_id === m.id).length;
-      const assCount = allAssignments.filter((ass) => ass.meeting_id === m.id).length;
-
-      return {
-        id: m.id,
-        meetingNumber: m.meeting_number,
-        gradeLevel: m.grade_level,
-        title: m.title,
-        description: m.description,
-        date: m.date,
-        startTime: m.start_time,
-        endTime: m.end_time,
-        isOpen: m.is_open,
-        isActive: m.is_active,
-        sessionToken: m.session_token || m.attendance_token || null,
-        attendanceCount: attCount,
-        materialCount: matCount,
-        assignmentCount: assCount,
-        createdAt: m.created_at,
-      };
+  try {
+    const allMeetings = await db.query.meetings.findMany({
+      orderBy: [desc(meetings.meeting_number), desc(meetings.date)],
     });
 
-  return results;
+    const allAttendance = await db.query.attendance.findMany().catch(() => []);
+    const allMaterials = await db.query.materials.findMany().catch(() => []);
+    const allAssignments = await db.query.assignments.findMany().catch(() => []);
+
+    const results: MeetingItemWithCounts[] = allMeetings
+      .filter((m) => {
+        if (!filterGrade) return true;
+        return m.grade_level === filterGrade || m.grade_level === null;
+      })
+      .map((m) => {
+        const attCount = allAttendance.filter((a) => a.meeting_id === m.id).length;
+        const matCount = allMaterials.filter((mat) => mat.meeting_id === m.id).length;
+        const assCount = allAssignments.filter((ass) => ass.meeting_id === m.id).length;
+
+        return {
+          id: m.id,
+          meetingNumber: m.meeting_number,
+          gradeLevel: m.grade_level,
+          title: m.title,
+          description: m.description,
+          date: m.date,
+          startTime: m.start_time,
+          endTime: m.end_time,
+          isOpen: m.is_open,
+          isActive: m.is_active,
+          sessionToken: m.session_token || m.attendance_token || null,
+          attendanceCount: attCount,
+          materialCount: matCount,
+          assignmentCount: assCount,
+          createdAt: m.created_at,
+        };
+      });
+
+    return results;
+  } catch (error) {
+    console.error('Error fetching all meetings:', error);
+    return [];
+  }
 }
 
 /**

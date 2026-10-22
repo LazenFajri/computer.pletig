@@ -74,47 +74,52 @@ export interface SubmissionWithDetails {
 export async function getAssignmentsAction(
   filterGrade?: GradeLevel | null
 ): Promise<AssignmentWithDetails[]> {
-  const allAssignments = await db.query.assignments.findMany({
-    orderBy: [desc(assignments.created_at)],
-    with: {
-      meeting: true,
-    },
-  });
-
-  const allSubmissions = await db.query.submissions.findMany();
-
-  return allAssignments
-    .filter((ass) => {
-      if (!filterGrade) return true;
-      if (ass.meeting && ass.meeting.grade_level !== null && ass.meeting.grade_level !== filterGrade) {
-        return false;
-      }
-      return true;
-    })
-    .map((ass) => {
-      const subCount = allSubmissions.filter((s) => s.assignment_id === ass.id).length;
-      return {
-        id: ass.id,
-        meetingId: ass.meeting_id,
-        title: ass.title,
-        instructions: ass.instructions,
-        dueDate: ass.due_date,
-        maxScore: ass.max_score,
-        attachmentUrl: ass.attachment_url || null,
-        gdriveUrl: ass.gdrive_url || null,
-        createdAt: ass.created_at,
-        submissionCount: subCount,
-        meeting: ass.meeting
-          ? {
-            id: ass.meeting.id,
-            meetingNumber: ass.meeting.meeting_number,
-            title: ass.meeting.title,
-            gradeLevel: ass.meeting.grade_level,
-            date: ass.meeting.date,
-          }
-          : null,
-      };
+  try {
+    const allAssignments = await db.query.assignments.findMany({
+      orderBy: [desc(assignments.created_at)],
+      with: {
+        meeting: true,
+      },
     });
+
+    const allSubmissions = await db.query.submissions.findMany();
+
+    return allAssignments
+      .filter((ass) => {
+        if (!filterGrade) return true;
+        if (ass.meeting && ass.meeting.grade_level !== null && ass.meeting.grade_level !== filterGrade) {
+          return false;
+        }
+        return true;
+      })
+      .map((ass) => {
+        const subCount = allSubmissions.filter((s) => s.assignment_id === ass.id).length;
+        return {
+          id: ass.id,
+          meetingId: ass.meeting_id,
+          title: ass.title,
+          instructions: ass.instructions,
+          dueDate: ass.due_date,
+          maxScore: ass.max_score,
+          attachmentUrl: ass.attachment_url || null,
+          gdriveUrl: ass.gdrive_url || null,
+          createdAt: ass.created_at,
+          submissionCount: subCount,
+          meeting: ass.meeting
+            ? {
+                id: ass.meeting.id,
+                meetingNumber: ass.meeting.meeting_number,
+                title: ass.meeting.title,
+                gradeLevel: ass.meeting.grade_level,
+                date: ass.meeting.date,
+              }
+            : null,
+        };
+      });
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    return [];
+  }
 }
 
 /**
@@ -489,32 +494,37 @@ export async function submitAssignmentAction(
 export async function getSubmissionsAction(
   assignmentId?: string
 ): Promise<SubmissionWithDetails[]> {
-  const allSubmissions = await db.query.submissions.findMany({
-    orderBy: [desc(submissions.submitted_at)],
-    with: {
-      assignment: true,
-    },
-  });
+  try {
+    const allSubmissions = await db.query.submissions.findMany({
+      orderBy: [desc(submissions.submitted_at)],
+      with: {
+        assignment: true,
+      },
+    });
 
-  return allSubmissions
-    .filter((s) => {
-      if (assignmentId && s.assignment_id !== assignmentId) return false;
-      return true;
-    })
-    .map((s) => ({
-      id: s.id,
-      assignmentId: s.assignment_id,
-      studentName: s.student_name,
-      gradeLevel: s.grade_level,
-      submissionUrl: s.submission_url,
-      submissionText: s.submission_text,
-      submittedAt: s.submitted_at,
-      status: s.status,
-      score: s.score,
-      feedback: s.feedback,
-      gradedAt: s.graded_at,
-      assignmentTitle: s.assignment?.title,
-    }));
+    return allSubmissions
+      .filter((s) => {
+        if (assignmentId && s.assignment_id !== assignmentId) return false;
+        return true;
+      })
+      .map((s) => ({
+        id: s.id,
+        assignmentId: s.assignment_id,
+        studentName: s.student_name,
+        gradeLevel: s.grade_level,
+        submissionUrl: s.submission_url,
+        submissionText: s.submission_text,
+        submittedAt: s.submitted_at,
+        status: s.status,
+        score: s.score,
+        feedback: s.feedback,
+        gradedAt: s.graded_at,
+        assignmentTitle: s.assignment?.title,
+      }));
+  } catch (error) {
+    console.error('Error fetching submissions:', error);
+    return [];
+  }
 }
 
 /**

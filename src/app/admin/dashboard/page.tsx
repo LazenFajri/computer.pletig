@@ -28,10 +28,10 @@ export default async function AdminDashboardPage() {
 
   // Ambil data awal dari server
   const [meetings, materials, assignments, submissions] = await Promise.all([
-    getAllMeetingsAction(),
-    getMaterialsAction(),
-    getAssignmentsAction(),
-    getSubmissionsAction(),
+    getAllMeetingsAction().catch(() => []),
+    getMaterialsAction().catch(() => []),
+    getAssignmentsAction().catch(() => []),
+    getSubmissionsAction().catch(() => []),
   ]);
 
   return (

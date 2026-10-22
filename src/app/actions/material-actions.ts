@@ -43,42 +43,47 @@ export async function getMaterialsAction(
   filterGrade?: GradeLevel | null,
   meetingId?: string
 ): Promise<MaterialWithMeeting[]> {
-  const allMaterials = await db.query.materials.findMany({
-    orderBy: [asc(materials.order_index), desc(materials.created_at)],
-    with: {
-      meeting: true,
-    },
-  });
+  try {
+    const allMaterials = await db.query.materials.findMany({
+      orderBy: [asc(materials.order_index), desc(materials.created_at)],
+      with: {
+        meeting: true,
+      },
+    });
 
-  return allMaterials
-    .filter((mat) => {
-      if (meetingId && mat.meeting_id !== meetingId) return false;
-      if (filterGrade) {
-        if (mat.meeting && mat.meeting.grade_level !== null && mat.meeting.grade_level !== filterGrade) {
-          return false;
-        }
-      }
-      return true;
-    })
-    .map((mat) => ({
-      id: mat.id,
-      meetingId: mat.meeting_id,
-      title: mat.title,
-      contentMarkdown: mat.content_markdown,
-      fileUrl: mat.file_url,
-      fileType: mat.file_type,
-      orderIndex: mat.order_index,
-      createdAt: mat.created_at,
-      meeting: mat.meeting
-        ? {
-            id: mat.meeting.id,
-            meetingNumber: mat.meeting.meeting_number,
-            title: mat.meeting.title,
-            gradeLevel: mat.meeting.grade_level,
-            date: mat.meeting.date,
+    return allMaterials
+      .filter((mat) => {
+        if (meetingId && mat.meeting_id !== meetingId) return false;
+        if (filterGrade) {
+          if (mat.meeting && mat.meeting.grade_level !== null && mat.meeting.grade_level !== filterGrade) {
+            return false;
           }
-        : null,
-    }));
+        }
+        return true;
+      })
+      .map((mat) => ({
+        id: mat.id,
+        meetingId: mat.meeting_id,
+        title: mat.title,
+        contentMarkdown: mat.content_markdown,
+        fileUrl: mat.file_url,
+        fileType: mat.file_type,
+        orderIndex: mat.order_index,
+        createdAt: mat.created_at,
+        meeting: mat.meeting
+          ? {
+              id: mat.meeting.id,
+              meetingNumber: mat.meeting.meeting_number,
+              title: mat.meeting.title,
+              gradeLevel: mat.meeting.grade_level,
+              date: mat.meeting.date,
+            }
+          : null,
+      }));
+  } catch (error) {
+    console.error('Error fetching materials:', error);
+    return [];
+  }
 }
 
 /**
