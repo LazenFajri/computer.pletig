@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 import { meetings, attendance, users } from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, or, isNull, desc } from 'drizzle-orm';
 import {
   checkActiveSession,
   getStudentsByGrade,
@@ -404,21 +404,45 @@ export async function openQuickSessionForGradeAction(
   }
 
   const safeTitle = title ? sanitizeText(title, 100) : undefined;
-
-  const allM = await db.query.meetings.findMany();
-  const nextNum = allM.length + 1;
   const wib = getWIBInfo();
 
-  // Buat jam mulai dari sekarang, selesai 90 menit ke depan
-  const startH = wib.hour;
-  const startM = wib.minute;
-  const startTime = `${startH.toString().padStart(2, '0')}:${startM.toString().padStart(2, '0')}`;
+  // Cari sesi yang sudah ada untuk kelas ini (utamakan sesi hari ini atau sesi terakhir kelas ini)
+  const existingMeeting = await db.query.meetings.findFirst({
+    where: or(eq(meetings.grade_level, gradeLevel), isNull(meetings.grade_level)),
+    orderBy: [desc(meetings.date), desc(meetings.meeting_number), desc(meetings.created_at)],
+  });
 
-  const endMinutes = wib.currentMinutes + 90;
-  const endH = Math.min(23, Math.floor(endMinutes / 60));
-  const endM = endMinutes % 60;
-  const endTime = `${endH.toString().padStart(2, '0')}:${endM.toString().padStart(2, '0')}`;
   const randomToken = Math.floor(1000 + Math.random() * 9000).toString();
+
+  if (existingMeeting) {
+    // Buka sesi yang sudah ada, JANGAN buat sesi baru!
+    const token = existingMeeting.session_token || existingMeeting.attendance_token || randomToken;
+    await db
+      .update(meetings)
+      .set({
+        is_open: true,
+        is_active: true,
+        date: wib.dateStr,
+        start_time: '12:45',
+        end_time: '13:55',
+        session_token: token,
+        attendance_token: token,
+        title: safeTitle || existingMeeting.title,
+        updated_at: new Date(),
+      })
+      .where(eq(meetings.id, existingMeeting.id));
+
+    revalidatePath('/absen');
+    revalidatePath('/admin/dashboard');
+    return {
+      success: true,
+      message: `Sesi "${existingMeeting.title}" berhasil dibuka untuk Kelas ${gradeLevel} (Kode Token: ${token})!`,
+    };
+  }
+
+  // Hanya jika benar-benar belum ada sesi sama sekali di database:
+  const allM = await db.query.meetings.findMany();
+  const nextNum = allM.length + 1;
 
   await db.insert(meetings).values({
     meeting_number: nextNum,
@@ -426,8 +450,8 @@ export async function openQuickSessionForGradeAction(
     title: safeTitle || `Pertemuan ${nextNum} - Praktikum Komputer Kelas ${gradeLevel}`,
     description: `Sesi dibuka manual oleh Pembina pada ${wib.dayName}, ${wib.dateStr}.`,
     date: wib.dateStr,
-    start_time: startTime,
-    end_time: endTime,
+    start_time: '12:45',
+    end_time: '13:55',
     is_open: true,
     is_active: true,
     session_token: randomToken,
@@ -438,7 +462,7 @@ export async function openQuickSessionForGradeAction(
   revalidatePath('/admin/dashboard');
   return {
     success: true,
-    message: `Sesi Pertemuan untuk Kelas ${gradeLevel} berhasil dibuka (${startTime} - ${endTime} WIB)!`,
+    message: `Sesi Pertemuan untuk Kelas ${gradeLevel} berhasil dibuka (12:45 - 13:55 WIB)!`,
   };
 }
 

@@ -176,8 +176,11 @@ export async function GET(req: NextRequest) {
     const totalAbsent = excelRecords.filter((r) => r.status === 'TIDAK HADIR').length;
 
     // 5. Generate file Excel berdesain warna & profesional
+    const sessionDate = targetM?.date || filteredAtt[0]?.meeting?.date || undefined;
+
     const excelBuffer = await generateStyledRekapExcel(excelRecords, {
       sessionTitle,
+      sessionDate,
       gradeFilter: gradeLabel,
       totalRecords: excelRecords.length,
       totalRegistered: excelRecords.length,

@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { ELECTRONIC_SIGN_BASE64 } from './electronic-sign-base64';
 
 export interface AttendanceRecordForExcel {
   no: number;
@@ -15,11 +16,76 @@ export interface AttendanceRecordForExcel {
 export interface RekapExcelOptions {
   title?: string;
   sessionTitle?: string;
+  sessionDate?: string; // Tanggal sesi pertemuan dibuat / diselenggarakan (e.g. '2026-10-22')
   gradeFilter?: string;
   totalRecords?: number;
   totalRegistered?: number;
   totalPresent?: number;
   totalAbsent?: number;
+}
+
+/**
+ * Format tanggal dalam format resmi Indonesia: "22 Oktober 2026"
+ */
+export function formatIndonesianDate(inputDate?: string | Date | null): string {
+  if (!inputDate) {
+    return new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date());
+  }
+
+  if (typeof inputDate === 'string') {
+    const trimmed = inputDate.trim();
+    // Format YYYY-MM-DD
+    const dashMatch = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (dashMatch) {
+      const year = parseInt(dashMatch[1], 10);
+      const month = parseInt(dashMatch[2], 10);
+      const day = parseInt(dashMatch[3], 10);
+      const months = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+      ];
+      if (month >= 1 && month <= 12) {
+        return `${day} ${months[month - 1]} ${year}`;
+      }
+    }
+
+    // Format DD/MM/YYYY
+    const slashMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) {
+      const day = parseInt(slashMatch[1], 10);
+      const month = parseInt(slashMatch[2], 10);
+      const year = parseInt(slashMatch[3], 10);
+      const months = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+      ];
+      if (month >= 1 && month <= 12) {
+        return `${day} ${months[month - 1]} ${year}`;
+      }
+    }
+  }
+
+  const d = new Date(inputDate);
+  if (!isNaN(d.getTime())) {
+    return new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(d);
+  }
+
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
 }
 
 /**
@@ -239,10 +305,16 @@ export async function generateStyledRekapExcel(
   currentRow++;
 
   // 6. FOOTER TANDA TANGAN (Bawah Kanan)
+  // Format: "Semarang, [tanggal sesi dibuat beserta tahun]"
+  const dateToUse =
+    options.sessionDate ||
+    records.find((r) => r.dateStr && r.dateStr !== '-')?.dateStr;
+  const formattedSessionDate = formatIndonesianDate(dateToUse);
+
   const signRow = currentRow;
   worksheet.mergeCells(`D${signRow}:F${signRow}`);
   const signPlace = worksheet.getCell(`D${signRow}`);
-  signPlace.value = 'Semarang, Jawa Tengah';
+  signPlace.value = `Semarang, ${formattedSessionDate}`;
   signPlace.font = { name: 'Segoe UI', size: 9.5, italic: true, color: { argb: 'FF475569' } };
   signPlace.alignment = { horizontal: 'center' };
 
@@ -252,13 +324,33 @@ export async function generateStyledRekapExcel(
   signTitle.font = { name: 'Segoe UI', size: 9.5, bold: true, color: { argb: 'FF1E293B' } };
   signTitle.alignment = { horizontal: 'center' };
 
+  // Set tinggi baris agar gambar tanda tangan pas dan tidak terpotong
+  worksheet.getRow(signRow).height = 18;
+  worksheet.getRow(signRow + 1).height = 18;
+  worksheet.getRow(signRow + 2).height = 24;
+  worksheet.getRow(signRow + 3).height = 24;
+  worksheet.getRow(signRow + 4).height = 22;
+
+  // Pasang Gambar Tanda Tangan Digital Pembina (Muhammad Fajri Setyawan)
+  try {
+    const signImageId = workbook.addImage({
+      base64: ELECTRONIC_SIGN_BASE64,
+      extension: 'jpeg',
+    });
+    // Kolom E (index ~4.12) berada persis di tengah merge D:F
+    worksheet.addImage(signImageId, {
+      tl: { col: 4.12, row: signRow + 1.25 },
+      ext: { width: 96, height: 52 },
+    });
+  } catch (err) {
+    console.warn('Peringatan: Gagal menambahkan gambar tanda tangan digital ke Excel:', err);
+  }
+
   worksheet.mergeCells(`D${signRow + 4}:F${signRow + 4}`);
   const signName = worksheet.getCell(`D${signRow + 4}`);
   signName.value = 'Muhammad Fajri Setyawan';
   signName.font = { name: 'Segoe UI', size: 9.5, bold: true, underline: true, color: { argb: 'FF0F172A' } };
   signName.alignment = { horizontal: 'center' };
-
-  worksheet.getRow(signRow + 4).height = 20;
 
   // Generate buffer
   const buffer = await workbook.xlsx.writeBuffer();

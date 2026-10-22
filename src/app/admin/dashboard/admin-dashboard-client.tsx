@@ -1188,8 +1188,17 @@ export default function AdminDashboardClient({
     return true;
   });
 
+  const todayWibStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+
   const activeMeeting =
-    meetingsList.find((m) => m.isOpen) || (meetingsList.length > 0 ? meetingsList[0] : null);
+    meetingsList.find((m) => m.isOpen) ||
+    meetingsList.find((m) => m.date === todayWibStr) ||
+    (meetingsList.length > 0 ? meetingsList[0] : null);
   const isAnyMeetingOpen = meetingsList.some((m) => m.isOpen);
 
   const filteredMaterials = materialsList.filter((mat) => {
