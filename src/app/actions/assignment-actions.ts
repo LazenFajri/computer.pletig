@@ -106,12 +106,12 @@ export async function getAssignmentsAction(
         submissionCount: subCount,
         meeting: ass.meeting
           ? {
-              id: ass.meeting.id,
-              meetingNumber: ass.meeting.meeting_number,
-              title: ass.meeting.title,
-              gradeLevel: ass.meeting.grade_level,
-              date: ass.meeting.date,
-            }
+            id: ass.meeting.id,
+            meetingNumber: ass.meeting.meeting_number,
+            title: ass.meeting.title,
+            gradeLevel: ass.meeting.grade_level,
+            date: ass.meeting.date,
+          }
           : null,
       };
     });
@@ -141,9 +141,12 @@ export async function createAssignmentAction(
     const cleanAttachmentUrl = attachmentUrl && attachmentUrl.trim()
       ? (sanitizeUrl(attachmentUrl) || sanitizeText(attachmentUrl.trim(), 500))
       : null;
+    const defaultGdriveUrl =
+      process.env.NEXT_PUBLIC_GDRIVE_SUBMISSION_URL ||
+      'https://drive.google.com/drive/folders/1sgR-9GFibFvMxeGLKfrqVFh8SAVcI9dO';
     const cleanGdriveUrl = gdriveUrl && gdriveUrl.trim()
       ? (sanitizeUrl(gdriveUrl) || sanitizeText(gdriveUrl.trim(), 500))
-      : null;
+      : defaultGdriveUrl;
 
     if (!cleanTitle) {
       return { success: false, error: 'Judul tugas wajib diisi.' };

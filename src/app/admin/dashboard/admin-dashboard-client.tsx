@@ -702,17 +702,17 @@ export default function AdminDashboardClient({
           meetingsList.map((m) =>
             m.id === target.id
               ? {
-                  ...m,
-                  title: target.title,
-                  meetingNumber: target.meetingNumber,
-                  gradeLevel: target.gradeLevel,
-                  date: target.date,
-                  startTime: target.startTime,
-                  endTime: target.endTime,
-                  description: target.description,
-                  isOpen: target.isOpen,
-                  isActive: target.isOpen,
-                }
+                ...m,
+                title: target.title,
+                meetingNumber: target.meetingNumber,
+                gradeLevel: target.gradeLevel,
+                date: target.date,
+                startTime: target.startTime,
+                endTime: target.endTime,
+                description: target.description,
+                isOpen: target.isOpen,
+                isActive: target.isOpen,
+              }
               : m
           )
         );
@@ -745,11 +745,11 @@ export default function AdminDashboardClient({
           meetingsList.map((m) =>
             m.id === meetingId
               ? {
-                  ...m,
-                  isOpen: nextStatus,
-                  isActive: nextStatus,
-                  sessionToken: res.data?.token || m.sessionToken,
-                }
+                ...m,
+                isOpen: nextStatus,
+                isActive: nextStatus,
+                sessionToken: res.data?.token || m.sessionToken,
+              }
               : m
           )
         );
@@ -813,12 +813,12 @@ export default function AdminDashboardClient({
           createdAt: new Date(),
           meeting: parentMeeting
             ? {
-                id: parentMeeting.id,
-                meetingNumber: 'meeting_number' in parentMeeting ? parentMeeting.meeting_number : parentMeeting.meetingNumber,
-                title: parentMeeting.title,
-                gradeLevel: 'grade_level' in parentMeeting ? parentMeeting.grade_level : parentMeeting.gradeLevel,
-                date: parentMeeting.date,
-              }
+              id: parentMeeting.id,
+              meetingNumber: 'meeting_number' in parentMeeting ? parentMeeting.meeting_number : parentMeeting.meetingNumber,
+              title: parentMeeting.title,
+              gradeLevel: 'grade_level' in parentMeeting ? parentMeeting.grade_level : parentMeeting.gradeLevel,
+              date: parentMeeting.date,
+            }
             : null,
         };
 
@@ -878,22 +878,22 @@ export default function AdminDashboardClient({
           materialsList.map((mat) =>
             mat.id === target.id
               ? {
-                  ...mat,
-                  meetingId: target.meetingId,
-                  title: target.title,
-                  contentMarkdown: target.contentMarkdown,
-                  fileUrl: target.fileUrl,
-                  fileType: target.fileType,
-                  meeting: parentMeeting
-                    ? {
-                        id: parentMeeting.id,
-                        meetingNumber: parentMeeting.meetingNumber,
-                        title: parentMeeting.title,
-                        gradeLevel: parentMeeting.gradeLevel,
-                        date: parentMeeting.date,
-                      }
-                    : mat.meeting,
-                }
+                ...mat,
+                meetingId: target.meetingId,
+                title: target.title,
+                contentMarkdown: target.contentMarkdown,
+                fileUrl: target.fileUrl,
+                fileType: target.fileType,
+                meeting: parentMeeting
+                  ? {
+                    id: parentMeeting.id,
+                    meetingNumber: parentMeeting.meetingNumber,
+                    title: parentMeeting.title,
+                    gradeLevel: parentMeeting.gradeLevel,
+                    date: parentMeeting.date,
+                  }
+                  : mat.meeting,
+              }
               : mat
           )
         );
@@ -974,12 +974,12 @@ export default function AdminDashboardClient({
           submissionCount: 0,
           meeting: parentMeeting
             ? {
-                id: parentMeeting.id,
-                meetingNumber: 'meeting_number' in parentMeeting ? parentMeeting.meeting_number : parentMeeting.meetingNumber,
-                title: parentMeeting.title,
-                gradeLevel: 'grade_level' in parentMeeting ? parentMeeting.grade_level : parentMeeting.gradeLevel,
-                date: parentMeeting.date,
-              }
+              id: parentMeeting.id,
+              meetingNumber: 'meeting_number' in parentMeeting ? parentMeeting.meeting_number : parentMeeting.meetingNumber,
+              title: parentMeeting.title,
+              gradeLevel: 'grade_level' in parentMeeting ? parentMeeting.grade_level : parentMeeting.gradeLevel,
+              date: parentMeeting.date,
+            }
             : null,
         };
 
@@ -1043,24 +1043,24 @@ export default function AdminDashboardClient({
           assignmentsList.map((ass) =>
             ass.id === target.id
               ? {
-                  ...ass,
-                  meetingId: target.meetingId,
-                  title: target.title,
-                  instructions: target.instructions,
-                  dueDate: target.dueDate,
-                  maxScore: target.maxScore,
-                  attachmentUrl: target.attachmentUrl,
-                  gdriveUrl: target.gdriveUrl,
-                  meeting: parentMeeting
-                    ? {
-                        id: parentMeeting.id,
-                        meetingNumber: parentMeeting.meetingNumber,
-                        title: parentMeeting.title,
-                        gradeLevel: parentMeeting.gradeLevel,
-                        date: parentMeeting.date,
-                      }
-                    : ass.meeting,
-                }
+                ...ass,
+                meetingId: target.meetingId,
+                title: target.title,
+                instructions: target.instructions,
+                dueDate: target.dueDate,
+                maxScore: target.maxScore,
+                attachmentUrl: target.attachmentUrl,
+                gdriveUrl: target.gdriveUrl,
+                meeting: parentMeeting
+                  ? {
+                    id: parentMeeting.id,
+                    meetingNumber: parentMeeting.meetingNumber,
+                    title: parentMeeting.title,
+                    gradeLevel: parentMeeting.gradeLevel,
+                    date: parentMeeting.date,
+                  }
+                  : ass.meeting,
+              }
               : ass
           )
         );
@@ -1104,7 +1104,7 @@ export default function AdminDashboardClient({
           if (homeCached) {
             saveOfflineData(OFFLINE_KEYS.HOME_MEETINGS, homeCached.filter((m) => m.id !== targetId));
           }
-        } catch {}
+        } catch { }
 
         const res = await deleteMeetingAction(targetId);
         if (res.success) {
@@ -1166,12 +1166,12 @@ export default function AdminDashboardClient({
           submissionsList.map((s) =>
             s.id === submissionId
               ? {
-                  ...s,
-                  status: 'graded',
-                  score: Number(data.score),
-                  feedback: data.feedback,
-                  gradedAt: new Date(),
-                }
+                ...s,
+                status: 'graded',
+                score: Number(data.score),
+                feedback: data.feedback,
+                gradedAt: new Date(),
+              }
               : s
           )
         );
@@ -1249,11 +1249,10 @@ export default function AdminDashboardClient({
       {/* Alert / Notification Bar */}
       {statusMsg && (
         <div
-          className={`p-4 rounded-2xl flex items-center justify-between text-sm font-semibold transition-all shadow-md ${
-            statusMsg.type === 'success'
+          className={`p-4 rounded-2xl flex items-center justify-between text-sm font-semibold transition-all shadow-md ${statusMsg.type === 'success'
               ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
               : 'bg-rose-50 text-rose-900 border border-rose-200'
-          }`}
+            }`}
         >
           <div className="flex items-center gap-2">
             {statusMsg.type === 'success' ? (
@@ -1325,11 +1324,10 @@ export default function AdminDashboardClient({
           <button
             type="button"
             onClick={() => setActiveTab('meetings')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
-              activeTab === 'meetings'
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'meetings'
                 ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
                 : 'text-slate-600 hover:bg-slate-100'
-            }`}
+              }`}
           >
             <CalendarCheck className="w-4 h-4 shrink-0" />
             <span>
@@ -1341,11 +1339,10 @@ export default function AdminDashboardClient({
           <button
             type="button"
             onClick={() => setActiveTab('assignments')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
-              activeTab === 'assignments'
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'assignments'
                 ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
                 : 'text-slate-600 hover:bg-slate-100'
-            }`}
+              }`}
           >
             <FileText className="w-4 h-4 shrink-0" />
             <span>
@@ -1357,11 +1354,10 @@ export default function AdminDashboardClient({
           <button
             type="button"
             onClick={() => setActiveTab('submissions')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
-              activeTab === 'submissions'
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'submissions'
                 ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
                 : 'text-slate-600 hover:bg-slate-100'
-            }`}
+              }`}
           >
             <Award className="w-4 h-4 shrink-0" />
             <span>
@@ -1373,11 +1369,10 @@ export default function AdminDashboardClient({
           <button
             type="button"
             onClick={() => setActiveTab('matrix')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
-              activeTab === 'matrix'
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'matrix'
                 ? 'bg-slate-900 text-white shadow-md shadow-slate-900/25 ring-2 ring-emerald-400/40'
                 : 'text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/60'
-            }`}
+              }`}
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>
@@ -1389,11 +1384,10 @@ export default function AdminDashboardClient({
           <button
             type="button"
             onClick={() => setActiveTab('rekap')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
-              activeTab === 'rekap'
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'rekap'
                 ? 'bg-teal-700 text-white shadow-md shadow-teal-700/25 ring-2 ring-teal-500/30'
                 : 'text-teal-700 bg-teal-50/70 hover:bg-teal-100/70'
-            }`}
+              }`}
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>
@@ -1436,11 +1430,10 @@ export default function AdminDashboardClient({
                 key={grade}
                 type="button"
                 onClick={() => setFilterGrade(grade as any)}
-                className={`text-xs px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${
-                  filterGrade === grade
+                className={`text-xs px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer shrink-0 ${filterGrade === grade
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                  }`}
               >
                 {grade === 'all' ? 'Semua' : `Kls ${grade}`}
               </button>
@@ -1610,11 +1603,10 @@ export default function AdminDashboardClient({
               {filteredMeetings.map((m) => (
                 <div
                   key={m.id}
-                  className={`bg-white rounded-3xl p-4 sm:p-5 border-2 transition-all relative overflow-hidden ${
-                    m.isOpen
+                  className={`bg-white rounded-3xl p-4 sm:p-5 border-2 transition-all relative overflow-hidden ${m.isOpen
                       ? 'border-emerald-300 bg-gradient-to-br from-white to-emerald-50/30 shadow-md shadow-emerald-500/10'
                       : 'border-slate-200 shadow-xs opacity-95'
-                  }`}
+                    }`}
                 >
                   {/* Top row: Meeting number, Badges, and Action buttons */}
                   <div className="flex items-start justify-between gap-2 mb-2.5">
@@ -1758,11 +1750,10 @@ export default function AdminDashboardClient({
                       type="button"
                       onClick={() => handleToggleMeetingStatus(m.id, m.isOpen)}
                       disabled={isPending}
-                      className={`w-full sm:w-auto text-xs font-bold px-3 py-2 sm:py-1.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shrink-0 ${
-                        m.isOpen
+                      className={`w-full sm:w-auto text-xs font-bold px-3 py-2 sm:py-1.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shrink-0 ${m.isOpen
                           ? 'bg-rose-100 text-rose-800 hover:bg-rose-200'
                           : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                      }`}
+                        }`}
                     >
                       {m.isOpen ? (
                         <>
@@ -2023,8 +2014,8 @@ export default function AdminDashboardClient({
                   gradingState[sub.id]?.score !== undefined
                     ? gradingState[sub.id].score
                     : sub.score !== null
-                    ? sub.score
-                    : '';
+                      ? sub.score
+                      : '';
                 const currentFeedback =
                   gradingState[sub.id]?.feedback !== undefined
                     ? gradingState[sub.id].feedback
@@ -2350,11 +2341,10 @@ export default function AdminDashboardClient({
                   <div className="pt-1.5 mt-1 border-t border-white/10 flex items-center justify-between text-xs">
                     <span className="text-slate-400">Data Lampau (&gt; 7 Hari):</span>
                     <span
-                      className={`px-2 py-0.5 rounded-md font-bold text-xs ${
-                        (rekapData?.staleRecordsCount ?? 0) > 0
+                      className={`px-2 py-0.5 rounded-md font-bold text-xs ${(rekapData?.staleRecordsCount ?? 0) > 0
                           ? 'bg-amber-400/20 text-amber-300'
                           : 'bg-emerald-400/20 text-emerald-300'
-                      }`}
+                        }`}
                     >
                       {rekapData?.staleRecordsCount ?? 0} Presensi
                     </span>
@@ -2375,8 +2365,8 @@ export default function AdminDashboardClient({
                     {isCleaningStale
                       ? 'Sedang Membersihkan...'
                       : (rekapData?.staleRecordsCount ?? 0) > 0
-                      ? `Bersihkan ${rekapData?.staleRecordsCount} Data Lampau (> 7 Hari)`
-                      : 'Data Sudah Bersih (Tidak Ada Data Lampau)'}
+                        ? `Bersihkan ${rekapData?.staleRecordsCount} Data Lampau (> 7 Hari)`
+                        : 'Data Sudah Bersih (Tidak Ada Data Lampau)'}
                   </span>
                 </button>
                 <div className="text-[10px] text-slate-400 text-center mt-2">
@@ -2401,33 +2391,30 @@ export default function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setRekapStatusTab('all')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                    rekapStatusTab === 'all'
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${rekapStatusTab === 'all'
                       ? 'bg-white text-slate-900 shadow-xs font-bold'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Semua ({rekapData?.totalRecords ?? 0})
                 </button>
                 <button
                   type="button"
                   onClick={() => setRekapStatusTab('HADIR')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
-                    rekapStatusTab === 'HADIR'
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${rekapStatusTab === 'HADIR'
                       ? 'bg-emerald-600 text-white shadow-xs font-bold'
                       : 'text-emerald-700 hover:text-emerald-900'
-                  }`}
+                    }`}
                 >
                   <span>✓ Hadir ({rekapData?.totalPresent ?? 0})</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setRekapStatusTab('TIDAK HADIR')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
-                    rekapStatusTab === 'TIDAK HADIR'
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${rekapStatusTab === 'TIDAK HADIR'
                       ? 'bg-rose-600 text-white shadow-xs font-bold'
                       : 'text-rose-700 hover:text-rose-900'
-                  }`}
+                    }`}
                 >
                   <span>✗ Tidak Hadir ({rekapData?.totalAbsent ?? 0})</span>
                 </button>
@@ -2484,9 +2471,8 @@ export default function AdminDashboardClient({
                         return (
                           <tr
                             key={rec.id}
-                            className={`hover:bg-teal-50/40 transition-colors ${
-                              idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'
-                            }`}
+                            className={`hover:bg-teal-50/40 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'
+                              }`}
                           >
                             <td className="py-2.5 px-3.5 text-center font-bold text-slate-400">{idx + 1}</td>
                             <td className="py-2.5 px-3.5 font-bold text-slate-900">{rec.studentName}</td>
@@ -2936,13 +2922,13 @@ export default function AdminDashboardClient({
                 </label>
                 <input
                   type="url"
-                  placeholder="https://drive.google.com/drive/folders/... (Folder pengumpulan karya siswa)"
+                  placeholder="https://drive.google.com/drive/folders/1sgR-9GFibFvMxeGLKfrqVFh8SAVcI9dO?usp=drive_link"
                   value={assignmentForm.gdriveUrl}
                   onChange={(e) => setAssignmentForm({ ...assignmentForm, gdriveUrl: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  Link ini akan langsung dibuka oleh siswa saat menekan tombol &quot;Kumpulkan Tugas (Google Drive)&quot;.
+                  Kosongkan untuk otomatis menggunakan link Google Drive default Pembina, atau masukkan link folder khusus.
                 </span>
               </div>
 
@@ -2989,8 +2975,8 @@ export default function AdminDashboardClient({
                 {deleteModal.type === 'meeting'
                   ? 'Konfirmasi Hapus Sesi'
                   : deleteModal.type === 'material'
-                  ? 'Konfirmasi Hapus Materi'
-                  : 'Konfirmasi Hapus Tugas'}
+                    ? 'Konfirmasi Hapus Materi'
+                    : 'Konfirmasi Hapus Tugas'}
               </span>
             </div>
 
@@ -3475,7 +3461,7 @@ export default function AdminDashboardClient({
                 </label>
                 <input
                   type="url"
-                  placeholder="https://drive.google.com/drive/folders/... (Folder pengumpulan karya siswa)"
+                  placeholder="https://drive.google.com/drive/folders/1sgR-9GFibFvMxeGLKfrqVFh8SAVcI9dO"
                   value={editAssignmentModal.data.gdriveUrl || ''}
                   onChange={(e) =>
                     setEditAssignmentModal({
@@ -3486,7 +3472,7 @@ export default function AdminDashboardClient({
                   className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  Link ini akan langsung dibuka oleh siswa saat menekan tombol &quot;Kumpulkan Tugas (Google Drive)&quot;.
+                  Kosongkan untuk otomatis menggunakan link Google Drive default Pembina, atau masukkan link folder khusus.
                 </span>
               </div>
 
@@ -3722,11 +3708,10 @@ export default function AdminDashboardClient({
                   handleToggleMeetingStatus(projectorModal.meeting!.id, projectorModal.meeting!.isOpen);
                   setProjectorModal({ isOpen: false, meeting: null, copied: false });
                 }}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
-                  projectorModal.meeting.isOpen
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${projectorModal.meeting.isOpen
                     ? 'bg-rose-100 text-rose-800 hover:bg-rose-200'
                     : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                }`}
+                  }`}
               >
                 <Lock className="w-4 h-4" />
                 <span>{projectorModal.meeting.isOpen ? 'Tutup Sesi Ini' : 'Buka Sesi Ini'}</span>

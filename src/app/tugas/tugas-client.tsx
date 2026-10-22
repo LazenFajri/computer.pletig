@@ -20,6 +20,9 @@ interface TugasClientProps {
   currentUser: SessionUser | null;
 }
 
+const DEFAULT_GDRIVE_SUBMISSION_URL =
+  'https://drive.google.com/drive/folders/1sgR-9GFibFvMxeGLKfrqVFh8SAVcI9dO?usp=drive_link';
+
 export default function TugasClient({
   initialAssignments,
   initialSubmissions,
@@ -214,7 +217,7 @@ export default function TugasClient({
                 const gdriveLink =
                   ass.gdriveUrl ||
                   process.env.NEXT_PUBLIC_GDRIVE_SUBMISSION_URL ||
-                  'https://drive.google.com';
+                  DEFAULT_GDRIVE_SUBMISSION_URL;
 
                 return (
                   <div
