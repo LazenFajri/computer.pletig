@@ -274,6 +274,7 @@ export default function AdminDashboardClient({
     dueDate: '',
     maxScore: 100,
     attachmentUrl: '',
+    gdriveUrl: '',
   });
   const [uploadingAssignmentAttachment, setUploadingAssignmentAttachment] = useState(false);
   const [assignmentAttachmentName, setAssignmentAttachmentName] = useState('');
@@ -932,6 +933,7 @@ export default function AdminDashboardClient({
         dueDate: assignmentForm.dueDate,
         maxScore: Number(assignmentForm.maxScore) || 100,
         attachmentUrl: assignmentForm.attachmentUrl || null,
+        gdriveUrl: assignmentForm.gdriveUrl || null,
       });
 
       if (res.success && res.data) {
@@ -967,6 +969,7 @@ export default function AdminDashboardClient({
           dueDate: res.data.due_date,
           maxScore: res.data.max_score,
           attachmentUrl: res.data.attachment_url,
+          gdriveUrl: res.data.gdrive_url,
           createdAt: new Date(),
           submissionCount: 0,
           meeting: parentMeeting
@@ -1001,6 +1004,7 @@ export default function AdminDashboardClient({
           dueDate: '',
           maxScore: 100,
           attachmentUrl: '',
+          gdriveUrl: '',
         });
         setAssignmentAttachmentName('');
 
@@ -1029,6 +1033,7 @@ export default function AdminDashboardClient({
         dueDate: target.dueDate || '',
         maxScore: Number(target.maxScore) || 100,
         attachmentUrl: target.attachmentUrl || null,
+        gdriveUrl: target.gdriveUrl || null,
       });
 
       if (res.success && res.data) {
@@ -1045,6 +1050,7 @@ export default function AdminDashboardClient({
                   dueDate: target.dueDate,
                   maxScore: target.maxScore,
                   attachmentUrl: target.attachmentUrl,
+                  gdriveUrl: target.gdriveUrl,
                   meeting: parentMeeting
                     ? {
                         id: parentMeeting.id,
@@ -1916,6 +1922,20 @@ export default function AdminDashboardClient({
                         >
                           <FileDown className="w-3.5 h-3.5 text-amber-700" />
                           <span>Lembar Kerja / Panduan Tugas Terlampir</span>
+                        </a>
+                      </div>
+                    )}
+
+                    {ass.gdriveUrl && (
+                      <div className="mb-3">
+                        <a
+                          href={ass.gdriveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2.5 py-1.5 rounded-xl transition-colors font-bold shadow-xs"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>Folder Google Drive Pengumpulan ↗</span>
                         </a>
                       </div>
                     )}
@@ -2910,6 +2930,22 @@ export default function AdminDashboardClient({
                 </span>
               </div>
 
+              <div>
+                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                  Link Google Drive Pengumpulan Tugas (Opsional)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://drive.google.com/drive/folders/... (Folder pengumpulan karya siswa)"
+                  value={assignmentForm.gdriveUrl}
+                  onChange={(e) => setAssignmentForm({ ...assignmentForm, gdriveUrl: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  Link ini akan langsung dibuka oleh siswa saat menekan tombol &quot;Kumpulkan Tugas (Google Drive)&quot;.
+                </span>
+              </div>
+
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
                 <button
                   type="button"
@@ -3430,6 +3466,27 @@ export default function AdminDashboardClient({
                 )}
                 <span className="text-[10px] text-slate-400 mt-1 block">
                   File ini dapat diunduh oleh siswa sebagai lembar materi kerja/latihan praktikum.
+                </span>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                  Link Google Drive Pengumpulan Tugas (Opsional)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://drive.google.com/drive/folders/... (Folder pengumpulan karya siswa)"
+                  value={editAssignmentModal.data.gdriveUrl || ''}
+                  onChange={(e) =>
+                    setEditAssignmentModal({
+                      ...editAssignmentModal,
+                      data: { ...editAssignmentModal.data!, gdriveUrl: e.target.value },
+                    })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  Link ini akan langsung dibuka oleh siswa saat menekan tombol &quot;Kumpulkan Tugas (Google Drive)&quot;.
                 </span>
               </div>
 

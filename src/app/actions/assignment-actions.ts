@@ -16,6 +16,7 @@ export interface CreateAssignmentParams {
   dueDate?: string; // YYYY-MM-DD
   maxScore?: number;
   attachmentUrl?: string | null;
+  gdriveUrl?: string | null;
 }
 
 export interface SubmitAssignmentParams {
@@ -40,6 +41,7 @@ export interface AssignmentWithDetails {
   dueDate: string | null;
   maxScore: number;
   attachmentUrl: string | null;
+  gdriveUrl: string | null;
   createdAt: Date;
   submissionCount: number;
   meeting: {
@@ -99,6 +101,7 @@ export async function getAssignmentsAction(
         dueDate: ass.due_date,
         maxScore: ass.max_score,
         attachmentUrl: ass.attachment_url || null,
+        gdriveUrl: ass.gdrive_url || null,
         createdAt: ass.created_at,
         submissionCount: subCount,
         meeting: ass.meeting
@@ -131,12 +134,15 @@ export async function createAssignmentAction(
       return { success: false, error: 'Hanya Pembina (Superadmin) yang dapat membuat tugas.' };
     }
 
-    const { meetingId, gradeLevel, title, instructions = '', dueDate, maxScore = 100, attachmentUrl } = params;
+    const { meetingId, gradeLevel, title, instructions = '', dueDate, maxScore = 100, attachmentUrl, gdriveUrl } = params;
 
     const cleanTitle = sanitizeText(title.trim(), 120);
     const cleanInstructions = sanitizeText(instructions.trim(), 5000);
     const cleanAttachmentUrl = attachmentUrl && attachmentUrl.trim()
       ? (sanitizeUrl(attachmentUrl) || sanitizeText(attachmentUrl.trim(), 500))
+      : null;
+    const cleanGdriveUrl = gdriveUrl && gdriveUrl.trim()
+      ? (sanitizeUrl(gdriveUrl) || sanitizeText(gdriveUrl.trim(), 500))
       : null;
 
     if (!cleanTitle) {
@@ -197,6 +203,7 @@ export async function createAssignmentAction(
         due_date: dueDate?.trim() || null,
         max_score: maxScore || 100,
         attachment_url: cleanAttachmentUrl || null,
+        gdrive_url: cleanGdriveUrl || null,
         is_group_work: false,
       })
       .returning();
@@ -232,6 +239,7 @@ export interface UpdateAssignmentParams {
   dueDate?: string;
   maxScore?: number;
   attachmentUrl?: string | null;
+  gdriveUrl?: string | null;
 }
 
 /**
@@ -251,7 +259,7 @@ export async function updateAssignmentAction(
       return { success: false, error: 'Hanya Pembina yang berhak mengubah tugas.' };
     }
 
-    const { assignmentId, meetingId, title, instructions = '', dueDate, maxScore = 100, attachmentUrl } = params;
+    const { assignmentId, meetingId, title, instructions = '', dueDate, maxScore = 100, attachmentUrl, gdriveUrl } = params;
 
     const cleanTitle = sanitizeText(title.trim(), 120);
     const cleanInstructions = sanitizeText(instructions.trim(), 5000);
@@ -259,6 +267,12 @@ export async function updateAssignmentAction(
       attachmentUrl !== undefined
         ? attachmentUrl && attachmentUrl.trim()
           ? sanitizeUrl(attachmentUrl) || sanitizeText(attachmentUrl.trim(), 500)
+          : null
+        : undefined;
+    const cleanGdriveUrl =
+      gdriveUrl !== undefined
+        ? gdriveUrl && gdriveUrl.trim()
+          ? sanitizeUrl(gdriveUrl) || sanitizeText(gdriveUrl.trim(), 500)
           : null
         : undefined;
 
@@ -291,6 +305,7 @@ export async function updateAssignmentAction(
         due_date: dueDate?.trim() || null,
         max_score: maxScore || 100,
         ...(cleanAttachmentUrl !== undefined ? { attachment_url: cleanAttachmentUrl || null } : {}),
+        ...(cleanGdriveUrl !== undefined ? { gdrive_url: cleanGdriveUrl || null } : {}),
       })
       .where(eq(assignments.id, assignmentId))
       .returning();

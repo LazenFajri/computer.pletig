@@ -1,39 +1,18 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect } from 'react';
 import type { AssignmentWithDetails, SubmissionWithDetails } from '@/app/actions/assignment-actions';
-import { submitAssignmentAction } from '@/app/actions/assignment-actions';
-import { getStudentsByGradeAction } from '@/app/actions/attendance-actions';
 import type { GradeLevel, SessionUser } from '@/lib/auth-types';
-import { playSuccessChime } from '@/components/audio-feedback';
-import ConfettiCelebration from '@/components/confetti';
 import {
   FileText,
-  Upload,
   Calendar,
-  CheckCircle2,
   Clock,
   ExternalLink,
   GraduationCap,
   Award,
-  Users,
-  Search,
-  AlertCircle,
-  Send,
-  Check,
   FileDown,
-  Loader2,
-  Link as LinkIcon,
+  CheckCircle2,
 } from 'lucide-react';
-
-interface StudentItem {
-  id: string;
-  name: string;
-  username: string;
-  class_name: string | null;
-  grade_level: number | null;
-  avatar_url: string | null;
-}
 
 interface TugasClientProps {
   initialAssignments: AssignmentWithDetails[];
@@ -48,14 +27,13 @@ export default function TugasClient({
 }: TugasClientProps) {
   const [selectedGrade, setSelectedGrade] = useState<GradeLevel | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'assignments' | 'results'>('assignments');
-  const [isPending, startTransition] = useTransition();
 
-  // Extract all meeting numbers from assignments
+  // Ambil daftar nomor pertemuan unik yang tersedia
   const availableMeetingNumbers = Array.from(
     new Set(
       initialAssignments
         .map((a) => a.meeting?.meetingNumber ?? (a as any).meeting_number)
-        .filter((n): n is number => typeof n === 'number' && n > 0)
+        .filter((n): n is number => typeof n === 'number' && !isNaN(n))
     )
   ).sort((a, b) => a - b);
 
@@ -67,24 +45,6 @@ export default function TugasClient({
     }
     return 1;
   });
-
-  // Submission Form Modal
-  const [selectedAssignment, setSelectedAssignment] = useState<AssignmentWithDetails | null>(null);
-  const [formGrade, setFormGrade] = useState<GradeLevel>(4);
-  const [studentName, setStudentName] = useState('');
-  const [submissionUrl, setSubmissionUrl] = useState('');
-  const [submissionText, setSubmissionText] = useState('');
-  const [submissionMode, setSubmissionMode] = useState<'file' | 'link'>('file');
-  const [uploadingStudentFile, setUploadingStudentFile] = useState(false);
-  const [studentUploadedFileName, setStudentUploadedFileName] = useState('');
-
-  // Auto-suggest students for chosen grade
-  const [studentsList, setStudentsList] = useState<StudentItem[]>([]);
-  const [searchStudent, setSearchStudent] = useState('');
-
-  // Status & feedback
-  const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
 
   // Submissions state
   const [submissionsList, setSubmissionsList] = useState<SubmissionWithDetails[]>(initialSubmissions);
@@ -110,142 +70,6 @@ export default function TugasClient({
     return () => window.removeEventListener('app:pull-to-refresh', handlePull);
   }, []);
 
-  // Load students when form grade changes
-  useEffect(() => {
-    let isMounted = true;
-    getStudentsByGradeAction(formGrade).then((students) => {
-      if (isMounted) {
-        setStudentsList(students as StudentItem[]);
-      }
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, [formGrade]);
-
-  const handleOpenSubmitModal = (assignment: AssignmentWithDetails) => {
-    setSelectedAssignment(assignment);
-    const defaultG = assignment.meeting?.gradeLevel
-      ? (assignment.meeting.gradeLevel as GradeLevel)
-      : (4 as GradeLevel);
-    setFormGrade(defaultG);
-    setStudentName('');
-    setSearchStudent('');
-    setSubmissionUrl('');
-    setSubmissionText('');
-    setSubmissionMode('file');
-    setUploadingStudentFile(false);
-    setStudentUploadedFileName('');
-    setStatusMsg(null);
-  };
-
-  const handleSelectStudentChip = (name: string) => {
-    setStudentName(name);
-    setSearchStudent(name);
-  };
-
-  const filteredStudents = studentsList.filter((s) =>
-    s.name.toLowerCase().includes(searchStudent.toLowerCase())
-  );
-
-  const handleStudentFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Ukuran file terlalu besar! Maksimal 15MB.');
-      return;
-    }
-
-    setUploadingStudentFile(true);
-    setStatusMsg(null);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Gagal mengunggah file.');
-      }
-      const fileUrl = data.fileUrl || data.url || data.publicUrl || '';
-      const originalName = data.originalName || data.fileName || file.name;
-      setSubmissionUrl(fileUrl);
-      setStudentUploadedFileName(originalName);
-    } catch (err: any) {
-      alert(err.message || 'Gagal mengunggah file tugas.');
-    } finally {
-      setUploadingStudentFile(false);
-    }
-  };
-
-  const handleSubmitTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    const finalName = studentName.trim() || searchStudent.trim();
-
-    if (!finalName || finalName.length < 2) {
-      setStatusMsg({ type: 'error', text: 'Silakan pilih atau ketik nama lengkap kamu ya.' });
-      return;
-    }
-
-    if (!submissionUrl.trim() && !submissionText.trim()) {
-      setStatusMsg({
-        type: 'error',
-        text: submissionMode === 'file'
-          ? 'Silakan pilih dan upload file tugas kamu terlebih dahulu.'
-          : 'Silakan isi tautan/link tugas (Google Drive / Canva / Scratch).',
-      });
-      return;
-    }
-
-    if (!selectedAssignment) return;
-
-    startTransition(async () => {
-      const res = await submitAssignmentAction({
-        assignmentId: selectedAssignment.id,
-        studentName: finalName,
-        gradeLevel: formGrade,
-        submissionUrl,
-        submissionText,
-      });
-
-      if (res.success && res.data) {
-        playSuccessChime();
-        setShowConfetti(true);
-        setStatusMsg({
-          type: 'success',
-          text: res.message || 'Tugas berhasil dikirim! Hebat sekali!',
-        });
-
-        // Add to local submissions list
-        const newSub: SubmissionWithDetails = {
-          id: res.data.id,
-          assignmentId: res.data.assignment_id,
-          studentName: res.data.student_name,
-          gradeLevel: res.data.grade_level,
-          submissionUrl: res.data.submission_url,
-          submissionText: res.data.submission_text,
-          submittedAt: new Date(),
-          status: 'submitted',
-          score: null,
-          feedback: null,
-          gradedAt: null,
-          assignmentTitle: selectedAssignment.title,
-        };
-
-        setSubmissionsList([newSub, ...submissionsList]);
-
-        setTimeout(() => {
-          setSelectedAssignment(null);
-        }, 1800);
-      } else {
-        setStatusMsg({ type: 'error', text: res.error || 'Gagal mengirim tugas.' });
-      }
-    });
-  };
-
   const filteredAssignments = initialAssignments.filter((ass) => {
     if (selectedGrade !== 'all') {
       if (ass.meeting && ass.meeting.gradeLevel !== null && ass.meeting.gradeLevel !== selectedGrade) {
@@ -263,12 +87,14 @@ export default function TugasClient({
 
   const filteredSubmissions = submissionsList.filter((sub) => {
     if (selectedGrade !== 'all') {
-      if (sub.gradeLevel !== selectedGrade) return false;
+      if (sub.gradeLevel !== null && sub.gradeLevel !== selectedGrade) {
+        return false;
+      }
     }
     if (filterMeetingNumber !== 'all') {
-      const parentAss = initialAssignments.find((a) => a.id === sub.assignmentId);
-      const meetingNum = parentAss?.meeting?.meetingNumber ?? (parentAss as any)?.meeting_number;
-      if (meetingNum !== undefined && meetingNum !== filterMeetingNumber) {
+      const targetAss = initialAssignments.find((a) => a.id === sub.assignmentId);
+      const assMeetingNum = targetAss?.meeting?.meetingNumber ?? (targetAss as any)?.meeting_number;
+      if (assMeetingNum !== undefined && assMeetingNum !== filterMeetingNumber) {
         return false;
       }
     }
@@ -277,8 +103,6 @@ export default function TugasClient({
 
   return (
     <div className="space-y-6">
-      <ConfettiCelebration active={showConfetti} onFinish={() => setShowConfetti(false)} />
-
       {/* Navigation Filter Bar */}
       <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4">
         {/* Tab Selection */}
@@ -386,68 +210,85 @@ export default function TugasClient({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredAssignments.map((ass) => (
-                <div
-                  key={ass.id}
-                  className="bg-white rounded-3xl p-6 border-2 border-slate-100 hover:border-amber-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800">
-                        {ass.meeting ? `Pertemuan ${ass.meeting.meetingNumber}` : 'Tugas Praktik'}
-                      </span>
-                      <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-amber-600" />
-                        Batas: {ass.dueDate || 'Hari ini'}
-                      </span>
+              {filteredAssignments.map((ass) => {
+                const gdriveLink =
+                  ass.gdriveUrl ||
+                  process.env.NEXT_PUBLIC_GDRIVE_SUBMISSION_URL ||
+                  'https://drive.google.com';
+
+                return (
+                  <div
+                    key={ass.id}
+                    className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800">
+                          {ass.meeting ? `Pertemuan ${ass.meeting.meetingNumber}` : 'Tugas Praktik'}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-amber-600" />
+                          Batas: {ass.dueDate || 'Hari ini'}
+                        </span>
+                      </div>
+
+                      <h3 className="font-heading font-bold text-slate-900 text-lg mb-2 group-hover:text-amber-700 transition-colors">
+                        {ass.title}
+                      </h3>
+
+                      {ass.instructions && (
+                        <div className="bg-amber-50/60 p-3.5 rounded-2xl text-xs text-amber-950 leading-relaxed mb-4 border border-amber-100">
+                          <div className="font-bold text-amber-900 mb-1 flex items-center gap-1">
+                            <FileText className="w-3.5 h-3.5 text-amber-600" />
+                            Petunjuk Pengerjaan:
+                          </div>
+                          {ass.instructions}
+                        </div>
+                      )}
+
+                      {ass.attachmentUrl && (
+                        <div className="mb-4">
+                          <a
+                            href={ass.attachmentUrl}
+                            target="_blank"
+                            download
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-100/90 hover:bg-amber-200 border border-amber-300/80 px-3.5 py-2 rounded-2xl transition-all shadow-xs"
+                          >
+                            <FileDown className="w-4 h-4 text-amber-700" />
+                            <span>Unduh Lembar Kerja / Panduan Tugas</span>
+                          </a>
+                        </div>
+                      )}
                     </div>
 
-                    <h3 className="font-heading font-bold text-slate-900 text-lg mb-2 group-hover:text-amber-700 transition-colors">
-                      {ass.title}
-                    </h3>
+                    {/* Section di bawah border unduh lembar kerja / panduan tugas */}
+                    <div className="pt-3.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <span className="text-xs text-slate-500 font-medium">
+                        Nilai Maksimal: <span className="font-bold text-slate-800">{ass.maxScore}</span>
+                      </span>
 
-                    {ass.instructions && (
-                      <div className="bg-amber-50/60 p-3.5 rounded-2xl text-xs text-amber-950 leading-relaxed mb-4 border border-amber-100">
-                        <div className="font-bold text-amber-900 mb-1 flex items-center gap-1">
-                          <FileText className="w-3.5 h-3.5 text-amber-600" />
-                          Petunjuk Pengerjaan:
-                        </div>
-                        {ass.instructions}
-                      </div>
-                    )}
-
-                    {ass.attachmentUrl && (
-                      <div className="mb-4">
-                        <a
-                          href={ass.attachmentUrl}
-                          target="_blank"
-                          download
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 bg-amber-100/90 hover:bg-amber-200 border border-amber-300/80 px-3.5 py-2 rounded-2xl transition-all shadow-xs"
-                        >
-                          <FileDown className="w-4 h-4 text-amber-700" />
-                          <span>Unduh Lembar Kerja / Panduan Tugas</span>
-                        </a>
-                      </div>
-                    )}
+                      <a
+                        href={gdriveLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-blue-600 via-emerald-600 to-amber-600 hover:from-blue-700 hover:via-emerald-700 hover:to-amber-700 text-white text-xs font-heading font-bold px-4 py-2.5 rounded-2xl shadow-md shadow-emerald-600/20 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                        title="Buka Google Drive untuk mengumpulkan hasil tugas praktik"
+                      >
+                        <svg className="w-4 h-4 shrink-0 drop-shadow-xs" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5l5.4 9.35z" fill="#0066DA"/>
+                          <path d="M43.65 25L29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44C.4 50 0 51.55 0 53.1h27.5L43.65 25z" fill="#00AC47"/>
+                          <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 10.15 7.9 13.65z" fill="#EA4335"/>
+                          <path d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.85 0H34.45c-1.65 0-3.2.4-4.55 1.2L43.65 25z" fill="#00832D"/>
+                          <path d="M59.8 53.1H27.5l-13.75 23.8c1.35.8 2.9 1.2 4.55 1.2h50.6c1.65 0 3.2-.4 4.55-1.2L59.8 53.1z" fill="#2684FC"/>
+                          <path d="M73.4 26.5l-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25l16.15 28.1h27.5c0-1.55-.4-3.1-1.2-4.5l-12.7-22.1z" fill="#FFBA00"/>
+                        </svg>
+                        <span>Kumpulkan Tugas (Google Drive) ↗</span>
+                      </a>
+                    </div>
                   </div>
-
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs text-slate-500 font-medium">
-                      Nilai Maksimal: <span className="font-bold text-slate-800">{ass.maxScore}</span>
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => handleOpenSubmitModal(ass)}
-                      className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-heading font-bold px-4 py-2.5 rounded-2xl shadow-md shadow-amber-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>Kirim Tugas Saya</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </>
@@ -464,7 +305,7 @@ export default function TugasClient({
               <p className="font-semibold text-slate-700 text-base">
                 Belum ada tugas yang dikumpulkan untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {selectedGrade !== 'all' ? `Kelas ${selectedGrade} SD` : ''}.
               </p>
-              <p className="text-xs text-slate-400 mt-1">Selesaikan tugas praktikum dan tekan tombol &quot;Kirim Tugas Saya&quot;.</p>
+              <p className="text-xs text-slate-400 mt-1">Selesaikan tugas praktikum dan kumpulkan ke Google Drive pembina.</p>
               {filterMeetingNumber !== 'all' && (
                 <button
                   type="button"
@@ -540,268 +381,6 @@ export default function TugasClient({
               </div>
             ))
           )}
-        </div>
-      )}
-
-      {/* ==========================================
-          MODAL FORMULIR PENGUMPULAN TUGAS SISWA
-          ========================================== */}
-      {selectedAssignment && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            {/* Header Modal */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-sm">
-                  <Upload className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
-                    Kirim Tugas Siswa
-                  </span>
-                  <h3 className="font-heading font-bold text-base text-slate-900 mt-0.5">
-                    {selectedAssignment.title}
-                  </h3>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedAssignment(null)}
-                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Notification message */}
-            {statusMsg && (
-              <div
-                className={`p-3.5 rounded-2xl text-xs font-semibold mb-4 flex items-center gap-2 ${
-                  statusMsg.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
-                    : 'bg-rose-50 text-rose-900 border border-rose-200'
-                }`}
-              >
-                {statusMsg.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                )}
-                <span>{statusMsg.text}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmitTask} className="space-y-4">
-              {/* Step 1: Pilih Kelas */}
-              <div>
-                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
-                  <GraduationCap className="w-4 h-4 text-amber-600" />
-                  1. Pilih Kelas Kamu
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[4, 5, 6].map((grade) => (
-                    <button
-                      key={grade}
-                      type="button"
-                      onClick={() => {
-                        setFormGrade(grade as GradeLevel);
-                        setStudentName('');
-                        setSearchStudent('');
-                      }}
-                      className={`py-2 rounded-2xl text-xs font-heading font-bold border-2 transition-all cursor-pointer ${
-                        formGrade === grade
-                          ? 'border-amber-500 bg-amber-50 text-amber-900 shadow-xs'
-                          : 'border-slate-200 hover:bg-slate-50 text-slate-600'
-                      }`}
-                    >
-                      Kelas {grade} SD
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Step 2: Pilih / Ketik Nama Siswa */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-amber-600" />
-                    2. Pilih atau Ketik Namamu
-                  </label>
-                  {studentName && (
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Check className="w-3 h-3" />
-                      Terpilih
-                    </span>
-                  )}
-                </div>
-
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ketik namamu di sini (misal: Aditia / Fathan)..."
-                    value={searchStudent}
-                    onChange={(e) => {
-                      setSearchStudent(e.target.value);
-                      setStudentName(e.target.value);
-                    }}
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
-                  />
-                </div>
-
-                {/* Auto-suggest Chips */}
-                {searchStudent.length > 0 && filteredStudents.length > 0 && (
-                  <div className="mt-2 max-h-36 overflow-y-auto p-1.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-wrap gap-1.5">
-                    {filteredStudents.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => handleSelectStudentChip(s.name)}
-                        className={`text-xs px-2.5 py-1 rounded-xl transition-all font-medium cursor-pointer ${
-                          studentName.toLowerCase() === s.name.toLowerCase()
-                            ? 'bg-amber-500 text-white font-bold shadow-xs'
-                            : 'bg-white hover:bg-amber-100 text-slate-700 border border-slate-200'
-                        }`}
-                      >
-                        {s.name} ({s.class_name || `${formGrade}A`})
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Step 3: Pilih File Tugas atau Link Online */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
-                    3. Hasil Kerja Siswa *
-                  </label>
-                  <div className="flex bg-slate-100 p-0.5 rounded-xl text-[11px] font-bold">
-                    <button
-                      type="button"
-                      onClick={() => setSubmissionMode('file')}
-                      className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                        submissionMode === 'file'
-                          ? 'bg-amber-600 text-white shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      📁 Upload File
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSubmissionMode('link')}
-                      className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                        submissionMode === 'link'
-                          ? 'bg-amber-600 text-white shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      🔗 Link Online
-                    </button>
-                  </div>
-                </div>
-
-                {submissionMode === 'file' ? (
-                  <div className="border-2 border-dashed border-amber-300 bg-amber-50/50 hover:bg-amber-50 rounded-2xl p-4 text-center transition-all">
-                    {uploadingStudentFile ? (
-                      <div className="py-4 flex flex-col items-center justify-center text-amber-700">
-                        <Loader2 className="w-8 h-8 animate-spin text-amber-600 mb-2" />
-                        <span className="text-xs font-bold">Mengupload file tugas...</span>
-                        <span className="text-[10px] text-amber-600/70">Mohon tunggu sebentar</span>
-                      </div>
-                    ) : submissionUrl && submissionUrl.startsWith('/api/files/') ? (
-                      <div className="py-2 flex flex-col items-center justify-center">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2">
-                          <CheckCircle2 className="w-6 h-6" />
-                        </div>
-                        <span className="text-xs font-bold text-slate-800 mb-0.5 max-w-[280px] truncate">
-                          {studentUploadedFileName || 'File berhasil diunggah'}
-                        </span>
-                        <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold border border-emerald-200">
-                          File siap dikirimkan
-                        </span>
-                        <label className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-700 font-bold hover:underline cursor-pointer">
-                          <span>Ganti File Lain</span>
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.sb3,.xlsx,.pptx"
-                            onChange={handleStudentFileUpload}
-                          />
-                        </label>
-                      </div>
-                    ) : (
-                      <label className="cursor-pointer flex flex-col items-center justify-center py-3">
-                        <Upload className="w-8 h-8 text-amber-600 mb-2 animate-bounce" />
-                        <span className="text-xs font-bold text-slate-800">
-                          Klik untuk Memilih File Tugas
-                        </span>
-                        <span className="text-[10px] text-slate-500 mt-1 max-w-xs">
-                          Word (.docx), PDF, Gambar (.png/.jpg), Scratch (.sb3), Excel (.xlsx) maks 15MB
-                        </span>
-                        <input
-                          type="file"
-                          className="hidden"
-                          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.sb3,.xlsx,.pptx"
-                          onChange={handleStudentFileUpload}
-                        />
-                      </label>
-                    )}
-                  </div>
-                ) : (
-                  <div>
-                    <input
-                      type="url"
-                      placeholder="https://drive.google.com/... atau https://scratch.mit.edu/..."
-                      value={submissionUrl}
-                      onChange={(e) => setSubmissionUrl(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
-                    />
-                    <span className="text-[10px] text-slate-400 mt-1 block">
-                      Pastikan link Google Drive atau Canva disetel &quot;Siapa saja yang memiliki link dapat melihat&quot;.
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Step 4: Catatan / Teks Tambahan */}
-              <div>
-                <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block mb-1.5">
-                  4. Catatan Tugas / Cerita Singkat (Opsional)
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="Contoh: Saya sudah mengetik 5 kalimat di Word dan menambahkan gambar pemandangan..."
-                  value={submissionText}
-                  onChange={(e) => setSubmissionText(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setSelectedAssignment(null)}
-                  className="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-heading font-bold px-6 py-2.5 rounded-2xl shadow-md shadow-amber-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>{isPending ? 'Mengirim...' : 'Kirim Tugas Saya'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
     </div>

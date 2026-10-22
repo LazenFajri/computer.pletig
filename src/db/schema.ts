@@ -181,6 +181,7 @@ export const assignments = sqliteTable('assignments', {
   due_date: text('due_date'), // YYYY-MM-DD
   max_score: integer('max_score').notNull().default(100),
   attachment_url: text('attachment_url'), // File materi / panduan tugas dari pembina
+  gdrive_url: text('gdrive_url'), // Link Google Drive pengumpulan tugas siswa
   is_group_work: integer('is_group_work', { mode: 'boolean' })
     .notNull()
     .default(false),
