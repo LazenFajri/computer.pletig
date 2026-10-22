@@ -322,3 +322,20 @@ export type NewAssignment = typeof assignments.$inferInsert;
 
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
+
+// ==========================================
+// 9. UPLOADED FILES (Penyimpanan Berkas Digital Persistent)
+// ==========================================
+export const uploadedFiles = sqliteTable('uploaded_files', {
+  id: text('id').primaryKey(),
+  original_name: text('original_name').notNull(),
+  mime_type: text('mime_type').notNull(),
+  file_size: integer('file_size').notNull(),
+  file_data: text('file_data').notNull(), // Base64 encoded string
+  created_at: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export type UploadedFile = typeof uploadedFiles.$inferSelect;
+export type NewUploadedFile = typeof uploadedFiles.$inferInsert;

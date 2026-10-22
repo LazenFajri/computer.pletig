@@ -293,7 +293,9 @@ export default function AdminDashboardClient({
     if (!res.ok) {
       throw new Error(data.error || 'Gagal mengunggah file.');
     }
-    return { fileUrl: data.fileUrl, originalName: data.originalName || file.name };
+    const fileUrl = data.fileUrl || data.url || data.publicUrl || '';
+    const originalName = data.originalName || data.fileName || file.name;
+    return { fileUrl, originalName };
   };
 
   // Feedback & Message notifications
@@ -333,6 +335,7 @@ export default function AdminDashboardClient({
   }>({ isOpen: false, data: null });
   const [uploadingEditMaterialFile, setUploadingEditMaterialFile] = useState(false);
   const [uploadingEditAssignmentAttachment, setUploadingEditAssignmentAttachment] = useState(false);
+  const [editAssignmentAttachmentName, setEditAssignmentAttachmentName] = useState('');
 
   // Modal Daftar Hadir Siswa per Sesi
   const [attendanceListModal, setAttendanceListModal] = useState<{
@@ -1865,7 +1868,14 @@ export default function AdminDashboardClient({
                       <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                         <button
                           type="button"
-                          onClick={() => setEditAssignmentModal({ isOpen: true, data: { ...ass } })}
+                          onClick={() => {
+                            setEditAssignmentAttachmentName(
+                              ass.attachmentUrl
+                                ? ass.attachmentUrl.split('/').pop()?.replace(/^\d+_/, '') || 'File lembar kerja terlampir'
+                                : ''
+                            );
+                            setEditAssignmentModal({ isOpen: true, data: { ...ass } });
+                          }}
                           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold transition-all border border-amber-200/80 shadow-xs cursor-pointer shrink-0"
                           title="Edit Tugas Ini"
                         >
@@ -2839,15 +2849,16 @@ export default function AdminDashboardClient({
                         <input
                           type="file"
                           className="hidden"
-                          accept=".pdf,.doc,.docx,.xlsx,.pptx,.sb3,.zip"
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.sb3,.zip,.rar,.7z,.png,.jpg,.jpeg"
                           onChange={async (e) => {
                             const f = e.target.files?.[0];
                             if (!f) return;
                             setUploadingAssignmentAttachment(true);
                             try {
                               const uploaded = await uploadFileToServer(f);
-                              setAssignmentForm({ ...assignmentForm, attachmentUrl: uploaded.fileUrl });
+                              setAssignmentForm((prev) => ({ ...prev, attachmentUrl: uploaded.fileUrl }));
                               setAssignmentAttachmentName(uploaded.originalName);
+                              showNotification('success', `File "${uploaded.originalName}" berhasil dilampirkan.`);
                             } catch (err: any) {
                               showNotification('error', err.message);
                             } finally {
@@ -2859,7 +2870,7 @@ export default function AdminDashboardClient({
                       <button
                         type="button"
                         onClick={() => {
-                          setAssignmentForm({ ...assignmentForm, attachmentUrl: '' });
+                          setAssignmentForm((prev) => ({ ...prev, attachmentUrl: '' }));
                           setAssignmentAttachmentName('');
                         }}
                         className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
@@ -2875,15 +2886,16 @@ export default function AdminDashboardClient({
                     <input
                       type="file"
                       className="hidden"
-                      accept=".pdf,.doc,.docx,.xlsx,.pptx,.sb3,.zip"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.sb3,.zip,.rar,.7z,.png,.jpg,.jpeg"
                       onChange={async (e) => {
                         const f = e.target.files?.[0];
                         if (!f) return;
                         setUploadingAssignmentAttachment(true);
                         try {
                           const uploaded = await uploadFileToServer(f);
-                          setAssignmentForm({ ...assignmentForm, attachmentUrl: uploaded.fileUrl });
+                          setAssignmentForm((prev) => ({ ...prev, attachmentUrl: uploaded.fileUrl }));
                           setAssignmentAttachmentName(uploaded.originalName);
+                          showNotification('success', `File "${uploaded.originalName}" berhasil dilampirkan.`);
                         } catch (err: any) {
                           showNotification('error', err.message);
                         } finally {
@@ -3342,7 +3354,7 @@ export default function AdminDashboardClient({
                     <div className="flex items-center gap-1.5 min-w-0">
                       <FileDown className="w-4 h-4 text-amber-700 shrink-0" />
                       <span className="text-xs font-bold text-amber-950 truncate max-w-[200px]">
-                        File panduan terlampir
+                        {editAssignmentAttachmentName || 'File panduan terlampir'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -3351,17 +3363,19 @@ export default function AdminDashboardClient({
                         <input
                           type="file"
                           className="hidden"
-                          accept=".pdf,.doc,.docx,.xlsx,.pptx,.sb3,.zip"
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.sb3,.zip,.rar,.7z,.png,.jpg,.jpeg"
                           onChange={async (e) => {
                             const f = e.target.files?.[0];
                             if (!f) return;
                             setUploadingEditAssignmentAttachment(true);
                             try {
                               const uploaded = await uploadFileToServer(f);
-                              setEditAssignmentModal({
-                                ...editAssignmentModal,
-                                data: { ...editAssignmentModal.data!, attachmentUrl: uploaded.fileUrl },
-                              });
+                              setEditAssignmentModal((prev) => ({
+                                ...prev,
+                                data: { ...prev.data!, attachmentUrl: uploaded.fileUrl },
+                              }));
+                              setEditAssignmentAttachmentName(uploaded.originalName);
+                              showNotification('success', `File "${uploaded.originalName}" berhasil dilampirkan.`);
                             } catch (err: any) {
                               showNotification('error', err.message);
                             } finally {
@@ -3372,12 +3386,13 @@ export default function AdminDashboardClient({
                       </label>
                       <button
                         type="button"
-                        onClick={() =>
-                          setEditAssignmentModal({
-                            ...editAssignmentModal,
-                            data: { ...editAssignmentModal.data!, attachmentUrl: null },
-                          })
-                        }
+                        onClick={() => {
+                          setEditAssignmentModal((prev) => ({
+                            ...prev,
+                            data: { ...prev.data!, attachmentUrl: null },
+                          }));
+                          setEditAssignmentAttachmentName('');
+                        }}
                         className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
                       >
                         Hapus
@@ -3391,17 +3406,19 @@ export default function AdminDashboardClient({
                     <input
                       type="file"
                       className="hidden"
-                      accept=".pdf,.doc,.docx,.xlsx,.pptx,.sb3,.zip"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.sb3,.zip,.rar,.7z,.png,.jpg,.jpeg"
                       onChange={async (e) => {
                         const f = e.target.files?.[0];
                         if (!f) return;
                         setUploadingEditAssignmentAttachment(true);
                         try {
                           const uploaded = await uploadFileToServer(f);
-                          setEditAssignmentModal({
-                            ...editAssignmentModal,
-                            data: { ...editAssignmentModal.data!, attachmentUrl: uploaded.fileUrl },
-                          });
+                          setEditAssignmentModal((prev) => ({
+                            ...prev,
+                            data: { ...prev.data!, attachmentUrl: uploaded.fileUrl },
+                          }));
+                          setEditAssignmentAttachmentName(uploaded.originalName);
+                          showNotification('success', `File "${uploaded.originalName}" berhasil dilampirkan.`);
                         } catch (err: any) {
                           showNotification('error', err.message);
                         } finally {

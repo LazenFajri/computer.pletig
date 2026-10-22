@@ -351,6 +351,14 @@ export function sanitizeUrl(input: string): string | null {
   if (!input) return null;
   const trimmed = input.trim();
 
+  // Izinkan path internal aplikasi (contoh: /api/files/... atau /uploads/...)
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.includes('\\')) {
+    // Pastikan tidak mengandung tag atau karakter berbahaya
+    if (!/[<>"'`]/.test(trimmed)) {
+      return trimmed;
+    }
+  }
+
   try {
     const parsed = new URL(trimmed);
     if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
@@ -361,3 +369,4 @@ export function sanitizeUrl(input: string): string | null {
     return null;
   }
 }
+

@@ -170,8 +170,10 @@ export default function TugasClient({
       if (!res.ok) {
         throw new Error(data.error || 'Gagal mengunggah file.');
       }
-      setSubmissionUrl(data.fileUrl);
-      setStudentUploadedFileName(data.originalName || file.name);
+      const fileUrl = data.fileUrl || data.url || data.publicUrl || '';
+      const originalName = data.originalName || data.fileName || file.name;
+      setSubmissionUrl(fileUrl);
+      setStudentUploadedFileName(originalName);
     } catch (err: any) {
       alert(err.message || 'Gagal mengunggah file tugas.');
     } finally {
