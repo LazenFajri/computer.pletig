@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import LogoutButton from '@/components/logout-button';
 import Link from 'next/link';
 import { getAllMeetingsAction } from '@/app/actions/meeting-actions';
-import { getMaterialsAction } from '@/app/actions/material-actions';
 import { getAssignmentsAction, getSubmissionsAction } from '@/app/actions/assignment-actions';
 import AdminDashboardClient from './admin-dashboard-client';
 import {
@@ -27,9 +26,8 @@ export default async function AdminDashboardPage() {
   }
 
   // Ambil data awal dari server
-  const [meetings, materials, assignments, submissions] = await Promise.all([
+  const [meetings, assignments, submissions] = await Promise.all([
     getAllMeetingsAction().catch(() => []),
-    getMaterialsAction().catch(() => []),
     getAssignmentsAction().catch(() => []),
     getSubmissionsAction().catch(() => []),
   ]);
@@ -89,10 +87,9 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Client Interactive Control Panel (Meetings, Materials, Assignments, Submissions) */}
+        {/* Client Interactive Control Panel (Meetings, Assignments, Submissions) */}
         <AdminDashboardClient
           initialMeetings={meetings}
-          initialMaterials={materials}
           initialAssignments={assignments}
           initialSubmissions={submissions}
           userName={user.name}

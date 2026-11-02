@@ -48,7 +48,7 @@ async function migrate() {
   console.log('✅ Updated existing assignments with default gdrive_url:', updateRes.rowsAffected);
 
   // 4. Verify all tables
-  const tables = ['users', 'sessions', 'meetings', 'attendance', 'materials', 'assignments', 'submissions', 'uploaded_files'];
+  const tables = ['users', 'sessions', 'meetings', 'attendance', 'assignments', 'submissions', 'uploaded_files'];
   for (const t of tables) {
     const res = await client.execute('PRAGMA table_info(' + t + ')');
     console.log(`- ${t}:`, res.rows.map((r: any) => r.name).join(', '));

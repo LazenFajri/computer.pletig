@@ -120,28 +120,6 @@ export const attendance = sqliteTable('attendance', {
 });
 
 // ==========================================
-// 6. MATERIALS (Materi Pembelajaran)
-// ==========================================
-export const materials = sqliteTable('materials', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  meeting_id: text('meeting_id')
-    .notNull()
-    .references(() => meetings.id, { onDelete: 'cascade' }),
-  title: text('title').notNull(),
-  content_markdown: text('content_markdown'),
-  file_url: text('file_url'), // Link slide, modul PDF, Canva, atau Google Drive
-  file_type: text('file_type', {
-    enum: ['pdf', 'doc', 'link', 'video'],
-  }).default('link'),
-  order_index: integer('order_index').notNull().default(1),
-  created_at: integer('created_at', { mode: 'timestamp_ms' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
-
-// ==========================================
 // 7. ASSIGNMENTS (Tugas / Praktik Siswa)
 // ==========================================
 export const assignments = sqliteTable('assignments', {
@@ -211,7 +189,6 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const meetingsRelations = relations(meetings, ({ many }) => ({
   attendances: many(attendance),
-  materials: many(materials),
   assignments: many(assignments),
 }));
 
@@ -229,13 +206,6 @@ export const attendanceRelations = relations(attendance, ({ one }) => ({
     fields: [attendance.partner_user_id],
     references: [users.id],
     relationName: 'partnerAttendances',
-  }),
-}));
-
-export const materialsRelations = relations(materials, ({ one }) => ({
-  meeting: one(meetings, {
-    fields: [materials.meeting_id],
-    references: [meetings.id],
   }),
 }));
 
@@ -275,9 +245,6 @@ export type NewMeeting = typeof meetings.$inferInsert;
 
 export type Attendance = typeof attendance.$inferSelect;
 export type NewAttendance = typeof attendance.$inferInsert;
-
-export type Material = typeof materials.$inferSelect;
-export type NewMaterial = typeof materials.$inferInsert;
 
 export type Assignment = typeof assignments.$inferSelect;
 export type NewAssignment = typeof assignments.$inferInsert;

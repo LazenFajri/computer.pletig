@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import ExcelJS from 'exceljs';
 import path from 'path';
 import { db } from '../db';
-import { users, meetings, materials, assignments } from '../db/schema';
+import { users, meetings, assignments } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
 async function importStudentsAndSeed() {
@@ -157,15 +157,6 @@ async function importStudentsAndSeed() {
     }).returning();
 
     if (m1[0]) {
-      await db.insert(materials).values({
-        meeting_id: m1[0].id,
-        title: 'Modul 01: Pengenalan Hardware & Aturan Lab',
-        content_markdown: '# Selamat Datang di Ekstra Komputer SDN Pleburan 03!\n\nMari kita jaga kebersihan dan keselamatan di ruang lab komputer bersama-sama.',
-        file_url: 'https://drive.google.com',
-        file_type: 'pdf',
-        order_index: 1,
-      });
-
       await db.insert(assignments).values({
         meeting_id: m1[0].id,
         title: 'Tugas 1: Sebutkan 4 Perangkat Keras Komputer Utama',

@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { meetings, attendance, materials, assignments } from '@/db/schema';
+import { meetings, attendance, assignments } from '@/db/schema';
 import { eq, desc, asc, and, or, count, isNull } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 import type { ActionState, GradeLevel } from '@/lib/auth-types';
@@ -32,13 +32,13 @@ export interface MeetingItemWithCounts {
   isActive: boolean;
   sessionToken?: string | null;
   attendanceCount: number;
-  materialCount: number;
+  materialCount?: number;
   assignmentCount: number;
   createdAt: Date;
 }
 
 /**
- * Mengambil semua daftar sesi pertemuan beserta jumlah peserta hadir, materi, dan tugas
+ * Mengambil semua daftar sesi pertemuan beserta jumlah peserta hadir dan tugas
  */
 export async function getAllMeetingsAction(
   filterGrade?: GradeLevel | null
@@ -49,7 +49,6 @@ export async function getAllMeetingsAction(
     });
 
     const allAttendance = await db.query.attendance.findMany().catch(() => []);
-    const allMaterials = await db.query.materials.findMany().catch(() => []);
     const allAssignments = await db.query.assignments.findMany().catch(() => []);
 
     const results: MeetingItemWithCounts[] = allMeetings
@@ -59,7 +58,6 @@ export async function getAllMeetingsAction(
       })
       .map((m) => {
         const attCount = allAttendance.filter((a) => a.meeting_id === m.id).length;
-        const matCount = allMaterials.filter((mat) => mat.meeting_id === m.id).length;
         const assCount = allAssignments.filter((ass) => ass.meeting_id === m.id).length;
 
         return {
@@ -75,7 +73,7 @@ export async function getAllMeetingsAction(
           isActive: m.is_active,
           sessionToken: m.session_token || m.attendance_token || null,
           attendanceCount: attCount,
-          materialCount: matCount,
+          materialCount: 0,
           assignmentCount: assCount,
           createdAt: m.created_at,
         };
@@ -295,16 +293,14 @@ export async function deleteMeetingAction(meetingId: string): Promise<ActionStat
       return { success: false, error: 'Sesi pertemuan tidak ditemukan.' };
     }
 
-    // Hapus presensi, materi, dan tugas terkait
+    // Hapus presensi dan tugas terkait
     await db.delete(attendance).where(eq(attendance.meeting_id, meetingId));
-    await db.delete(materials).where(eq(materials.meeting_id, meetingId));
     await db.delete(assignments).where(eq(assignments.meeting_id, meetingId));
     await db.delete(meetings).where(eq(meetings.id, meetingId));
 
     try {
       revalidatePath('/absen');
       revalidatePath('/admin/dashboard');
-      revalidatePath('/materi');
       revalidatePath('/tugas');
       revalidatePath('/');
     } catch {

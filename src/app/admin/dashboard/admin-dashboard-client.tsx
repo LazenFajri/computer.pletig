@@ -13,13 +13,6 @@ import {
   type MeetingItemWithCounts,
 } from '@/app/actions/meeting-actions';
 import {
-  createMaterialAction,
-  deleteMaterialAction,
-  updateMaterialAction,
-  getMaterialsAction,
-  type MaterialWithMeeting,
-} from '@/app/actions/material-actions';
-import {
   createAssignmentAction,
   deleteAssignmentAction,
   gradeSubmissionAction,
@@ -85,7 +78,6 @@ import AttendanceChecklistGrid from '@/components/attendance-checklist-grid';
 
 interface AdminDashboardClientProps {
   initialMeetings: MeetingItemWithCounts[];
-  initialMaterials: MaterialWithMeeting[];
   initialAssignments: AssignmentWithDetails[];
   initialSubmissions: SubmissionWithDetails[];
   userName: string;
@@ -93,17 +85,15 @@ interface AdminDashboardClientProps {
 
 export default function AdminDashboardClient({
   initialMeetings,
-  initialMaterials,
   initialAssignments,
   initialSubmissions,
   userName,
 }: AdminDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<'meetings' | 'materials' | 'assignments' | 'submissions' | 'rekap' | 'matrix'>('meetings');
+  const [activeTab, setActiveTab] = useState<'meetings' | 'assignments' | 'submissions' | 'rekap' | 'matrix'>('meetings');
   const [isPending, startTransition] = useTransition();
 
   // State lists
   const [meetingsList, setMeetingsList] = useState(initialMeetings);
-  const [materialsList, setMaterialsList] = useState(initialMaterials);
   const [assignmentsList, setAssignmentsList] = useState(initialAssignments);
   const [submissionsList, setSubmissionsList] = useState(initialSubmissions);
 
@@ -114,13 +104,6 @@ export default function AdminDashboardClient({
       saveOfflineData(OFFLINE_KEYS.ALL_MEETINGS, initialMeetings);
     }
   }, [initialMeetings]);
-
-  useEffect(() => {
-    if (Array.isArray(initialMaterials)) {
-      setMaterialsList(initialMaterials);
-      saveOfflineData(OFFLINE_KEYS.MATERIALS, initialMaterials);
-    }
-  }, [initialMaterials]);
 
   useEffect(() => {
     if (Array.isArray(initialAssignments)) {
@@ -138,9 +121,8 @@ export default function AdminDashboardClient({
   // Real-time synchronization: Saat pull-to-refresh ditarik atau berkala tiap 4 detik jika tab aktif
   const refetchAllData = useCallback(async () => {
     try {
-      const [refreshedM, refreshedMat, refreshedAss, refreshedSub] = await Promise.all([
+      const [refreshedM, refreshedAss, refreshedSub] = await Promise.all([
         getAllMeetingsAction(),
-        getMaterialsAction(),
         getAssignmentsAction(),
         getSubmissionsAction(),
       ]);
@@ -150,15 +132,6 @@ export default function AdminDashboardClient({
         setMeetingsList((prev) => {
           if (JSON.stringify(prev) !== JSON.stringify(refreshedM)) {
             return refreshedM;
-          }
-          return prev;
-        });
-      }
-      if (Array.isArray(refreshedMat)) {
-        saveOfflineData(OFFLINE_KEYS.MATERIALS, refreshedMat);
-        setMaterialsList((prev) => {
-          if (JSON.stringify(prev) !== JSON.stringify(refreshedMat)) {
-            return refreshedMat;
           }
           return prev;
         });
@@ -251,19 +224,6 @@ export default function AdminDashboardClient({
     isOpen: true,
   });
 
-  // Modal / Form state: Materi Baru
-  const [showNewMaterialModal, setShowNewMaterialModal] = useState(false);
-  const [materialForm, setMaterialForm] = useState({
-    meetingId: 'auto',
-    gradeLevel: 'all' as 'all' | '4' | '5' | '6',
-    title: '',
-    contentMarkdown: '',
-    fileUrl: '',
-    fileType: 'pdf' as 'link' | 'pdf' | 'doc' | 'video',
-  });
-  const [uploadingMaterialFile, setUploadingMaterialFile] = useState(false);
-  const [materialFileName, setMaterialFileName] = useState('');
-
   // Modal / Form state: Tugas Baru
   const [showNewAssignmentModal, setShowNewAssignmentModal] = useState(false);
   const [assignmentForm, setAssignmentForm] = useState({
@@ -308,7 +268,7 @@ export default function AdminDashboardClient({
   // Custom Confirmation Modal State (Pengganti confirm() browser)
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
-    type: 'meeting' | 'material' | 'assignment';
+    type: 'meeting' | 'assignment';
     id: string;
     title: string;
     details?: string;
@@ -325,16 +285,10 @@ export default function AdminDashboardClient({
     data: MeetingItemWithCounts | null;
   }>({ isOpen: false, data: null });
 
-  const [editMaterialModal, setEditMaterialModal] = useState<{
-    isOpen: boolean;
-    data: MaterialWithMeeting | null;
-  }>({ isOpen: false, data: null });
-
   const [editAssignmentModal, setEditAssignmentModal] = useState<{
     isOpen: boolean;
     data: AssignmentWithDetails | null;
   }>({ isOpen: false, data: null });
-  const [uploadingEditMaterialFile, setUploadingEditMaterialFile] = useState(false);
   const [uploadingEditAssignmentAttachment, setUploadingEditAssignmentAttachment] = useState(false);
   const [editAssignmentAttachmentName, setEditAssignmentAttachmentName] = useState('');
 
@@ -759,163 +713,6 @@ export default function AdminDashboardClient({
     });
   };
 
-  // --- HANDLER: CREATE MATERIAL ---
-  const handleCreateMaterial = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!materialForm.title.trim()) {
-      showNotification('error', 'Judul materi wajib diisi.');
-      return;
-    }
-
-    startTransition(async () => {
-      const res = await createMaterialAction({
-        meetingId: materialForm.meetingId,
-        gradeLevel: materialForm.gradeLevel === 'all' ? null : (Number(materialForm.gradeLevel) as GradeLevel),
-        title: materialForm.title,
-        contentMarkdown: materialForm.contentMarkdown,
-        fileUrl: materialForm.fileUrl,
-        fileType: materialForm.fileType,
-      });
-
-      if (res.success && res.data) {
-        showNotification('success', res.message || 'Materi berhasil ditambahkan!');
-        const returnedMeeting = res.data.meeting;
-        const parentMeeting = returnedMeeting || meetingsList.find((m) => m.id === res.data!.meeting_id);
-
-        if (returnedMeeting && !meetingsList.some((m) => m.id === returnedMeeting.id)) {
-          const newMeetingItem: MeetingItemWithCounts = {
-            id: returnedMeeting.id,
-            meetingNumber: returnedMeeting.meeting_number,
-            gradeLevel: returnedMeeting.grade_level,
-            title: returnedMeeting.title,
-            description: returnedMeeting.description,
-            date: returnedMeeting.date,
-            startTime: returnedMeeting.start_time,
-            endTime: returnedMeeting.end_time,
-            isOpen: returnedMeeting.is_open,
-            isActive: returnedMeeting.is_active,
-            attendanceCount: 0,
-            materialCount: 1,
-            assignmentCount: 0,
-            createdAt: new Date(),
-          };
-          setMeetingsList((prev) => [newMeetingItem, ...prev]);
-        }
-
-        const newMat: MaterialWithMeeting = {
-          id: res.data.id,
-          meetingId: res.data.meeting_id,
-          title: res.data.title,
-          contentMarkdown: res.data.content_markdown,
-          fileUrl: res.data.file_url,
-          fileType: res.data.file_type as any,
-          orderIndex: res.data.order_index,
-          createdAt: new Date(),
-          meeting: parentMeeting
-            ? {
-              id: parentMeeting.id,
-              meetingNumber: 'meeting_number' in parentMeeting ? parentMeeting.meeting_number : parentMeeting.meetingNumber,
-              title: parentMeeting.title,
-              gradeLevel: 'grade_level' in parentMeeting ? parentMeeting.grade_level : parentMeeting.gradeLevel,
-              date: parentMeeting.date,
-            }
-            : null,
-        };
-
-        setMaterialsList((prev) => {
-          const next = [newMat, ...prev];
-          saveOfflineData(OFFLINE_KEYS.MATERIALS, next);
-          return next;
-        });
-
-        // Tampilkan langsung di UI (pindah ke tab materi & sesuaikan filter kelas jika perlu)
-        setActiveTab('materials');
-        if (filterGrade !== 'all' && materialForm.gradeLevel !== 'all' && filterGrade !== Number(materialForm.gradeLevel)) {
-          setFilterGrade('all');
-        }
-
-        setShowNewMaterialModal(false);
-        setMaterialForm({
-          meetingId: 'auto',
-          gradeLevel: 'all',
-          title: '',
-          contentMarkdown: '',
-          fileUrl: '',
-          fileType: 'link',
-        });
-
-        refetchAllData();
-      } else {
-        showNotification('error', res.error || 'Gagal menambahkan materi.');
-      }
-    });
-  };
-
-  // --- HANDLER: UPDATE MATERIAL ---
-  const handleUpdateMaterial = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editMaterialModal.data || !editMaterialModal.data.title.trim()) {
-      showNotification('error', 'Judul materi wajib diisi.');
-      return;
-    }
-
-    startTransition(async () => {
-      const target = editMaterialModal.data!;
-      const res = await updateMaterialAction({
-        materialId: target.id,
-        meetingId: target.meetingId,
-        title: target.title,
-        contentMarkdown: target.contentMarkdown || '',
-        fileUrl: target.fileUrl || '',
-        fileType: target.fileType as any,
-        orderIndex: target.orderIndex,
-      });
-
-      if (res.success && res.data) {
-        showNotification('success', res.message || 'Materi berhasil diperbarui!');
-        const parentMeeting = meetingsList.find((m) => m.id === target.meetingId);
-        setMaterialsList(
-          materialsList.map((mat) =>
-            mat.id === target.id
-              ? {
-                ...mat,
-                meetingId: target.meetingId,
-                title: target.title,
-                contentMarkdown: target.contentMarkdown,
-                fileUrl: target.fileUrl,
-                fileType: target.fileType,
-                meeting: parentMeeting
-                  ? {
-                    id: parentMeeting.id,
-                    meetingNumber: parentMeeting.meetingNumber,
-                    title: parentMeeting.title,
-                    gradeLevel: parentMeeting.gradeLevel,
-                    date: parentMeeting.date,
-                  }
-                  : mat.meeting,
-              }
-              : mat
-          )
-        );
-        setEditMaterialModal({ isOpen: false, data: null });
-        refetchAllData();
-      } else {
-        showNotification('error', res.error || 'Gagal memperbarui materi.');
-      }
-    });
-  };
-
-  // --- HANDLER: PROMPT DELETE MATERIAL ---
-  const promptDeleteMaterial = (materialId: string, title: string) => {
-    setDeleteModal({
-      isOpen: true,
-      type: 'material',
-      id: materialId,
-      title,
-      details: 'Modul materi ini tidak akan dapat diakses lagi oleh siswa di perpustakaan digital.',
-    });
-  };
-
   // --- HANDLER: CREATE ASSIGNMENT ---
   const handleCreateAssignment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1113,20 +910,7 @@ export default function AdminDashboardClient({
           showNotification('error', res.error || 'Gagal menghapus sesi.');
         }
         refetchAllData();
-      } else if (targetType === 'material') {
-        setMaterialsList((prev) => {
-          const next = prev.filter((m) => m.id !== targetId);
-          saveOfflineData(OFFLINE_KEYS.MATERIALS, next);
-          return next;
-        });
 
-        const res = await deleteMaterialAction(targetId);
-        if (res.success) {
-          showNotification('success', res.message || 'Materi berhasil dihapus.');
-        } else {
-          showNotification('error', res.error || 'Gagal menghapus materi.');
-        }
-        refetchAllData();
       } else if (targetType === 'assignment') {
         setAssignmentsList((prev) => {
           const next = prev.filter((a) => a.id !== targetId);
@@ -1210,17 +994,6 @@ export default function AdminDashboardClient({
     (meetingsList.length > 0 ? meetingsList[0] : null);
   const isAnyMeetingOpen = meetingsList.some((m) => m.isOpen);
 
-  const filteredMaterials = materialsList.filter((mat) => {
-    if (filterGrade !== 'all') {
-      if (mat.meeting?.gradeLevel !== filterGrade && mat.meeting?.gradeLevel !== null) return false;
-    }
-    if (filterMeetingNumber !== 'all') {
-      const mNum = mat.meeting?.meetingNumber ?? (mat.meeting as any)?.meeting_number;
-      if (mNum !== undefined && mNum !== filterMeetingNumber) return false;
-    }
-    return true;
-  });
-
   const filteredAssignments = assignmentsList.filter((ass) => {
     if (filterGrade !== 'all') {
       if (ass.meeting?.gradeLevel !== filterGrade && ass.meeting?.gradeLevel !== null) return false;
@@ -1298,11 +1071,11 @@ export default function AdminDashboardClient({
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-            <BookOpen className="w-5 h-5" />
+            <FileText className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xl font-heading font-bold text-slate-800">{materialsList.length}</div>
-            <div className="text-[11px] text-slate-500 font-medium">Materi Praktikum</div>
+            <div className="text-xl font-heading font-bold text-slate-800">{assignmentsList.length}</div>
+            <div className="text-[11px] text-slate-500 font-medium">Tugas Praktikum</div>
           </div>
         </div>
 
@@ -2974,9 +2747,7 @@ export default function AdminDashboardClient({
               <span>
                 {deleteModal.type === 'meeting'
                   ? 'Konfirmasi Hapus Sesi'
-                  : deleteModal.type === 'material'
-                    ? 'Konfirmasi Hapus Materi'
-                    : 'Konfirmasi Hapus Tugas'}
+                  : 'Konfirmasi Hapus Tugas'}
               </span>
             </div>
 
@@ -2990,8 +2761,6 @@ export default function AdminDashboardClient({
               <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">
                 {deleteModal.type === 'meeting' ? (
                   <CalendarCheck className="w-4 h-4" />
-                ) : deleteModal.type === 'material' ? (
-                  <BookOpen className="w-4 h-4 text-blue-600" />
                 ) : (
                   <FileText className="w-4 h-4 text-amber-600" />
                 )}

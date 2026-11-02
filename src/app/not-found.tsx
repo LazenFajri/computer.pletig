@@ -62,26 +62,18 @@ export default function NotFound() {
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-3">
                 Mau pergi ke mana sekarang?
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <Link
                   href="/absen"
-                  className="p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all flex items-center gap-2.5 text-xs font-bold text-slate-800 shadow-xs"
+                  className="p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all flex items-center justify-center gap-2.5 text-xs font-bold text-slate-800 shadow-xs"
                 >
                   <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Presensi Siswa</span>
                 </Link>
 
                 <Link
-                  href="/materi"
-                  className="p-3 rounded-xl bg-white border border-slate-200 hover:border-purple-300 hover:bg-purple-50/50 transition-all flex items-center gap-2.5 text-xs font-bold text-slate-800 shadow-xs"
-                >
-                  <BookOpen className="w-4 h-4 text-purple-600 shrink-0" />
-                  <span>Materi Belajar</span>
-                </Link>
-
-                <Link
                   href="/tugas"
-                  className="p-3 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all flex items-center gap-2.5 text-xs font-bold text-slate-800 shadow-xs"
+                  className="p-3 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all flex items-center justify-center gap-2.5 text-xs font-bold text-slate-800 shadow-xs"
                 >
                   <FileCheck className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>Tugas Praktikum</span>

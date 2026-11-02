@@ -7,7 +7,6 @@
 export const OFFLINE_KEYS = {
   HOME_MEETINGS: 'pletig_offline_home_meetings',
   ALL_MEETINGS: 'pletig_offline_all_meetings',
-  MATERIALS: 'pletig_offline_materials',
   ASSIGNMENTS: 'pletig_offline_assignments',
   STUDENTS: (grade: number | string) => `pletig_offline_students_kelas_${grade}`,
   ATTENDANCE: (meetingId: string) => `pletig_offline_attendance_${meetingId}`,

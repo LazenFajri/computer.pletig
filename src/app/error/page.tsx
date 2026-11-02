@@ -126,11 +126,11 @@ export default async function SafeErrorPage({
               </Link>
 
               <Link
-                href="/materi"
+                href="/tugas"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-heading font-bold text-sm transition-all cursor-pointer"
               >
                 <BookOpen className="w-4 h-4 text-purple-600" />
-                <span>Materi Belajar</span>
+                <span>Tugas Praktikum</span>
               </Link>
             </div>
           </div>

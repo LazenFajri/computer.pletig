@@ -8,7 +8,7 @@ dotenv.config();
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
 import * as schema from '../db/schema';
-import { users, meetings, materials, assignments } from '../db/schema';
+import { users, meetings, assignments } from '../db/schema';
 import bcrypt from 'bcryptjs';
 import ExcelJS from 'exceljs';
 import { count } from 'drizzle-orm';

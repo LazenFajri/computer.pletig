@@ -4,7 +4,7 @@ dotenv.config();
 
 import bcrypt from 'bcryptjs';
 import { db } from './index';
-import { users, meetings, materials, assignments } from './schema';
+import { users, meetings, assignments } from './schema';
 
 async function seed() {
   console.log('🌱 Memulai proses seeding database computer.pletig SDN Pleburan 03...');
@@ -211,16 +211,6 @@ async function seed() {
     }
 
     if (meetingId && m.meeting_number === 1) {
-      // Tambahkan materi untuk pertemuan 1
-      await db.insert(materials).values({
-        meeting_id: meetingId,
-        title: 'Modul 01: Pengenalan Hardware & Aturan Lab',
-        content_markdown: '# Selamat Datang di Ekstra Komputer SDN Pleburan 03!\n\nMari kita jaga kebersihan dan keselamatan di ruang lab komputer bersama-sama.',
-        file_url: 'https://drive.google.com',
-        file_type: 'pdf',
-        order_index: 1,
-      });
-
       // Tambahkan tugas untuk pertemuan 1
       await db.insert(assignments).values({
         meeting_id: meetingId,
