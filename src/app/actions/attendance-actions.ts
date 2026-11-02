@@ -220,7 +220,11 @@ export async function submitAttendanceAction(
           deviceStudents = parsed;
         }
       }
-      const rawCap = cookieStore.get(capCookieKey)?.value;
+      const rawCap =
+        cookieStore.get(capCookieKey)?.value ||
+        cookieStore.get(`pletig_dev_cap_${meetingId}_${currentRombel}`)?.value ||
+        cookieStore.get(`pletig_dev_cap_${meetingId}`)?.value ||
+        cookieStore.get('pletig_dev_cap_active')?.value;
       if (rawCap === '1' || rawCap === '2') {
         effectiveCapacity = parseInt(rawCap, 10);
       }

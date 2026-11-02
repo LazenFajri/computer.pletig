@@ -96,6 +96,7 @@ export default function AbsenClient({
   const [showConfetti, setShowConfetti] = useState(false);
   const [sessionToken, setSessionToken] = useState(initialSession?.sessionToken || '');
   const [deviceStudentsCount, setDeviceStudentsCount] = useState<number>(0);
+  const [deviceCapacity, setDeviceCapacity] = useState<number>(2);
   const isSubmittingRef = useRef(false);
 
   // Helper Deteksi Shift Otomatis (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00 WIB)
@@ -228,6 +229,17 @@ export default function AbsenClient({
   }, [selectedGrade]);
 
   useEffect(() => {
+    try {
+      const saved = selectedMeetingId
+        ? localStorage.getItem(`pletig_laptop_capacity_${selectedMeetingId}`)
+        : localStorage.getItem('pletig_laptop_capacity');
+      if (saved === '1' || saved === '2') {
+        setDeviceCapacity(Number(saved));
+      }
+    } catch {}
+  }, [selectedMeetingId]);
+
+  useEffect(() => {
     if (selectedMeetingId) {
       setDeviceStudentsCount(getDeviceStudents(selectedMeetingId).length);
     }
@@ -301,8 +313,10 @@ export default function AbsenClient({
     const deviceStudents = getDeviceStudents(selectedMeetingId);
     const normFinalName = finalName.toLowerCase();
     const isAlreadyOnThisDevice = deviceStudents.some((n) => n.toLowerCase() === normFinalName);
-    if (deviceStudents.length >= 2 && !isAlreadyOnThisDevice) {
-      setErrorMsg('Laptop ini sudah dipakai absen 2 orang. Silakan gunakan laptop lain atau minta bantuan Kak Pembina!');
+    if (deviceStudents.length >= deviceCapacity && !isAlreadyOnThisDevice) {
+      setErrorMsg(
+        `Laptop ini sudah dipakai absen ${deviceCapacity} orang (${deviceCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}). Silakan gunakan laptop lain atau minta bantuan Kak Pembina!`
+      );
       return;
     }
 
@@ -323,6 +337,7 @@ export default function AbsenClient({
         studentUserId: targetStudent.id || null,
         meetingId: selectedMeetingId,
         sessionToken: cleanToken,
+        laptopCapacity: deviceCapacity,
         className: selectedRombel && selectedRombel !== 'all' ? selectedRombel : (targetStudent.class_name || null),
         shift: getCurrentShift(),
       });
@@ -768,15 +783,15 @@ export default function AbsenClient({
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
                 <Laptop className="w-3.5 h-3.5 text-blue-600" />
                 <span>
-                  Siswa ke-{deviceStudentsCount || 1} di laptop ini (Batas maksimal 2 siswa per laptop)
+                  Siswa ke-{deviceStudentsCount || 1} di laptop ini (Batas {deviceCapacity} siswa per laptop)
                 </span>
               </span>
             </div>
 
             <div className="mt-6">
-              {deviceStudentsCount >= 2 ? (
+              {deviceStudentsCount >= deviceCapacity ? (
                 <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs max-w-sm mx-auto font-medium">
-                  🔒 Kuota presensi laptop ini telah penuh (2/2 siswa). Siswa lain silakan bergantian di laptop berikutnya ya!
+                  🔒 Kuota presensi laptop ini telah selesai ({deviceStudentsCount}/{deviceCapacity} siswa). Selamat mengikuti praktikum komputer!
                 </div>
               ) : (
                 <button
@@ -1048,7 +1063,7 @@ export default function AbsenClient({
                 {/* Device locking status badge */}
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-white border border-amber-200 text-amber-900 shadow-2xs shrink-0">
                   <Laptop className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Laptop ini: {deviceStudentsCount}/2 Siswa (Sesi {getCurrentShift()})</span>
+                  <span>Laptop ini: {deviceStudentsCount}/{deviceCapacity} Siswa (Sesi {getCurrentShift()})</span>
                 </div>
               </div>
 
@@ -1088,11 +1103,11 @@ export default function AbsenClient({
                 ⚡ <strong>Otomatis Hadir:</strong> Saat 4 angka token terisi dan namamu dipilih, presensi langsung tersimpan otomatis tanpa perlu menekan tombol lagi.
               </p>
 
-              {deviceStudentsCount >= 2 && !getDeviceStudents(selectedMeetingId).some((n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()) && (
+              {deviceStudentsCount >= deviceCapacity && !getDeviceStudents(selectedMeetingId).some((n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()) && (
                 <div className="p-3 rounded-2xl bg-amber-100/90 text-amber-900 text-xs flex items-center gap-2.5 font-medium border border-amber-300">
                   <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
                   <span>
-                    Laptop ini sudah dipakai absen 2 orang untuk Sesi {getCurrentShift()}. Pergantian ke sesi berikutnya otomatis dibuka sesuai jam lab (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00 WIB).
+                    Laptop ini sudah dipakai absen {deviceCapacity} orang ({deviceCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}) untuk Sesi {getCurrentShift()}. Pergantian ke sesi berikutnya otomatis dibuka sesuai jam lab (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00 WIB).
                   </span>
                 </div>
               )}
@@ -1133,7 +1148,7 @@ export default function AbsenClient({
                   !sessionStatus?.isOpen ||
                   !selectedStudent ||
                   isSelectedStudentAttended ||
-                  (deviceStudentsCount >= 2 &&
+                  (deviceStudentsCount >= deviceCapacity &&
                     !getDeviceStudents(selectedMeetingId).some(
                       (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
                     ))
@@ -1143,7 +1158,7 @@ export default function AbsenClient({
                     ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed select-none shadow-none'
                     : isSelectedStudentAttended
                     ? 'bg-slate-100 text-emerald-800 border-2 border-emerald-300 cursor-not-allowed select-none shadow-none'
-                    : deviceStudentsCount >= 2 &&
+                    : deviceStudentsCount >= deviceCapacity &&
                       !getDeviceStudents(selectedMeetingId).some(
                         (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
                       )
@@ -1161,13 +1176,13 @@ export default function AbsenClient({
                     <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
                     <span>Sudah Hadir Hari Ini ({selectedStudent.name})</span>
                   </>
-                ) : deviceStudentsCount >= 2 &&
+                ) : deviceStudentsCount >= deviceCapacity &&
                   !getDeviceStudents(selectedMeetingId).some(
                     (n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()
                   ) ? (
                   <>
                     <Laptop className="w-6 h-6 text-amber-700 shrink-0" />
-                    <span>Laptop Sudah Dipakai 2 Orang</span>
+                    <span>Laptop Sudah Dipakai {deviceCapacity} Orang</span>
                   </>
                 ) : selectedStudent ? (
                   <>
