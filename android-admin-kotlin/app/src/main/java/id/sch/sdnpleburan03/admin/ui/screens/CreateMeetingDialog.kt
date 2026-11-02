@@ -33,8 +33,8 @@ fun CreateMeetingDialog(
 ) {
     var title by remember { mutableStateOf("") }
     var selectedGrade by remember { mutableStateOf<Int?>(null) }
-    var startTime by remember { mutableStateOf("12:45") }
-    var endTime by remember { mutableStateOf("13:55") }
+    var startTime by remember { mutableStateOf("12:30") }
+    var endTime by remember { mutableStateOf("14:00") }
     var description by remember { mutableStateOf("") }
 
     AlertDialog(

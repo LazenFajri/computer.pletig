@@ -55,10 +55,14 @@ export default function LaptopModeClient({
       localStorage.setItem('pletig_laptop_capacity', String(capacity));
       if (meetingId) {
         localStorage.setItem(`pletig_laptop_capacity_${meetingId}`, String(capacity));
+        localStorage.setItem(`pletig_laptop_capacity_${meetingId}_${rombel}`, String(capacity));
       }
       // Simpan cookie agar server action langsung mengenali kapasitas device
       const cKey = meetingId ? `pletig_dev_cap_${meetingId}` : 'pletig_dev_cap_active';
       document.cookie = `${cKey}=${capacity}; max-age=${60 * 60 * 12}; path=/; SameSite=Lax`;
+      if (meetingId) {
+        document.cookie = `pletig_dev_cap_${meetingId}_${rombel}=${capacity}; max-age=${60 * 60 * 12}; path=/; SameSite=Lax`;
+      }
     } catch {
       // non-blocking
     }

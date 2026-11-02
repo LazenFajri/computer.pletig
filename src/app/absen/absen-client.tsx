@@ -9,6 +9,7 @@ import {
   submitAttendanceAction,
   openQuickSessionForGradeAction,
   toggleMeetingOpenAction,
+  resetLaptopSessionAction,
 } from '@/app/actions/attendance-actions';
 import type { GradeLevel, SessionUser } from '@/lib/auth-types';
 import type { ActiveSessionResult } from '@/lib/attendance';
@@ -98,16 +99,21 @@ export default function AbsenClient({
   const [deviceStudentsCount, setDeviceStudentsCount] = useState<number>(0);
   const isSubmittingRef = useRef(false);
 
-  // Helper Proteksi Lapis 2: Device / Browser Session Locking (Maksimal 2 siswa per laptop)
+  // Helper Proteksi Lapis 2: Device / Browser Session Locking (Scoped per Sesi & Rombel)
+  // Sesi 1 (12:30 - 13:20) dan Sesi 2 (13:20 - 14:00) memiliki kuota mandiri pada laptop yang sama
   const getDeviceStudents = (meetingId?: string | null): string[] => {
     if (typeof window === 'undefined' || !meetingId) return [];
     try {
-      const localVal = localStorage.getItem(`pletig_dev_students_${meetingId}`);
+      const shift = sessionStatus?.activeShift || 1;
+      const r = selectedRombel && selectedRombel !== 'all' ? selectedRombel : 'all';
+      const scopedKey = `pletig_dev_students_${meetingId}_${r}_s${shift}`;
+      const localVal = localStorage.getItem(scopedKey);
       if (localVal) {
         const parsed = JSON.parse(localVal);
         if (Array.isArray(parsed)) return parsed;
       }
-      const match = document.cookie.match(new RegExp(`(^|;\\s*)pletig_dev_att_${meetingId}=([^;]*)`));
+      const cookieKey = `pletig_dev_att_${meetingId}_${r}_s${shift}`;
+      const match = document.cookie.match(new RegExp(`(^|;\\s*)${cookieKey}=([^;]*)`));
       if (match && match[2]) {
         const parsedCookie = JSON.parse(decodeURIComponent(match[2]));
         if (Array.isArray(parsedCookie)) return parsedCookie;
@@ -121,14 +127,33 @@ export default function AbsenClient({
   const recordDeviceStudent = (meetingId: string, name: string) => {
     if (typeof window === 'undefined') return;
     try {
+      const shift = sessionStatus?.activeShift || 1;
+      const r = selectedRombel && selectedRombel !== 'all' ? selectedRombel : 'all';
+      const scopedKey = `pletig_dev_students_${meetingId}_${r}_s${shift}`;
       const existing = getDeviceStudents(meetingId);
       if (!existing.some((n) => n.toLowerCase() === name.toLowerCase())) {
         existing.push(name);
       }
-      localStorage.setItem(`pletig_dev_students_${meetingId}`, JSON.stringify(existing));
+      localStorage.setItem(scopedKey, JSON.stringify(existing));
       setDeviceStudentsCount(existing.length);
     } catch {
       // non-blocking
+    }
+  };
+
+  const handleResetDeviceLock = async () => {
+    try {
+      if (selectedMeetingId) {
+        const shift = sessionStatus?.activeShift || 1;
+        const r = selectedRombel && selectedRombel !== 'all' ? selectedRombel : 'all';
+        localStorage.removeItem(`pletig_dev_students_${selectedMeetingId}_${r}_s${shift}`);
+        localStorage.removeItem(`pletig_dev_students_${selectedMeetingId}`);
+        await resetLaptopSessionAction(selectedMeetingId, r, shift);
+      }
+      setDeviceStudentsCount(0);
+      setErrorMsg(null);
+    } catch {
+      setDeviceStudentsCount(0);
     }
   };
 
@@ -208,6 +233,12 @@ export default function AbsenClient({
       clearInterval(timer);
     };
   }, [selectedGrade]);
+
+  useEffect(() => {
+    if (selectedMeetingId) {
+      setDeviceStudentsCount(getDeviceStudents(selectedMeetingId).length);
+    }
+  }, [selectedMeetingId, selectedRombel, sessionStatus?.activeShift]);
 
   const handleGradeChange = (grade: GradeLevel) => {
     setSelectedGrade(grade);
@@ -299,6 +330,8 @@ export default function AbsenClient({
         studentUserId: targetStudent.id || null,
         meetingId: selectedMeetingId,
         sessionToken: cleanToken,
+        className: selectedRombel && selectedRombel !== 'all' ? selectedRombel : (targetStudent.class_name || null),
+        shift: sessionStatus?.activeShift || 1,
       });
 
       if (!res.success) {
@@ -1020,9 +1053,22 @@ export default function AbsenClient({
                 </div>
 
                 {/* Device locking status badge */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-white border border-amber-200 text-amber-900 shadow-2xs shrink-0">
-                  <Laptop className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Laptop ini: {deviceStudentsCount}/2 Siswa</span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-white border border-amber-200 text-amber-900 shadow-2xs shrink-0">
+                    <Laptop className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Laptop ini: {deviceStudentsCount}/2 Siswa</span>
+                  </div>
+                  {deviceStudentsCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleResetDeviceLock}
+                      title="Klik jika berganti sesi atau siswa baru di laptop ini"
+                      className="px-2.5 py-1 bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+                    >
+                      <RefreshCw className="w-3 h-3 text-amber-700" />
+                      <span>Ganti Sesi</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1063,11 +1109,21 @@ export default function AbsenClient({
               </p>
 
               {deviceStudentsCount >= 2 && !getDeviceStudents(selectedMeetingId).some((n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()) && (
-                <div className="p-2.5 rounded-xl bg-amber-100/90 text-amber-900 text-[11px] flex items-center gap-2 font-medium">
-                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
-                  <span>
-                    Laptop ini sudah dipakai absen 2 orang. Silakan gunakan laptop lain atau minta bantuan Kak Pembina!
-                  </span>
+                <div className="p-3 rounded-2xl bg-amber-100/90 text-amber-900 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 font-medium border border-amber-300">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                    <span>
+                      Laptop ini sudah dipakai absen 2 orang untuk sesi ini.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResetDeviceLock}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-[11px] font-bold shadow-xs transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Reset untuk Sesi 2 / Siswa Baru</span>
+                  </button>
                 </div>
               )}
             </div>

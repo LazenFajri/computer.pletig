@@ -11,18 +11,18 @@ export interface WIBInfo {
   currentMinutes: number; // hour * 60 + minute
   dayOfWeek: number; // 1=Senin, 2=Selasa, 3=Rabu, 4=Kamis, 5=Jumat, 6=Sabtu, 0=Minggu
   dayName: string; // 'Senin', 'Selasa', dst.
-  isWithinDefaultTime: boolean; // 12:45 - 13:55 WIB
-  activeShift: 1 | 2 | null; // Sesi 1: 12:45 - 13:20, Sesi 2: 13:20 - 13:55
-  activeShiftLabel: string; // 'Sesi 1 (12:45 - 13:20 WIB)' atau 'Sesi 2 (13:20 - 13:55 WIB)'
+  isWithinDefaultTime: boolean; // 12:30 - 14:00 WIB (toleransi 12:15 - 14:15)
+  activeShift: 1 | 2 | null; // Sesi 1: 12:30 - 13:20, Sesi 2: 13:20 - 14:00
+  activeShiftLabel: string; // 'Sesi 1 (12:30 - 13:20 WIB)' atau 'Sesi 2 (13:20 - 14:00 WIB)'
   defaultGradeToday: GradeLevel | null; // Senin: 6, Selasa: 5, Kamis: 4
 }
 
 /**
  * Menghitung waktu WIB (Asia/Jakarta, UTC+7) secara akurat dari server
  * Jam Praktikum Terbagi Menjadi 2 Sesi:
- * - Sesi 1: 12:45 s/d 13:20 WIB (765 s/d 800 menit)
- * - Sesi 2: 13:20 s/d 13:55 WIB (800 s/d 835 menit)
- * Total rentang jam praktikum: 12:45 s/d 13:55 WIB
+ * - Sesi 1: 12:30 s/d 13:20 WIB (750 s/d 800 menit, toleransi mulai 12:15 = 735 menit)
+ * - Sesi 2: 13:20 s/d 14:00 WIB (800 s/d 840 menit, toleransi s/d 14:15 = 855 menit)
+ * Total rentang jam praktikum: 12:30 s/d 14:00 WIB
  */
 export function getWIBInfo(customDate = new Date()): WIBInfo {
   const formatter = new Intl.DateTimeFormat('id-ID', {
@@ -73,20 +73,20 @@ export function getWIBInfo(customDate = new Date()): WIBInfo {
     dayOfWeek = 6;
   }
 
-  // 12:45 = 12 * 60 + 45 = 765 menit
+  // 12:30 = 12 * 60 + 30 = 750 menit (toleransi mulai 12:15 = 735)
   // 13:20 = 13 * 60 + 20 = 800 menit
-  // 13:55 = 13 * 60 + 55 = 835 menit
+  // 14:00 = 14 * 60 + 0 = 840 menit (toleransi s/d 14:15 = 855)
   const currentMinutes = hour * 60 + minute;
-  const isWithinDefaultTime = currentMinutes >= 765 && currentMinutes <= 835;
+  const isWithinDefaultTime = currentMinutes >= 735 && currentMinutes <= 855;
 
   let activeShift: 1 | 2 | null = null;
   let activeShiftLabel = '';
-  if (currentMinutes >= 765 && currentMinutes < 800) {
+  if (currentMinutes >= 735 && currentMinutes < 800) {
     activeShift = 1;
-    activeShiftLabel = 'Sesi 1 (12:45 - 13:20 WIB)';
-  } else if (currentMinutes >= 800 && currentMinutes <= 835) {
+    activeShiftLabel = 'Sesi 1 (12:30 - 13:20 WIB)';
+  } else if (currentMinutes >= 800 && currentMinutes <= 855) {
     activeShift = 2;
-    activeShiftLabel = 'Sesi 2 (13:20 - 13:55 WIB)';
+    activeShiftLabel = 'Sesi 2 (13:20 - 14:00 WIB)';
   }
 
   return {
@@ -194,7 +194,7 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
   const gradeScheduleDay =
     gradeLevel === 4 ? 'Kamis' : gradeLevel === 5 ? 'Selasa' : 'Senin';
 
-  // OTOMATIS BUKA: Jika saat ini berada di rentang jam praktikum (12:45 - 13:55 WIB) & hari kegiatan kelas ini
+  // OTOMATIS BUKA: Jika saat ini berada di rentang jam praktikum (12:30 - 14:00 WIB, toleransi 12:15 - 14:15) & hari kegiatan kelas ini
   if (wib.isWithinDefaultTime && isCorrectDayForGrade) {
     // Cari sesi yang SESUAI untuk hari ini secara berurutan:
     // 1. Utamakan sesi yang tanggalnya persis hari ini (misal: Minggu 1 di 2026-10-22, Minggu 2 di 2026-10-29)
@@ -213,8 +213,8 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
           is_open: true,
           is_active: true,
           date: existingMeeting.date || wib.dateStr,
-          start_time: '12:45',
-          end_time: '13:55',
+          start_time: '12:30',
+          end_time: '14:00',
           session_token: token,
           attendance_token: token,
           updated_at: new Date(),
@@ -253,10 +253,10 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
           meeting_number: nextNum,
           grade_level: gradeLevel,
           title: `Praktikum Komputer Kelas ${gradeLevel} (Minggu ke-${nextNum})`,
-          description: `Sesi praktikum otomatis Minggu ke-${nextNum} dibuka pukul 12:45 - 13:55 WIB (${wib.activeShiftLabel || 'Sesi Aktif'}).`,
+          description: `Sesi praktikum otomatis Minggu ke-${nextNum} dibuka pukul 12:30 - 14:00 WIB (${wib.activeShiftLabel || 'Sesi Aktif'}).`,
           date: wib.dateStr,
-          start_time: '12:45',
-          end_time: '13:55',
+          start_time: '12:30',
+          end_time: '14:00',
           is_open: true,
           is_active: true,
           session_token: randomToken,
@@ -268,7 +268,7 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
       return {
         isOpen: true,
         reason: 'scheduled',
-        message: `Sesi presensi otomatis dibuka: ${createdMeeting.title} (${wib.dayName}, ${wib.activeShiftLabel || '12:45 - 13:55 WIB'})`,
+        message: `Sesi presensi otomatis dibuka: ${createdMeeting.title} (${wib.dayName}, ${wib.activeShiftLabel || '12:30 - 14:00 WIB'})`,
         meeting: createdMeeting,
         openMeetings: [createdMeeting],
         allMeetingsForGrade: [createdMeeting, ...allMeetingsForGrade],
@@ -285,12 +285,12 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
   const todayMeeting = allMeetingsForGrade.find((m) => m.date === wib.dateStr);
   const relevantMeeting = todayMeeting || (allMeetingsForGrade.length > 0 ? allMeetingsForGrade[0] : null);
 
-  // Jika hari ini jadwal kelas tersebut tetapi waktu sebelum 12:45 WIB
-  if (isCorrectDayForGrade && wib.currentMinutes < 765) {
+  // Jika hari ini jadwal kelas tersebut tetapi waktu sebelum 12:30 WIB (toleransi 12:15 WIB)
+  if (isCorrectDayForGrade && wib.currentMinutes < 735) {
     return {
       isOpen: false,
       reason: 'closed',
-      message: `Sesi presensi Kelas ${gradeLevel} otomatis dibuka pukul 12:45 WIB (Sesi 1: 12:45 - 13:20 • Sesi 2: 13:20 - 13:55 WIB).`,
+      message: `Sesi presensi Kelas ${gradeLevel} otomatis dibuka pukul 12:30 WIB (Sesi 1: 12:30 - 13:20 • Sesi 2: 13:20 - 14:00 WIB).`,
       meeting: relevantMeeting,
       openMeetings: [],
       allMeetingsForGrade,
@@ -300,12 +300,12 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
     };
   }
 
-  // Jika hari ini jadwal kelas tersebut tetapi waktu sudah lewat 13:55 WIB
-  if (isCorrectDayForGrade && wib.currentMinutes > 835) {
+  // Jika hari ini jadwal kelas tersebut tetapi waktu sudah lewat 14:00 WIB (toleransi s/d 14:15 WIB)
+  if (isCorrectDayForGrade && wib.currentMinutes > 855) {
     return {
       isOpen: false,
       reason: 'closed',
-      message: `Sesi presensi Kelas ${gradeLevel} hari ini telah selesai pada pukul 13:55 WIB. Pembina dapat membuka kembali sesi sewaktu-waktu di dashboard.`,
+      message: `Sesi presensi Kelas ${gradeLevel} hari ini telah selesai pada pukul 14:00 WIB. Pembina dapat membuka kembali sesi sewaktu-waktu di dashboard.`,
       meeting: relevantMeeting,
       openMeetings: [],
       allMeetingsForGrade,
@@ -319,7 +319,7 @@ export async function checkActiveSession(gradeLevel: GradeLevel): Promise<Active
   return {
     isOpen: false,
     reason: 'closed',
-    message: `Hari ini (${wib.dayName}) bukan jadwal kegiatan Kelas ${gradeLevel}. Jadwal praktikum Kelas ${gradeLevel} adalah setiap hari ${gradeScheduleDay} pukul 12:45 - 13:55 WIB.`,
+    message: `Hari ini (${wib.dayName}) bukan jadwal kegiatan Kelas ${gradeLevel}. Jadwal praktikum Kelas ${gradeLevel} adalah setiap hari ${gradeScheduleDay} pukul 12:30 - 14:00 WIB (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00).`,
     meeting: relevantMeeting,
     openMeetings: [],
     allMeetingsForGrade,

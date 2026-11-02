@@ -18,8 +18,8 @@ Antarmuka pengguna tetap sangat cepat tanpa jeda (*zero UI freeze*) berkat local
 
 2. **Kontrol Sesi Otomatis & Anti-Titip Absen Token Generator**:
    - Jadwal praktikum 2 sesi beruntun:
-     - **Sesi 1**: `12:45` s/d `13:20` WIB.
-     - **Sesi 2**: `13:20` s/d `13:55` WIB.
+     - **Sesi 1**: `12:30` s/d `13:20` WIB.
+     - **Sesi 2**: `13:20` s/d `14:00` WIB.
    - Toggle Buka / Tutup Sesi presensi seketika (eksekusi langsung update status ke Turso Cloud).
    - Generator Token Sesi 4-Digit berukuran besar dan eye-catching untuk dipajang di proyektor lab atau papan tulis.
    - Tombol **"Acak Token"** untuk rotasi token sesi kapan saja dengan update instan ke Turso.

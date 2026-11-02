@@ -72,8 +72,8 @@ class AdminRepository(private val context: Context) {
     suspend fun createMeeting(
         title: String,
         gradeLevel: Int?,
-        startTime: String = "12:45",
-        endTime: String = "13:55",
+        startTime: String = "12:30",
+        endTime: String = "14:00",
         description: String? = null
     ): MeetingEntity = withContext(Dispatchers.IO) {
         val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -117,8 +117,8 @@ class AdminRepository(private val context: Context) {
     suspend fun createMeetingOffline(
         title: String,
         gradeLevel: Int?,
-        startTime: String = "12:45",
-        endTime: String = "13:55",
+        startTime: String = "12:30",
+        endTime: String = "14:00",
         description: String? = null
     ) = createMeeting(title, gradeLevel, startTime, endTime, description)
 
