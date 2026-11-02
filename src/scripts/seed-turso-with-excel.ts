@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 import ExcelJS from 'exceljs';
 import path from 'path';
 import { db } from '../db';
-import { users, deviceStations, meetings, materials, assignments } from '../db/schema';
+import { users, meetings, materials, assignments } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
 async function importStudentsAndSeed() {
@@ -123,21 +123,7 @@ async function importStudentsAndSeed() {
   }
   console.log(`\n✅ Selesai memasukkan ${studentsToInsert.length} siswa!`);
 
-  // 3. Stasiun Laptop
-  console.log('💻 Memastikan 20 Nomor Laptop tersedia...');
-  for (let i = 1; i <= 20; i++) {
-    const padded = i.toString().padStart(2, '0');
-    const stationNumber = `Laptop ${padded}`;
-    await db
-      .insert(deviceStations)
-      .values({
-        station_number: stationNumber,
-        device_name: `Laptop Lab (${padded})`,
-        status: 'available',
-        assigned_notes: `Meja Lab Komputer SDN Pleburan 03`,
-      })
-      .onConflictDoNothing();
-  }
+
 
   // 4. Pastikan Pertemuan Awal tersedia jika belum ada
   console.log('📅 Memeriksa Sesi Pertemuan Awal...');

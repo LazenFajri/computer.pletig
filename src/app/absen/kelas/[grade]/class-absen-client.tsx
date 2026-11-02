@@ -8,7 +8,6 @@ import {
   submitAttendanceAction,
   openQuickSessionForGradeAction,
   toggleMeetingOpenAction,
-  resetLaptopSessionAction,
 } from '@/app/actions/attendance-actions';
 import type { GradeLevel, SessionUser } from '@/lib/auth-types';
 import type { ActiveSessionResult } from '@/lib/attendance';
@@ -99,12 +98,22 @@ export default function ClassAbsenClient({
   const [deviceCapacity, setDeviceCapacity] = useState<number>(initialCapacity || 2);
   const isSubmittingRef = useRef(false);
 
+  // Helper Deteksi Shift Otomatis (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00 WIB)
+  const getCurrentShift = (): 1 | 2 => {
+    if (sessionStatus?.activeShift === 1 || sessionStatus?.activeShift === 2) {
+      return sessionStatus.activeShift;
+    }
+    const now = new Date();
+    const wibMinutes = ((now.getUTCHours() + 7) % 24) * 60 + now.getUTCMinutes();
+    return wibMinutes >= 800 ? 2 : 1; // 13:20 WIB = 800 menit
+  };
+
   // Helper Proteksi Lapis 2: Device / Browser Session Locking (Scoped per Sesi & Rombel)
-  // Sesi 1 (12:30 - 13:20) dan Sesi 2 (13:20 - 14:00) memiliki kuota mandiri pada laptop yang sama
+  // Sesi 1 (12:30 - 13:20) dan Sesi 2 (13:20 - 14:00) otomatis memiliki kuota mandiri pada laptop yang sama
   const getDeviceStudents = (meetingId?: string | null): string[] => {
     if (typeof window === 'undefined' || !meetingId) return [];
     try {
-      const shift = sessionStatus?.activeShift || 1;
+      const shift = getCurrentShift();
       const r = rombel && rombel !== 'all' ? rombel : 'all';
       const scopedKey = `pletig_dev_students_${meetingId}_${r}_s${shift}`;
       const localVal = localStorage.getItem(scopedKey);
@@ -127,7 +136,7 @@ export default function ClassAbsenClient({
   const recordDeviceStudent = (meetingId: string, name: string) => {
     if (typeof window === 'undefined') return;
     try {
-      const shift = sessionStatus?.activeShift || 1;
+      const shift = getCurrentShift();
       const r = rombel && rombel !== 'all' ? rombel : 'all';
       const scopedKey = `pletig_dev_students_${meetingId}_${r}_s${shift}`;
       const existing = getDeviceStudents(meetingId);
@@ -138,22 +147,6 @@ export default function ClassAbsenClient({
       setDeviceStudentsCount(existing.length);
     } catch {
       // non-blocking
-    }
-  };
-
-  const handleResetDeviceLock = async () => {
-    try {
-      if (selectedMeetingId) {
-        const shift = sessionStatus?.activeShift || 1;
-        const r = rombel && rombel !== 'all' ? rombel : 'all';
-        localStorage.removeItem(`pletig_dev_students_${selectedMeetingId}_${r}_s${shift}`);
-        localStorage.removeItem(`pletig_dev_students_${selectedMeetingId}`);
-        await resetLaptopSessionAction(selectedMeetingId, r, shift);
-      }
-      setDeviceStudentsCount(0);
-      setErrorMsg(null);
-    } catch {
-      setDeviceStudentsCount(0);
     }
   };
 
@@ -332,7 +325,7 @@ export default function ClassAbsenClient({
         sessionToken: cleanToken,
         laptopCapacity: deviceCapacity,
         className: rombel || targetStudent.class_name || null,
-        shift: sessionStatus?.activeShift || 1,
+        shift: getCurrentShift(),
       });
 
       if (!res.success) {
@@ -970,7 +963,7 @@ export default function ClassAbsenClient({
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-white border border-amber-200 text-amber-900 shadow-2xs shrink-0">
                     <Laptop className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Laptop ini: {deviceStudentsCount}/{deviceCapacity} Siswa ({sessionStatus?.activeShiftLabel ? `Sesi ${sessionStatus.activeShift}` : 'Sesi Ini'})</span>
+                    <span>Laptop ini: {deviceStudentsCount}/{deviceCapacity} Siswa (Sesi {getCurrentShift()})</span>
                   </div>
                   <Link
                     href={`/absen/kelas/${grade}/${rombel || 'all'}/mode`}
@@ -978,15 +971,6 @@ export default function ClassAbsenClient({
                   >
                     Ganti Mode
                   </Link>
-                  <button
-                    type="button"
-                    onClick={handleResetDeviceLock}
-                    className="text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-xl border border-blue-200 transition-colors cursor-pointer flex items-center gap-1"
-                    title="Reset kuota laptop ini jika berganti sesi atau siswa baru"
-                  >
-                    <RefreshCw className="w-3 h-3" />
-                    <span>Ganti Sesi / Siswa Baru</span>
-                  </button>
                 </div>
               </div>
 
@@ -1027,21 +1011,11 @@ export default function ClassAbsenClient({
               </p>
 
               {deviceStudentsCount >= deviceCapacity && !getDeviceStudents(selectedMeetingId).some((n) => n.toLowerCase() === (selectedStudent?.name || '').toLowerCase()) && (
-                <div className="p-3 rounded-2xl bg-amber-100/90 text-amber-900 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 font-medium border border-amber-300">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
-                    <span>
-                      Laptop ini sudah dipakai absen {deviceCapacity} orang ({deviceCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}) untuk sesi/rombel ini.
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleResetDeviceLock}
-                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white rounded-xl text-[11px] font-bold shadow-xs transition-all flex items-center gap-1 shrink-0 cursor-pointer"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>Reset untuk Sesi 2 / Siswa Baru</span>
-                  </button>
+                <div className="p-3 rounded-2xl bg-amber-100/90 text-amber-900 text-xs flex items-center gap-2.5 font-medium border border-amber-300">
+                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span>
+                    Laptop ini sudah dipakai absen {deviceCapacity} orang ({deviceCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}) untuk Sesi {getCurrentShift()}. Pergantian ke sesi berikutnya otomatis dibuka sesuai jam lab (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00 WIB).
+                  </span>
                 </div>
               )}
             </div>

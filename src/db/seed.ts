@@ -4,7 +4,7 @@ dotenv.config();
 
 import bcrypt from 'bcryptjs';
 import { db } from './index';
-import { users, deviceStations, meetings, materials, assignments } from './schema';
+import { users, meetings, materials, assignments } from './schema';
 
 async function seed() {
   console.log('🌱 Memulai proses seeding database computer.pletig SDN Pleburan 03...');
@@ -156,33 +156,7 @@ async function seed() {
       });
   }
 
-  // 4. Data 20 Device Stations (Laptop 01 - Laptop 20)
-  console.log('💻 Menambahkan 20 Nomor Station / Laptop Lab Komputer...');
-  const laptopBrands = ['Lenovo ThinkPad', 'Asus VivoBook', 'Acer Aspire', 'HP Pavilion'];
 
-  for (let i = 1; i <= 20; i++) {
-    const paddedNum = i.toString().padStart(2, '0');
-    const stationNumber = `Laptop ${paddedNum}`;
-    const brand = laptopBrands[(i - 1) % laptopBrands.length];
-    const tableNumber = Math.ceil(i / 2);
-    const position = i % 2 === 1 ? 'Sisi Kiri' : 'Sisi Kanan';
-
-    await db
-      .insert(deviceStations)
-      .values({
-        station_number: stationNumber,
-        device_name: `${brand} (Unit #${paddedNum})`,
-        status: i === 18 ? 'maintenance' : 'available',
-        assigned_notes: `Meja ${tableNumber} - ${position} (Lab Komputer Utama)`,
-      })
-      .onConflictDoUpdate({
-        target: deviceStations.station_number,
-        set: {
-          device_name: `${brand} (Unit #${paddedNum})`,
-          assigned_notes: `Meja ${tableNumber} - ${position} (Lab Komputer Utama)`,
-        },
-      });
-  }
 
   // 5. Data Pertemuan Awal (Pertemuan 1, 2, 3)
   console.log('📅 Menambahkan data pertemuan awal (Meetings)...');

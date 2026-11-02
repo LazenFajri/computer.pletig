@@ -8,7 +8,7 @@ dotenv.config();
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
 import * as schema from '../db/schema';
-import { users, deviceStations, meetings, materials, assignments } from '../db/schema';
+import { users, meetings, materials, assignments } from '../db/schema';
 import bcrypt from 'bcryptjs';
 import ExcelJS from 'exceljs';
 import { count } from 'drizzle-orm';
@@ -142,22 +142,7 @@ async function seedRealTurso() {
   }
   console.log(`\n✅ Seluruh ${studentsToInsert.length} siswa resmi tersimpan di Turso!`);
 
-  // 3. Stasiun Laptop
-  console.log('\n💻 3. Menyimpan 20 Slot Laptop Lab Komputer...');
-  for (let i = 1; i <= 20; i++) {
-    const padded = i.toString().padStart(2, '0');
-    const stationNumber = `Laptop ${padded}`;
-    await tursoDb
-      .insert(deviceStations)
-      .values({
-        station_number: stationNumber,
-        device_name: `Laptop Lab (${padded})`,
-        status: 'available',
-        assigned_notes: `Meja Lab Komputer SDN Pleburan 03`,
-      })
-      .onConflictDoNothing();
-  }
-  console.log('✅ 20 Slot Laptop berhasil disiapkan di Turso.');
+
 
   // 4. Sesi Pertemuan Awal
   console.log('\n📅 4. Membuat Sesi Pertemuan Awal Terbuka...');
@@ -205,13 +190,11 @@ async function seedRealTurso() {
   // 5. Verifikasi Total
   const [totalUsers] = await tursoDb.select({ count: count() }).from(users);
   const [totalMeetings] = await tursoDb.select({ count: count() }).from(meetings);
-  const [totalStations] = await tursoDb.select({ count: count() }).from(deviceStations);
 
   console.log('\n=============================================');
   console.log('🎉 MIGRASI KE TURSO BERHASIL SEMPURNA!');
   console.log(`Total User di Turso: ${totalUsers.count}`);
   console.log(`Total Sesi Pertemuan: ${totalMeetings.count}`);
-  console.log(`Total Laptop: ${totalStations.count}`);
   console.log('=============================================');
 }
 

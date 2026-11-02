@@ -237,7 +237,7 @@ export async function submitAttendanceAction(
     if (deviceStudents.length >= effectiveCapacity && !isAlreadyOnThisDevice) {
       return {
         success: false,
-        error: `Laptop ini telah diatur untuk maksimal ${effectiveCapacity} siswa (${effectiveCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}) pada Sesi ${currentShift} (${currentRombel !== 'all' ? `Rombel ${currentRombel}` : 'Lab'}). Jika kamu berganti sesi atau siswa baru, silakan gunakan tombol [Ganti Sesi / Siswa Baru] di laptop ini.`,
+        error: `Laptop ini telah diatur untuk maksimal ${effectiveCapacity} siswa (${effectiveCapacity === 1 ? '1 Laptop 1 Siswa' : '1 Laptop 2 Siswa'}) pada Sesi ${currentShift} (${currentRombel !== 'all' ? `Rombel ${currentRombel}` : 'Lab'}). Kuota sesi berikutnya terbuka otomatis sesuai jam lab (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00 WIB).`,
       };
     }
 
@@ -521,6 +521,14 @@ export async function resetLaptopSessionAction(
   shift?: number | null
 ): Promise<ActionState> {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || (currentUser.role !== 'superadmin' && currentUser.role !== 'guru')) {
+      return {
+        success: false,
+        error: 'Akses ditolak: Hanya Pembina / Guru yang berwenang mereset kuota laptop.',
+      };
+    }
+
     const cookieStore = await cookies();
     if (meetingId) {
       const s = shift || 1;

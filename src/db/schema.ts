@@ -52,31 +52,6 @@ export const sessions = sqliteTable('sessions', {
     .$defaultFn(() => new Date()),
 });
 
-// ==========================================
-// 3. DEVICE STATIONS (Laptop Lab Komputer)
-// ==========================================
-export const deviceStations = sqliteTable('device_stations', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  station_number: text('station_number').notNull().unique(), // e.g. 'Laptop 01' - 'Laptop 20'
-  device_name: text('device_name'), // e.g. 'Lenovo ThinkPad E14', 'Asus VivoBook'
-  status: text('status', {
-    enum: ['available', 'occupied', 'maintenance', 'broken'],
-  })
-    .notNull()
-    .default('available'),
-  assigned_notes: text('assigned_notes'), // Catatan posisi/kondisi meja
-  current_user_id: text('current_user_id').references(() => users.id, {
-    onDelete: 'set null',
-  }),
-  created_at: integer('created_at', { mode: 'timestamp_ms' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updated_at: integer('updated_at', { mode: 'timestamp_ms' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
 
 // ==========================================
 // 4. MEETINGS (Pertemuan Ekstrakurikuler Dinamis)
@@ -228,21 +203,10 @@ export const submissions = sqliteTable('submissions', {
 // DRIZZLE RELATIONS
 // ==========================================
 
-export const usersRelations = relations(users, ({ many, one }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
   attendances: many(attendance, { relationName: 'userAttendances' }),
   partnerAttendances: many(attendance, { relationName: 'partnerAttendances' }),
   submissions: many(submissions, { relationName: 'userSubmissions' }),
-  assignedStation: one(deviceStations, {
-    fields: [users.id],
-    references: [deviceStations.current_user_id],
-  }),
-}));
-
-export const deviceStationsRelations = relations(deviceStations, ({ one }) => ({
-  currentUser: one(users, {
-    fields: [deviceStations.current_user_id],
-    references: [users.id],
-  }),
 }));
 
 export const meetingsRelations = relations(meetings, ({ many }) => ({
@@ -305,9 +269,6 @@ export type NewUser = typeof users.$inferInsert;
 
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
-
-export type DeviceStation = typeof deviceStations.$inferSelect;
-export type NewDeviceStation = typeof deviceStations.$inferInsert;
 
 export type Meeting = typeof meetings.$inferSelect;
 export type NewMeeting = typeof meetings.$inferInsert;
