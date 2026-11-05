@@ -9,73 +9,67 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-playful-grid flex flex-col justify-between p-4 sm:p-6 md:p-10">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-between p-4 sm:p-6 md:p-10">
       {/* Top Bar */}
       <div className="max-w-3xl mx-auto w-full flex items-center justify-between mb-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-200 shadow-xs transition-all hover:-translate-x-0.5"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 bg-white px-3.5 py-1.5 rounded-lg border border-slate-200 shadow-xs transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Beranda</span>
         </Link>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-white/80 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-slate-200">
-          <Laptop className="w-4 h-4 text-teal-600" />
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-600 bg-white px-3.5 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+          <Laptop className="w-4 h-4 text-slate-500" />
           <span>SDN Pleburan 03</span>
         </div>
       </div>
 
       {/* Main 404 Card */}
-      <div className="max-w-2xl mx-auto w-full my-auto">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-          {/* Header Accent */}
-          <div className="h-3 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500" />
-
+      <div className="max-w-xl mx-auto w-full my-auto">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in duration-200">
           <div className="p-6 sm:p-10 text-center">
             {/* Status Code Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold font-mono tracking-wider mb-5 shadow-xs bg-amber-50 text-amber-800 border border-amber-200">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-xs font-mono font-medium mb-5 bg-amber-50 text-amber-700 border border-amber-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
               <span>HTTP 404 • NOT FOUND</span>
             </div>
 
-            {/* Playful Number & Icon */}
-            <div className="relative inline-block mb-6">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto shadow-inner text-amber-600">
-                <HelpCircle className="w-12 h-12 text-amber-600" />
+            {/* Icon */}
+            <div className="inline-block mb-4">
+              <div className="w-12 h-12 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700">
+                <HelpCircle className="w-6 h-6" />
               </div>
-              <span className="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-xl bg-slate-900 text-white font-mono text-xs font-bold shadow-md">
-                404
-              </span>
             </div>
 
             {/* Title & Subtitle */}
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mb-2">
               Halaman Tidak Ditemukan
             </h1>
-            <p className="text-sm sm:text-base font-semibold text-slate-600 mb-5">
+            <p className="text-xs sm:text-sm text-slate-500 mb-6 max-w-sm mx-auto">
               Sepertinya alamat web yang kamu buka keliru atau belum dibuat oleh Pembina.
             </p>
 
             {/* Helpful Quick Links Box */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-5 text-left mb-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-3">
-                Mau pergi ke mana sekarang?
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-left mb-6">
+              <span className="text-xs font-semibold text-slate-500 block mb-2.5">
+                Navigasi Cepat
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Link
                   href="/absen"
-                  className="p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all flex items-center justify-center gap-2.5 text-xs font-bold text-slate-800 shadow-xs"
+                  className="p-2.5 rounded-lg bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 text-xs font-medium text-slate-800 shadow-xs"
                 >
-                  <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span>Presensi Siswa</span>
                 </Link>
 
                 <Link
                   href="/tugas"
-                  className="p-3 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all flex items-center justify-center gap-2.5 text-xs font-bold text-slate-800 shadow-xs"
+                  className="p-2.5 rounded-lg bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 text-xs font-medium text-slate-800 shadow-xs"
                 >
-                  <FileCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                  <FileCheck className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span>Tugas Praktikum</span>
                 </Link>
               </div>
@@ -84,7 +78,7 @@ export default function NotFound() {
             {/* Primary Action Button */}
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-heading font-bold text-sm shadow-md shadow-blue-500/20 transition-all cursor-pointer hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm shadow-xs transition-colors cursor-pointer"
             >
               <Home className="w-4 h-4" />
               <span>Kembali ke Beranda Utama</span>
@@ -92,15 +86,15 @@ export default function NotFound() {
           </div>
 
           {/* Footer note */}
-          <div className="bg-slate-50 border-t border-slate-100 px-6 py-4 text-center text-xs text-slate-400">
+          <div className="bg-slate-50 border-t border-slate-100 px-6 py-3.5 text-center text-xs text-slate-400">
             Portal Ekstrakurikuler Komputer • SDN Pleburan 03 Semarang
           </div>
         </div>
       </div>
 
       {/* Footer Info */}
-      <div className="text-center text-[11px] text-slate-400 mt-4">
-        Jika ada link yang rusak, hubungi Pembina Lab Komputer: Muhammad Fajri Setyawan
+      <div className="text-center text-xs text-slate-400 mt-4">
+        Jika ada kendala tautan rusak, hubungi Pembina Lab Komputer: Muhammad Fajri Setyawan
       </div>
     </div>
   );

@@ -1,18 +1,11 @@
 import type { Metadata } from 'next';
-import { Fredoka, Plus_Jakarta_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 
-const fredoka = Fredoka({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-fredoka',
+  variable: '--font-sans',
   weight: ['400', '500', '600', '700'],
-  display: 'swap',
-});
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-plus-jakarta',
-  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
 });
 
@@ -37,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={`${fredoka.variable} ${plusJakarta.variable}`}>
-      <body className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-amber-300 selection:text-slate-900 overflow-x-hidden overflow-y-auto">
+    <html lang="id" className={inter.variable}>
+      <body className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-slate-200 selection:text-slate-900 overflow-x-hidden overflow-y-auto">
         <PwaRegister />
         <PullToRefresh />
         {children}

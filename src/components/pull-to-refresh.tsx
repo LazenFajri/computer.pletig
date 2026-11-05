@@ -54,7 +54,7 @@ export default function PullToRefresh() {
 
     // Tahan visual loading 950ms agar user merasa proses refresh benar-benar tuntas
     setTimeout(() => {
-      // 3. Tampilkan status sukses "Data berhasil diperbarui ✓"
+      // 3. Tampilkan status sukses "Data berhasil diperbarui"
       setRefreshState('success');
 
       setTimeout(() => {
@@ -248,14 +248,14 @@ export default function PullToRefresh() {
       }}
     >
       <div
-        className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-xl border backdrop-blur-md transition-all duration-200 ${
+        className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full shadow-sm border transition-all duration-200 text-xs font-medium ${
           refreshState === 'success'
-            ? 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-600/30 scale-100'
+            ? 'bg-slate-900 text-white border-slate-800'
             : refreshState === 'refreshing'
-            ? 'bg-purple-600 text-white border-purple-500 shadow-purple-600/30 scale-100'
+            ? 'bg-slate-900 text-white border-slate-800'
             : isTriggered
-            ? 'bg-indigo-600 text-white border-indigo-500 shadow-indigo-600/30 scale-105'
-            : 'bg-white/95 text-slate-800 border-slate-200 shadow-slate-900/15 scale-95'
+            ? 'bg-slate-900 text-white border-slate-800'
+            : 'bg-white text-slate-800 border-slate-200'
         }`}
       >
         {refreshState === 'success' ? (
@@ -270,9 +270,9 @@ export default function PullToRefresh() {
             }}
           />
         )}
-        <span className="text-xs font-heading font-bold select-none tracking-tight">
+        <span className="text-xs font-medium select-none tracking-tight">
           {refreshState === 'success'
-            ? 'Data berhasil diperbarui ✓'
+            ? 'Data berhasil diperbarui'
             : refreshState === 'refreshing'
             ? 'Memperbarui data...'
             : isTriggered

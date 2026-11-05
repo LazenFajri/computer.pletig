@@ -74,19 +74,19 @@ export default function LaptopModeClient({
   };
 
   return (
-    <div className="min-h-screen bg-playful-grid flex flex-col justify-between p-3 sm:p-6 md:p-8 pb-24 sm:pb-8 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-between p-4 sm:p-6 md:p-8 pb-24 sm:pb-8 overflow-x-hidden">
       {/* Top Navbar */}
-      <div className="max-w-4xl mx-auto w-full flex items-center justify-between mb-4 sm:mb-6">
+      <div className="max-w-4xl mx-auto w-full flex items-center justify-between mb-6">
         <Link
           href={`/absen?grade=${grade}`}
-          className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 bg-white/90 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl border border-slate-200 shadow-xs transition-all hover:-translate-x-0.5 cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900 bg-white px-3.5 py-1.5 rounded-lg border border-slate-200 shadow-xs transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <ArrowLeft className="w-4 h-4 text-slate-500" aria-hidden="true" />
           <span>Ganti Rombel</span>
         </Link>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold text-slate-600 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-200">
-          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-700 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
           <span>Rombel {rombel} • Kelas {grade} SD</span>
         </div>
       </div>
@@ -95,24 +95,26 @@ export default function LaptopModeClient({
       <main className="max-w-3xl mx-auto w-full flex-1 flex flex-col justify-center my-auto py-4">
         {/* Header Title */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 mb-3 sm:mb-4">
-            <Laptop className="w-7 h-7 sm:w-8 sm:h-8" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-900 text-white shadow-xs mb-3">
+            <Laptop className="w-6 h-6" aria-hidden="true" />
           </div>
 
-          <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3.5 py-1 rounded-full text-xs font-bold mb-2.5 border border-blue-200/80">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span>Langkah Persiapan Presensi • Rombel {rombel}</span>
+          <div className="block">
+            <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-medium mb-2.5 border border-slate-200">
+              <Sparkles className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
+              <span>Persiapan Presensi • Rombel {rombel}</span>
+            </span>
           </div>
 
-          <h1 className="font-heading text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
             Pilih Penggunaan Laptop Ini
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1.5 max-w-lg mx-auto leading-relaxed">
-            Berapa siswa yang menggunakan laptop ini untuk sesi praktikum hari ini? Pilihanmu akan otomatis menyesuaikan kuota <strong>Kode Token Sesi Lab</strong>.
+          <p className="text-xs sm:text-sm text-slate-500 font-normal mt-1.5 max-w-lg mx-auto leading-relaxed">
+            Berapa siswa yang menggunakan laptop ini untuk sesi praktikum hari ini? Pilihan akan otomatis menyesuaikan batas presensi laptop.
           </p>
 
           {meetingTitle && (
-            <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-100/90 px-3 py-1 rounded-xl">
+            <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-white px-3 py-1 rounded-md border border-slate-200">
               <span>Sesi: <strong>{meetingTitle}</strong></span>
             </div>
           )}
@@ -134,22 +136,22 @@ export default function LaptopModeClient({
                 !isSaving && handleSelectMode(1);
               }
             }}
-            className={`bg-white rounded-3xl p-6 sm:p-7 border-3 transition-all cursor-pointer flex flex-col justify-between group relative text-left shadow-md hover:shadow-xl hover:-translate-y-1 ${
+            className={`bg-white rounded-xl p-6 border transition-colors cursor-pointer flex flex-col justify-between group relative text-left shadow-xs ${
               selectedCapacity === 1
-                ? 'border-blue-600 ring-4 ring-blue-500/15 shadow-blue-500/10'
-                : 'border-slate-200 hover:border-blue-400'
+                ? 'border-indigo-600 ring-2 ring-indigo-500/20'
+                : 'border-slate-200 hover:border-slate-300'
             }`}
           >
-            {/* Badge Rekomendasi / Pilihan */}
+            {/* Badge */}
             <div className="flex items-center justify-between gap-2 mb-4">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full flex items-center gap-1">
-                <User className="w-3 h-3 text-blue-600" />
+              <span className="text-[11px] font-medium uppercase tracking-wider text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                 Mode Mandiri
               </span>
 
               {selectedCapacity === 1 && (
-                <span className="text-xs font-bold text-emerald-600 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="text-xs font-medium text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                   Terpilih
                 </span>
               )}
@@ -157,29 +159,29 @@ export default function LaptopModeClient({
 
             {/* Icon & Title */}
             <div>
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-500 to-sky-500 text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform mb-4">
+              <div className="w-12 h-12 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-lg mb-4 shadow-xs group-hover:bg-indigo-600 transition-colors">
                 <div className="flex items-center -space-x-1">
-                  <Laptop className="w-7 h-7" />
-                  <span className="text-xs font-bold bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center shadow-xs">1</span>
+                  <Laptop className="w-5 h-5" aria-hidden="true" />
+                  <span className="text-[10px] font-bold bg-white text-slate-900 rounded-full w-4 h-4 flex items-center justify-center ml-0.5">1</span>
                 </div>
               </div>
 
-              <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900 group-hover:text-blue-600 transition-colors">
-                1 Laptop 1 Orang
+              <h2 className="text-lg font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                1 Laptop 1 Siswa
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed">
+              <p className="text-xs text-slate-500 font-normal mt-1 leading-relaxed">
                 Saya mengerjakan praktikum <strong>sendirian</strong> di laptop ini tanpa teman sebangku.
               </p>
 
               {/* Point Keunggulan */}
               <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 text-xs text-slate-600">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                  <ShieldCheck className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
                   <span>Kode Token Lab berlaku untuk <strong>1 siswa</strong></span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Status token menampilkan: <strong>0/1 Siswa</strong></span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
+                  <span>Status token: <strong>0/1 Siswa</strong></span>
                 </div>
               </div>
             </div>
@@ -188,10 +190,10 @@ export default function LaptopModeClient({
             <div className="pt-5 mt-4">
               <button
                 type="button"
-                className="w-full py-3 px-4 rounded-2xl bg-blue-600 group-hover:bg-blue-700 text-white font-heading font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-lg bg-slate-900 group-hover:bg-indigo-600 text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
                 <span>Pilih 1 Siswa (Sendiri)</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -207,22 +209,22 @@ export default function LaptopModeClient({
                 !isSaving && handleSelectMode(2);
               }
             }}
-            className={`bg-white rounded-3xl p-6 sm:p-7 border-3 transition-all cursor-pointer flex flex-col justify-between group relative text-left shadow-md hover:shadow-xl hover:-translate-y-1 ${
+            className={`bg-white rounded-xl p-6 border transition-colors cursor-pointer flex flex-col justify-between group relative text-left shadow-xs ${
               selectedCapacity === 2
-                ? 'border-purple-600 ring-4 ring-purple-500/15 shadow-purple-500/10'
-                : 'border-slate-200 hover:border-purple-400'
+                ? 'border-indigo-600 ring-2 ring-indigo-500/20'
+                : 'border-slate-200 hover:border-slate-300'
             }`}
           >
             {/* Badge */}
             <div className="flex items-center justify-between gap-2 mb-4">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-full flex items-center gap-1">
-                <Users className="w-3 h-3 text-purple-600" />
+              <span className="text-[11px] font-medium uppercase tracking-wider text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                 Mode Berpasangan
               </span>
 
               {selectedCapacity === 2 && (
-                <span className="text-xs font-bold text-emerald-600 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="text-xs font-medium text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                   Terpilih
                 </span>
               )}
@@ -230,29 +232,29 @@ export default function LaptopModeClient({
 
             {/* Icon & Title */}
             <div>
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-700 text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-purple-600/25 group-hover:scale-105 transition-transform mb-4">
+              <div className="w-12 h-12 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-lg mb-4 shadow-xs group-hover:bg-indigo-600 transition-colors">
                 <div className="flex items-center -space-x-1">
-                  <Laptop className="w-7 h-7" />
-                  <span className="text-xs font-bold bg-white text-purple-600 rounded-full w-5 h-5 flex items-center justify-center shadow-xs">2</span>
+                  <Laptop className="w-5 h-5" aria-hidden="true" />
+                  <span className="text-[10px] font-bold bg-white text-slate-900 rounded-full w-4 h-4 flex items-center justify-center ml-0.5">2</span>
                 </div>
               </div>
 
-              <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900 group-hover:text-purple-600 transition-colors">
-                1 Laptop 2 Orang
+              <h2 className="text-lg font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                1 Laptop 2 Siswa
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed">
+              <p className="text-xs text-slate-500 font-normal mt-1 leading-relaxed">
                 Saya berbagi laptop ini <strong>berdua</strong> bersama 1 teman sebangku di lab komputer.
               </p>
 
               {/* Point Keunggulan */}
               <div className="mt-4 pt-4 border-t border-slate-100 space-y-2 text-xs text-slate-600">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0" />
+                  <ShieldCheck className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
                   <span>Kode Token Lab mengizinkan <strong>2 siswa</strong></span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Status token menampilkan: <strong>0/2 Siswa</strong></span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
+                  <span>Status token: <strong>0/2 Siswa</strong></span>
                 </div>
               </div>
             </div>
@@ -261,26 +263,26 @@ export default function LaptopModeClient({
             <div className="pt-5 mt-4">
               <button
                 type="button"
-                className="w-full py-3 px-4 rounded-2xl bg-purple-600 group-hover:bg-purple-700 text-white font-heading font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-purple-600/20 transition-all cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-lg bg-slate-900 group-hover:bg-indigo-600 text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
                 <span>Pilih 2 Siswa (Berdua)</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Petunjuk Tambahan */}
-        <div className="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-2xl text-xs text-blue-900 flex items-start gap-2.5 max-w-xl mx-auto">
-          <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+        <div className="p-3.5 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-600 flex items-start gap-2.5 max-w-xl mx-auto">
+          <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" aria-hidden="true" />
           <p className="leading-relaxed">
-            Jika kamu salah memilih, kamu masih bisa mengganti mode penggunaan laptop ini kapan saja pada form presensi berikutnya.
+            Jika kamu salah memilih, kamu masih bisa mengganti mode penggunaan laptop ini kapan saja pada tombol Mode di sudut kanan atas.
           </p>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="text-center text-xs text-slate-400 py-3 max-w-4xl mx-auto w-full">
+      <footer className="text-center text-xs text-slate-400 py-4 max-w-4xl mx-auto w-full">
         SDN Pleburan 03 Semarang • Ekstrakurikuler Komputer
       </footer>
     </div>

@@ -49,59 +49,59 @@ export default async function HomePage() {
   }));
 
   return (
-    <div className="min-h-screen bg-playful-grid flex flex-col pb-24 sm:pb-0 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col pb-24 sm:pb-0 overflow-x-hidden">
       {/* Top Notification / School Bar */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-600 text-white text-xs font-medium py-1.5 sm:py-2 px-3 sm:px-4 shadow-xs">
+      <div className="bg-slate-900 text-slate-200 text-xs font-medium py-2 px-4 border-b border-slate-800">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-2 truncate">
-            <span className="inline-flex items-center justify-center bg-white/20 rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider shrink-0">
+          <div className="flex items-center gap-2 truncate">
+            <span className="inline-flex items-center justify-center bg-slate-800 text-slate-200 rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider shrink-0 border border-slate-700">
               SDN Pleburan 03
             </span>
-            <span className="hidden sm:inline text-blue-100 text-xs truncate">
+            <span className="hidden sm:inline text-slate-400 text-xs truncate">
               Laboratorium Komputer & Literasi Digital
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-blue-100 text-[11px] sm:text-xs shrink-0">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="hidden sm:inline">Jam Absen:</span>
+          <div className="flex items-center gap-2 text-slate-300 text-xs shrink-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="hidden sm:inline text-slate-400">Jam Absen:</span>
             <span className="font-semibold text-white">12:30 - 14:00 WIB</span>
           </div>
         </div>
       </div>
 
       {/* Main Header / Navigation */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl overflow-hidden bg-white border border-slate-200/80 shadow-md shadow-blue-600/10 shrink-0 flex items-center justify-center">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg overflow-hidden bg-white border border-slate-200 shrink-0 flex items-center justify-center">
               <img src="/logo.jpg" alt="Logo computer.pletig" className="w-full h-full object-cover" />
             </div>
             <div>
-              <h1 className="font-heading text-lg sm:text-2xl font-bold tracking-tight text-slate-900 leading-tight">
-                computer<span className="text-blue-600">.pletig</span>
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-tight">
+                computer<span className="text-indigo-600">.pletig</span>
               </h1>
-              <p className="text-[10px] sm:text-xs text-slate-500 font-medium">
+              <p className="text-[11px] text-slate-500 font-normal">
                 Portal Ekstrakurikuler Komputer
               </p>
             </div>
           </Link>
 
-          {/* Desktop Navigation Links (Disembunyikan di Ponsel karena sudah ada Bottom Navigation) */}
-          <div className="hidden sm:flex items-center gap-2 sm:gap-3">
+          {/* Desktop Navigation Links */}
+          <div className="hidden sm:flex items-center gap-2.5">
             <Link
               href="/absen"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-heading font-bold px-3.5 sm:px-4 py-2 rounded-2xl shadow-sm transition-all flex items-center gap-1.5 hover:-translate-y-0.5"
+              className="bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-medium px-4 py-2 rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
             >
-              <CalendarCheck className="w-4 h-4" />
+              <CalendarCheck className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               <span>Presensi</span>
             </Link>
 
             <Link
               href="/tugas"
-              className="text-slate-700 hover:text-amber-600 hover:bg-amber-50 text-xs sm:text-sm font-heading font-bold px-3 py-2 rounded-2xl border border-slate-200 transition-all flex items-center gap-1.5"
+              className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg border border-slate-200 transition-colors flex items-center gap-1.5"
             >
-              <FileText className="w-4 h-4 text-amber-600" />
+              <FileText className="w-4 h-4 text-slate-500" aria-hidden="true" />
               <span>Tugas</span>
             </Link>
 
@@ -109,9 +109,9 @@ export default async function HomePage() {
               <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                 <Link
                   href="/admin/dashboard"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-heading font-bold px-3 py-2 rounded-2xl shadow-sm transition-all flex items-center gap-1.5"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3.5 py-2 rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
                 >
-                  <ShieldCheck className="w-4 h-4" />
+                  <ShieldCheck className="w-4 h-4" aria-hidden="true" />
                   <span>Dashboard Pembina</span>
                 </Link>
                 <LogoutButton variant="pill" />
@@ -121,45 +121,41 @@ export default async function HomePage() {
         </div>
       </header>
 
-      {/* Hero Section (Dioptimalkan agar tidak memanjang berlebihan di ponsel) */}
-      <section className="pt-4 sm:pt-8 pb-3 sm:pb-8 px-4 sm:px-6">
+      {/* Hero Section */}
+      <section className="pt-6 sm:pt-8 pb-4 sm:pb-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-sky-600 rounded-3xl p-5 sm:p-10 text-white shadow-xl shadow-blue-600/15 relative overflow-hidden">
-            {/* Background decorative circles */}
-            <div className="absolute -right-10 -bottom-10 w-60 sm:w-72 h-60 sm:h-72 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-            <div className="absolute left-1/2 -top-20 w-48 sm:w-60 h-48 sm:h-60 bg-yellow-300/10 rounded-full blur-xl pointer-events-none"></div>
-
+          <div className="bg-slate-900 rounded-xl p-6 sm:p-10 text-white border border-slate-800 shadow-sm relative overflow-hidden">
             <div className="relative z-10 max-w-2xl">
-              <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/15 backdrop-blur-sm px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold text-white mb-3 border border-white/20">
-                <Laptop className="w-3.5 h-3.5 text-blue-200" />
+              <div className="inline-flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-full text-xs font-medium text-slate-300 mb-4 border border-slate-700">
+                <Laptop className="w-4 h-4 text-indigo-400" aria-hidden="true" />
                 <span>SDN Pleburan 03 Semarang</span>
               </div>
 
-              <h2 className="font-heading text-2xl sm:text-4xl md:text-5xl font-bold leading-tight mb-2 sm:mb-4 text-white">
-                Belajar Komputer Jadi Mudah dan Menyenangkan
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-3 text-white">
+                Belajar Komputer Jadi Terarah dan Terstruktur
               </h2>
 
-              <p className="text-blue-100 text-xs sm:text-base mb-4 sm:mb-6 leading-relaxed line-clamp-2 sm:line-clamp-none">
-                Platform kegiatan praktikum komputer SDN Pleburan 03. Siswa cukup memilih kelas dan klik namanya untuk presensi tanpa repot password.
+              <p className="text-slate-300 text-xs sm:text-sm mb-6 leading-relaxed">
+                Platform kegiatan praktikum komputer SDN Pleburan 03. Siswa dapat melakukan presensi mandiri berbasis kelas dan rombel secara teratur.
               </p>
 
               {/* Action Buttons */}
-              <div className="flex flex-row items-center gap-2.5 sm:gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <Link
                   href="/absen"
-                  className="flex-1 sm:flex-none justify-center bg-white text-blue-700 hover:bg-blue-50 font-heading font-bold text-xs sm:text-base px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl shadow-lg transition-all flex items-center gap-1.5 sm:gap-2 active:scale-95"
+                  className="bg-white text-slate-900 hover:bg-slate-100 font-medium text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-xs transition-colors flex items-center gap-2"
                 >
-                  <CalendarCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
-                  <span>Presensi Kehadiran</span>
-                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
+                  <CalendarCheck className="w-4 h-4 text-emerald-600" aria-hidden="true" />
+                  <span>Buka Presensi</span>
+                  <ArrowRight className="w-4 h-4 text-slate-500" aria-hidden="true" />
                 </Link>
 
                 <Link
                   href="#jadwal"
-                  className="flex-none justify-center bg-white/15 hover:bg-white/25 text-white font-heading font-semibold text-xs sm:text-base px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-2xl backdrop-blur-md border border-white/20 transition-all flex items-center gap-1.5 active:scale-95"
+                  className="bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs sm:text-sm px-4 py-2.5 rounded-lg border border-slate-700 transition-colors flex items-center gap-2"
                 >
-                  <Clock className="w-3.5 h-3.5 text-blue-200" />
-                  <span>Jadwal</span>
+                  <Clock className="w-4 h-4 text-slate-400" aria-hidden="true" />
+                  <span>Lihat Jadwal</span>
                 </Link>
               </div>
             </div>
@@ -167,24 +163,24 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* QUICK ACTION APP GRID (Khas Aplikasi: Teks Lengkap Tanpa Terpotong Titik-Titik) */}
+      {/* QUICK ACTION APP GRID */}
       <section className="py-2 sm:py-4 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {/* Action 1: Presensi */}
             <Link
               href="/absen"
-              className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3.5 active:scale-95 group text-left"
+              className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-colors flex flex-col sm:flex-row sm:items-center gap-3.5 text-left group"
             >
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                <CalendarCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                <CalendarCheck className="w-5 h-5" aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <h4 className="font-heading font-bold text-xs sm:text-sm text-slate-900 leading-tight">
+                <h3 className="text-sm font-semibold text-slate-900 leading-tight">
                   Presensi Siswa
-                </h4>
-                <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-tight">
-                  Isi kehadiran harian
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 leading-tight">
+                  Pencatatan kehadiran praktikum
                 </p>
               </div>
             </Link>
@@ -192,17 +188,17 @@ export default async function HomePage() {
             {/* Action 2: Tugas */}
             <Link
               href="/tugas"
-              className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3.5 active:scale-95 group text-left"
+              className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-colors flex flex-col sm:flex-row sm:items-center gap-3.5 text-left group"
             >
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
+              <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5" aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <h4 className="font-heading font-bold text-xs sm:text-sm text-slate-900 leading-tight">
+                <h3 className="text-sm font-semibold text-slate-900 leading-tight">
                   Tugas Praktikum
-                </h4>
-                <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-tight">
-                  Latihan komputer
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 leading-tight">
+                  Pengumpulan latihan komputer
                 </p>
               </div>
             </Link>
@@ -210,17 +206,17 @@ export default async function HomePage() {
             {/* Action 3: Jadwal */}
             <a
               href="#jadwal"
-              className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3.5 active:scale-95 group text-left"
+              className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-colors flex flex-col sm:flex-row sm:items-center gap-3.5 text-left group"
             >
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
+              <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5" aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <h4 className="font-heading font-bold text-xs sm:text-sm text-slate-900 leading-tight">
-                  Jadwal Kelas
-                </h4>
-                <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-tight">
-                  Senin, Selasa, Kamis
+                <h3 className="text-sm font-semibold text-slate-900 leading-tight">
+                  Jadwal Praktikum
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 leading-tight">
+                  Senin, Selasa, dan Kamis
                 </p>
               </div>
             </a>
@@ -228,78 +224,77 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Jadwal Mingguan Ekstrakurikuler (Senin: Kelas 6, Selasa: Kelas 5, Kamis: Kelas 4) */}
-      <section id="jadwal" className="py-4 sm:py-8 px-4 sm:px-6">
+      {/* Jadwal Mingguan Ekstrakurikuler */}
+      <section id="jadwal" className="py-6 sm:py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-4 sm:mb-6">
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">
+          <div className="text-center mb-6">
+            <span className="text-xs font-medium text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
               Jadwal Praktikum Lab
             </span>
-            <h3 className="font-heading text-lg sm:text-2xl font-bold text-slate-800 mt-1">
+            <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-2">
               Jadwal Kelas 4, 5, dan 6
             </h3>
-            <p className="text-slate-500 text-xs mt-0.5">
+            <p className="text-slate-500 text-xs sm:text-sm mt-1">
               Presensi otomatis dibuka pukul 12:30 s.d 14:00 WIB (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00).
             </p>
           </div>
 
-          {/* Schedule Component (Mobile: Ringkas Tab Switcher, Desktop: 3 Kolom - Dinamis dari Sesi Pembina) */}
           <HomeScheduleTabs initialMeetings={serializedMeetings} />
         </div>
       </section>
 
-      {/* 3 Keunggulan Platform (Ringkas & Efisien di Ponsel) */}
-      <section className="py-4 sm:py-8 px-4 sm:px-6">
+      {/* 3 Keunggulan Platform */}
+      <section className="py-6 sm:py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-3xl p-5 sm:p-8 border border-slate-200 shadow-xs">
-            <div className="text-center max-w-xl mx-auto mb-5 sm:mb-8">
-              <h3 className="font-heading text-lg sm:text-2xl font-bold text-slate-900">
-                Ramah Anak & Tanpa Beban Akun
+          <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-xs">
+            <div className="text-center max-w-xl mx-auto mb-6">
+              <h3 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                Terstruktur, Cepat, dan Akuntabel
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Dirancang khusus agar siswa SD langsung belajar tanpa kebingungan kata sandi.
+              <p className="text-xs text-slate-500 mt-1">
+                Dirancang khusus untuk mendukung operasional laboratorium komputer SDN Pleburan 03 Semarang.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
-              <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3 sm:block">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 sm:mb-3">
-                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              <div className="p-4 sm:p-5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-3 sm:block">
+                <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 text-emerald-600 flex items-center justify-center shrink-0 sm:mb-3 shadow-xs">
+                  <CheckCircle2 className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div>
-                  <h4 className="font-heading font-bold text-xs sm:text-base text-slate-900">
-                    Presensi Siswa Cepat
+                  <h4 className="font-semibold text-sm text-slate-900">
+                    Presensi Mandiri Cepat
                   </h4>
-                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed">
-                    Tinggal klik kelas dan nama siswa, tombol presensi langsung aktif.
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Siswa memilih kelas dan namanya, presensi tercatat otomatis tanpa membebani siswa dengan kata sandi.
                   </p>
                 </div>
               </div>
 
-              <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3 sm:block">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 sm:mb-3">
-                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="p-4 sm:p-5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-3 sm:block">
+                <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 text-amber-600 flex items-center justify-center shrink-0 sm:mb-3 shadow-xs">
+                  <FileText className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div>
-                  <h4 className="font-heading font-bold text-xs sm:text-base text-slate-900">
-                    Tugas & Latihan Praktik
+                  <h4 className="font-semibold text-sm text-slate-900">
+                    Penugasan Praktikum
                   </h4>
-                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed">
-                    Pengumpulan hasil latihan mengetik, gambar digital, dan proyek Scratch.
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Pengumpulan hasil latihan mengetik, format dokumen, grafis digital, dan modul latihan.
                   </p>
                 </div>
               </div>
 
-              <div className="p-3.5 sm:p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3 sm:block">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0 sm:mb-3">
-                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="p-4 sm:p-5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-3 sm:block">
+                <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 text-indigo-600 flex items-center justify-center shrink-0 sm:mb-3 shadow-xs">
+                  <ShieldCheck className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <div>
-                  <h4 className="font-heading font-bold text-xs sm:text-base text-slate-900">
-                    Kendali Guru Fleksibel
+                  <h4 className="font-semibold text-sm text-slate-900">
+                    Kendali Pembina Terpadu
                   </h4>
-                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed">
-                    Pembina bisa mengaktifkan sesi tambahan kapan saja sesuai kebutuhan.
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Pembina mengelola sesi, memantau matriks centang kehadiran, serta mengunduh rekapitulasi data.
                   </p>
                 </div>
               </div>
@@ -309,16 +304,16 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto bg-white border-t border-slate-200 py-4 sm:py-6 px-4">
+      <footer className="mt-auto bg-white border-t border-slate-200 py-6 px-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 text-xs text-slate-500 text-center sm:text-left">
           <div className="flex items-center gap-2 justify-center">
-            <span className="font-heading font-bold text-slate-700 text-xs sm:text-sm">
+            <span className="font-semibold text-slate-800 text-xs sm:text-sm">
               computer.pletig
             </span>
             <span>•</span>
             <span>SDN Pleburan 03 Semarang</span>
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-xs text-slate-400">
             Pembina Lab Komputer: Muhammad Fajri Setyawan
           </div>
         </div>

@@ -29,15 +29,6 @@ interface ConfigItem {
   time: string;
   title: string;
   description: string;
-  accentBorder: string;
-  accentBg: string;
-  accentText: string;
-  badgeBg: string;
-  iconBg: string;
-  btnBg: string;
-  btnText: string;
-  borderCard: string;
-  badgeLight: string;
 }
 
 const DEFAULT_CONFIG: Record<number, ConfigItem> = {
@@ -48,15 +39,6 @@ const DEFAULT_CONFIG: Record<number, ConfigItem> = {
     title: 'Pengenalan Komputer & Mouse',
     description:
       'Pengenalan perangkat keras komputer, cara memegang mouse yang benar, etika lab, dan latihan mengetik baris dasar.',
-    accentBorder: 'border-sky-300',
-    accentBg: 'bg-sky-50/50',
-    accentText: 'text-sky-700',
-    badgeBg: 'bg-sky-100 text-sky-800',
-    iconBg: 'bg-sky-500 text-white',
-    btnBg: 'bg-sky-600 hover:bg-sky-700',
-    btnText: 'text-sky-700 hover:text-sky-800',
-    borderCard: 'border-sky-200',
-    badgeLight: 'text-sky-700 bg-sky-50',
   },
   5: {
     grade: 5,
@@ -65,15 +47,6 @@ const DEFAULT_CONFIG: Record<number, ConfigItem> = {
     title: 'Latihan Mengetik 10 Jari',
     description:
       'Latihan mengetik 10 jari, format teks kreatif, menyisipkan gambar, dan pembuatan dokumen tugas sekolah.',
-    accentBorder: 'border-emerald-300',
-    accentBg: 'bg-emerald-50/50',
-    accentText: 'text-emerald-700',
-    badgeBg: 'bg-emerald-100 text-emerald-800',
-    iconBg: 'bg-emerald-500 text-white',
-    btnBg: 'bg-emerald-600 hover:bg-emerald-700',
-    btnText: 'text-emerald-700 hover:text-emerald-800',
-    borderCard: 'border-emerald-200',
-    badgeLight: 'text-emerald-700 bg-emerald-50',
   },
   6: {
     grade: 6,
@@ -82,15 +55,6 @@ const DEFAULT_CONFIG: Record<number, ConfigItem> = {
     title: 'Mengetik Cepat & Logika Komputer',
     description:
       'Latihan mengetik cepat, pengolahan dokumen tingkat lanjut, dan pengenalan dasar logika komputer.',
-    accentBorder: 'border-amber-300',
-    accentBg: 'bg-amber-50/50',
-    accentText: 'text-amber-700',
-    badgeBg: 'bg-amber-100 text-amber-800',
-    iconBg: 'bg-amber-500 text-white',
-    btnBg: 'bg-amber-600 hover:bg-amber-700',
-    btnText: 'text-amber-700 hover:text-amber-800',
-    borderCard: 'border-amber-200',
-    badgeLight: 'text-amber-700 bg-amber-50',
   },
 };
 
@@ -220,18 +184,18 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
 
   return (
     <div>
-      {/* MOBILE VIEW: Compact Tab Switcher (Hemat Ruang & Dinamis) */}
+      {/* MOBILE VIEW: Compact Tab Switcher */}
       <div className="sm:hidden space-y-3">
         {/* Tab Pills */}
-        <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-200/80 rounded-2xl">
+        <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-lg border border-slate-200">
           {schedules.map((item) => (
             <button
               key={item.grade}
               type="button"
               onClick={() => setActiveGrade(item.grade)}
-              className={`py-2 px-1 rounded-xl text-xs font-heading font-bold transition-all text-center cursor-pointer ${
+              className={`py-2 px-1 rounded-md text-xs font-semibold transition-colors text-center cursor-pointer ${
                 activeGrade === item.grade
-                  ? 'bg-white text-slate-900 shadow-sm scale-100'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -244,23 +208,19 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
         </div>
 
         {/* Selected Single Card */}
-        <div
-          className={`bg-white rounded-3xl p-4 sm:p-5 border-2 ${selectedItem.accentBorder} shadow-sm animate-in fade-in zoom-in-95 duration-150`}
-        >
+        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2.5">
-              <div
-                className={`w-10 h-10 rounded-2xl flex items-center justify-center font-heading font-bold text-lg shrink-0 ${selectedItem.iconBg}`}
-              >
+              <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center font-semibold text-base shrink-0">
                 {selectedItem.grade}
               </div>
               <div>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h4 className="font-heading text-base font-bold text-slate-900 leading-tight">
+                  <h4 className="text-base font-semibold text-slate-900 leading-tight">
                     Kelas {selectedItem.grade} SD
                   </h4>
                   {selectedItem.meetingNumber && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-800">
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-700">
                       Pertemuan {selectedItem.meetingNumber}
                     </span>
                   )}
@@ -269,88 +229,88 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
             </div>
 
             {selectedItem.isOpen ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 Sesi Dibuka
               </span>
             ) : (
-              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${selectedItem.badgeBg}`}>
+              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700 shrink-0">
                 {selectedItem.day}
               </span>
             )}
           </div>
 
           {selectedItem.title && (
-            <div className="font-heading font-bold text-sm text-slate-800 mb-2">
+            <div className="text-sm font-semibold text-slate-800 mb-2">
               {selectedItem.title}
             </div>
           )}
 
           <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium mb-3">
-            <Clock className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <Clock className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
             <span className="truncate">
               {selectedItem.day}{selectedItem.dateDisplay ? `, ${selectedItem.dateDisplay}` : ''} • {selectedItem.time}
             </span>
           </div>
 
-          <p className="text-xs text-slate-600 leading-relaxed mb-3.5 bg-slate-50/70 p-3 rounded-2xl border border-slate-100">
+          <p className="text-xs text-slate-600 leading-relaxed mb-4 p-3 rounded-lg bg-slate-50 border border-slate-200">
             {selectedItem.description}
           </p>
 
           <Link
             href={`/absen?grade=${selectedItem.grade}`}
-            className={`w-full py-2.5 px-3 rounded-xl font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-white shadow-xs ${selectedItem.btnBg}`}
+            className="w-full py-2.5 px-4 rounded-lg text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-colors bg-slate-900 hover:bg-slate-800 shadow-xs"
           >
             <span>Buka Presensi Kelas {selectedItem.grade}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </Link>
         </div>
       </div>
 
-      {/* DESKTOP VIEW: Full 3-Column Grid */}
-      <div className="hidden sm:grid sm:grid-cols-3 gap-6">
+      {/* DESKTOP VIEW: Clean 3-Column Grid */}
+      <div className="hidden sm:grid sm:grid-cols-3 gap-5">
         {schedules.map((item) => (
           <div
             key={item.grade}
-            className={`bg-white rounded-3xl p-6 border-2 ${item.borderCard} shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between`}
+            className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs hover:border-slate-300 transition-colors flex flex-col justify-between"
           >
             <div>
               {/* Header: Grade number & Status Badge */}
               <div className="flex items-center justify-between mb-3.5">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-heading font-bold text-xl ${item.iconBg}`}>
+                <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center font-semibold text-base">
                   {item.grade}
                 </div>
                 {item.isOpen ? (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 shadow-xs">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                     Sesi Dibuka
                   </span>
                 ) : (
-                  <div className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${item.badgeLight}`}>
+                  <div className="text-xs font-medium px-2.5 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-700">
                     {item.day}
                   </div>
                 )}
               </div>
 
               {/* Title & Meeting Badge */}
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="font-heading text-lg font-bold text-slate-900">
+              <div className="flex items-center gap-2 mb-1.5">
+                <h4 className="text-base font-semibold text-slate-900">
                   Kelas {item.grade} SD
                 </h4>
                 {item.meetingNumber && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-700">
                     Pertemuan {item.meetingNumber}
                   </span>
                 )}
               </div>
 
               {item.title && (
-                <div className="font-heading font-bold text-sm text-slate-800 mb-2.5 line-clamp-1">
+                <div className="text-sm font-semibold text-slate-800 mb-2 line-clamp-1">
                   {item.title}
                 </div>
               )}
 
-              <p className="text-xs text-slate-600 leading-relaxed bg-slate-50/70 p-3 rounded-2xl border border-slate-100 mb-4 line-clamp-2">
+              <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4 line-clamp-2">
                 {item.description}
               </p>
             </div>
@@ -358,7 +318,7 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
             {/* Bottom Row: Jadwal & Tombol Aksi */}
             <div className="space-y-3 pt-3.5 border-t border-slate-100">
               <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-                <Clock className="w-4 h-4 text-blue-600 shrink-0" />
+                <Clock className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
                 <span className="truncate">
                   {item.day}{item.dateDisplay ? `, ${item.dateDisplay}` : ''} • {item.time}
                 </span>
@@ -366,10 +326,10 @@ export default function HomeScheduleTabs({ initialMeetings = [] }: HomeScheduleT
 
               <Link
                 href={`/absen?grade=${item.grade}`}
-                className={`w-full py-2.5 px-4 rounded-2xl text-white font-heading font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all hover:opacity-95 hover:shadow-md cursor-pointer ${item.btnBg}`}
+                className="w-full py-2.5 px-4 rounded-lg text-white font-medium text-xs flex items-center justify-center gap-2 shadow-xs transition-colors bg-slate-900 hover:bg-slate-800 cursor-pointer"
               >
                 <span>Buka Presensi Kelas {item.grade}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Link>
             </div>
           </div>

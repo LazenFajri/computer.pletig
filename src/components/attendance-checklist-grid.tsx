@@ -21,6 +21,8 @@ import {
   Sparkles,
   Loader2,
   SlidersHorizontal,
+  Lightbulb,
+  Eye,
 } from 'lucide-react';
 
 interface AttendanceChecklistGridProps {
@@ -242,30 +244,30 @@ export default function AttendanceChecklistGrid({
       {/* Toast Feedback */}
       {feedbackToast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-bold animate-in fade-in slide-in-from-bottom-5 ${
+          className={`fixed bottom-6 right-6 z-50 px-3.5 py-2.5 rounded-lg shadow-sm border flex items-center gap-2.5 text-xs font-medium animate-in fade-in slide-in-from-bottom-5 ${
             feedbackToast.type === 'success'
-              ? 'bg-emerald-600 text-white shadow-emerald-600/30'
-              : 'bg-rose-600 text-white shadow-rose-600/30'
+              ? 'bg-slate-900 text-white border-slate-800'
+              : 'bg-rose-600 text-white border-rose-700'
           }`}
         >
           {feedbackToast.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-100" />
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
           ) : (
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-100" />
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-200" />
           )}
           <span>{feedbackToast.text}</span>
         </div>
       )}
 
       {/* Header Card Matriks Presensi */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs relative overflow-hidden">
+      <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-200/80">
-                <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                <Sparkles className="w-3.5 h-3.5 text-slate-500" />
                 <span>Matriks Presensi Centang Otomatis</span>
-                <span className="text-[10px] font-semibold bg-teal-100 text-teal-800 px-1.5 py-0.2 rounded-md">
+                <span className="text-[10px] font-semibold bg-slate-200 text-slate-800 px-1.5 py-0.2 rounded">
                   Jadwal Nyata 2026
                 </span>
               </div>
@@ -351,20 +353,22 @@ export default function AttendanceChecklistGrid({
         </div>
 
         {/* Banner Penjelasan Otomatisasi Presensi */}
-        <div className="mt-4 p-3 sm:p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200/70 flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 text-xs">
-          <div className="flex items-center gap-2.5 text-teal-950 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="mt-4 p-3 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2.5 text-slate-800 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
             <span>
-              <strong className="text-emerald-800">100% Otomatis Terdeteksi:</strong> Saat siswa menekan tombol <em>&quot;Saya Hadir&quot;</em> di dashboard siswa, tanda centang hijau (<strong className="text-emerald-700">✓</strong>) pada tanggal pertemuan hari ini langsung muncul otomatis tanpa perlu diklik manual.
+              <strong className="text-slate-900">100% Otomatis Terdeteksi:</strong> Saat siswa menekan tombol <em>&quot;Saya Hadir&quot;</em> di dashboard siswa, status kehadiran pada tanggal pertemuan hari ini langsung tercatat otomatis.
             </span>
           </div>
           {isAdmin ? (
-            <div className="text-[11px] text-teal-800 shrink-0 bg-white/80 px-2.5 py-1 rounded-xl border border-teal-200/60 font-semibold">
-              💡 Klik kotak = Override manual (siswa tanpa HP/izin)
+            <div className="text-[11px] text-slate-700 shrink-0 bg-white px-2.5 py-1 rounded-lg border border-slate-200 font-medium inline-flex items-center gap-1.5">
+              <Lightbulb className="w-3.5 h-3.5 text-slate-500 shrink-0" aria-hidden="true" />
+              <span>Klik kotak = Override manual (izin/sakit)</span>
             </div>
           ) : (
-            <div className="text-[11px] text-slate-600 shrink-0 bg-white/80 px-2.5 py-1 rounded-xl border border-slate-200 font-semibold">
-              👁️ Mode Guru (Read-Only)
+            <div className="text-[11px] text-slate-600 shrink-0 bg-white px-2.5 py-1 rounded-lg border border-slate-200 font-medium inline-flex items-center gap-1.5">
+              <Eye className="w-3.5 h-3.5 text-slate-500 shrink-0" aria-hidden="true" />
+              <span>Mode Guru (Read-Only)</span>
             </div>
           )}
         </div>
@@ -390,7 +394,7 @@ export default function AttendanceChecklistGrid({
       </div>
 
       {/* FILTER ROMBEL TABS & SEARCH INPUT */}
-      <div className="bg-white rounded-3xl p-3.5 sm:p-4 border border-slate-200 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div className="bg-white rounded-xl p-3 sm:p-3.5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* Rombel Tabs (6B, 6A, 5B, 5A, 4B, 4A) */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {AVAILABLE_ROMBELS.map((rombel) => {
@@ -400,16 +404,16 @@ export default function AttendanceChecklistGrid({
                 key={rombel.code}
                 type="button"
                 onClick={() => setSelectedRombel(rombel.code)}
-                className={`px-4 py-2 rounded-2xl text-xs font-heading font-bold transition-all flex items-center gap-2 shrink-0 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer ${
                   isActive
-                    ? 'bg-slate-900 text-white shadow-md shadow-slate-900/15'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
                 <span>Kelas {rombel.code}</span>
                 <span
-                  className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+                  className={`text-[9px] font-medium px-1.5 py-0.2 rounded ${
+                    isActive ? 'bg-slate-800 text-slate-200' : 'bg-slate-200 text-slate-600'
                   }`}
                 >
                   {rombel.day}
@@ -421,19 +425,19 @@ export default function AttendanceChecklistGrid({
 
         {/* Student Name Search */}
         <div className="relative shrink-0 md:w-64">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder={`Cari nama di ${selectedRombel}...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3.5 py-2 rounded-2xl border border-slate-200 text-xs font-medium focus:border-teal-600 focus:ring-2 focus:ring-teal-600/10 outline-none bg-slate-50/60 focus:bg-white transition-all"
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:border-slate-900 focus:ring-1 focus:ring-slate-900 outline-none bg-white transition-colors"
           />
         </div>
       </div>
 
       {/* TABEL MATRIKS CHECKLIST */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         {loading ? (
           <div className="p-16 text-center text-slate-400 text-xs">
             <Loader2 className="w-8 h-8 mx-auto mb-3 animate-spin text-teal-600" />
@@ -569,10 +573,10 @@ export default function AttendanceChecklistGrid({
                                   type="button"
                                   onClick={() => handleToggleCell(student, column)}
                                   disabled={isCellLoading}
-                                  className={`w-9 h-9 mx-auto rounded-xl flex items-center justify-center transition-all cursor-pointer font-bold ${
+                                  className={`w-8 h-8 mx-auto rounded-lg flex items-center justify-center transition-colors cursor-pointer font-medium ${
                                     isPresent
-                                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-xs shadow-emerald-500/30 scale-100 hover:scale-105 active:scale-95'
-                                      : 'bg-slate-100 hover:bg-emerald-100 text-slate-300 hover:text-emerald-700 hover:border-emerald-300 border border-transparent'
+                                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                                      : 'bg-slate-100 hover:bg-slate-200 text-slate-400 border border-slate-200'
                                   }`}
                                   title={`${student.studentName} - ${column.displayDate}: ${
                                     isPresent ? 'Hadir (Klik untuk batalkan)' : 'Tidak Hadir (Klik untuk centang hadir)'
@@ -691,8 +695,8 @@ export default function AttendanceChecklistGrid({
         {matrixData && (
           <div className="p-3 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-medium">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-              <span className="font-semibold text-slate-700">Centang Hijau (✓) = Otomatis terisi saat siswa absen mandiri</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span className="font-medium text-slate-700">Tanda Hijau = Otomatis terisi saat siswa absen mandiri</span>
               <span className="text-slate-300 mx-1">•</span>
               <span className="text-slate-400">Dash (-) = Belum hadir / belum mulai</span>
             </div>

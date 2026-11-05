@@ -22,12 +22,12 @@ export default function LogoutButton({ className = '', variant = 'pill' }: Logou
     'inline-flex items-center gap-1.5 font-medium transition-all text-xs cursor-pointer shrink-0 whitespace-nowrap';
 
   let variantStyles =
-    'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl shadow-xs';
+    'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-lg shadow-xs';
   if (variant === 'danger') {
     variantStyles =
-      'bg-rose-600 text-white hover:bg-rose-700 px-4 py-2 rounded-2xl shadow-md shadow-rose-600/20';
+      'bg-rose-600 text-white hover:bg-rose-700 px-3.5 py-1.5 rounded-lg shadow-xs';
   } else if (variant === 'ghost') {
-    variantStyles = 'text-slate-500 hover:text-rose-600 px-2 py-1';
+    variantStyles = 'text-slate-500 hover:text-rose-600 px-2 py-1 rounded-lg';
   }
 
   return (

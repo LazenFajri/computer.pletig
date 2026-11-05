@@ -73,6 +73,8 @@ import {
   Sparkles,
   Copy,
   Lock,
+  ArrowRight,
+  X,
 } from 'lucide-react';
 import AttendanceChecklistGrid from '@/components/attendance-checklist-grid';
 
@@ -1091,15 +1093,15 @@ export default function AdminDashboardClient({
       </div>
 
       {/* Main Tab Bar Navigation */}
-      <div className="bg-white rounded-3xl p-2 sm:p-2.5 border border-slate-200 shadow-sm flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5 sm:gap-3 overflow-hidden">
+      <div className="bg-white rounded-xl p-1.5 sm:p-2 border border-slate-200 shadow-xs flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5 overflow-hidden">
         {/* Scrollable Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 xl:pb-0 scrollbar-none min-w-0 flex-1">
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 xl:pb-0 scrollbar-none min-w-0 flex-1">
           <button
             type="button"
             onClick={() => setActiveTab('meetings')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'meetings'
-                ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
-                : 'text-slate-600 hover:bg-slate-100'
+            className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'meetings'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
           >
             <CalendarCheck className="w-4 h-4 shrink-0" />
@@ -1112,9 +1114,9 @@ export default function AdminDashboardClient({
           <button
             type="button"
             onClick={() => setActiveTab('assignments')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'assignments'
-                ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
-                : 'text-slate-600 hover:bg-slate-100'
+            className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'assignments'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
           >
             <FileText className="w-4 h-4 shrink-0" />
@@ -1127,9 +1129,9 @@ export default function AdminDashboardClient({
           <button
             type="button"
             onClick={() => setActiveTab('submissions')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'submissions'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                : 'text-slate-600 hover:bg-slate-100'
+            className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'submissions'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
           >
             <Award className="w-4 h-4 shrink-0" />
@@ -1142,27 +1144,27 @@ export default function AdminDashboardClient({
           <button
             type="button"
             onClick={() => setActiveTab('matrix')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'matrix'
-                ? 'bg-slate-900 text-white shadow-md shadow-slate-900/25 ring-2 ring-emerald-400/40'
-                : 'text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/60'
+            className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'matrix'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
             <span>
               <span className="2xl:hidden">Matriks Presensi</span>
-              <span className="hidden 2xl:inline">✓ Matriks Presensi Centang</span>
+              <span className="hidden 2xl:inline">Matriks Presensi Centang</span>
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('rekap')}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-heading font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'rekap'
-                ? 'bg-teal-700 text-white shadow-md shadow-teal-700/25 ring-2 ring-teal-500/30'
-                : 'text-teal-700 bg-teal-50/70 hover:bg-teal-100/70'
+            className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${activeTab === 'rekap'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0" />
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>
               <span className="2xl:hidden">Rekap Excel</span>
               <span className="hidden 2xl:inline">Rekap & Unduh Excel</span>
@@ -1220,30 +1222,31 @@ export default function AdminDashboardClient({
           ======================================================== */}
       {activeTab === 'meetings' && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs">
             <div>
-              <h2 className="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
-                <CalendarCheck className="w-5 h-5 text-purple-600" />
+              <h2 className="font-bold tracking-tight text-base sm:text-lg text-slate-900 flex items-center gap-2">
+                <CalendarCheck className="w-5 h-5 text-slate-700" />
                 <span>Daftar Sesi Pertemuan Ekstrakurikuler</span>
               </h2>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 <p className="text-xs text-slate-500">
-                  Sesi praktikum otomatis: <span className="font-bold text-slate-700">12:30 s.d 14:00 WIB (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00)</span>. Token ditampilkan langsung di layar siswa.
+                  Sesi praktikum otomatis: <span className="font-semibold text-slate-700">12:30 s.d 14:00 WIB (Sesi 1: 12:30-13:20 • Sesi 2: 13:20-14:00)</span>. Token ditampilkan langsung di layar siswa.
                 </p>
                 {filterMeetingNumber !== 'all' ? (
-                  <span className="text-[10px] font-bold bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full border border-purple-200 inline-flex items-center gap-1">
+                  <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200 inline-flex items-center gap-1">
                     <span>Minggu ke-{filterMeetingNumber} ({filteredMeetings.length} Sesi)</span>
                     <button
                       type="button"
                       onClick={() => setFilterMeetingNumber('all')}
-                      className="text-purple-600 hover:text-purple-900 font-bold ml-1 cursor-pointer"
+                      className="text-slate-500 hover:text-slate-900 ml-1 cursor-pointer inline-flex items-center"
                       title="Lihat semua minggu"
+                      aria-label="Lihat semua minggu"
                     >
-                      ✕
+                      <X className="w-3 h-3" aria-hidden="true" />
                     </button>
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">
                     Semua Minggu ({filteredMeetings.length} Sesi)
                   </span>
                 )}
@@ -1253,16 +1256,16 @@ export default function AdminDashboardClient({
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Link
                 href="/absen"
-                className="text-xs font-heading font-bold px-3.5 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 transition-all shadow-xs"
+                className="text-xs font-medium px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 transition-colors shadow-xs"
               >
-                <Laptop className="w-3.5 h-3.5 text-emerald-600" />
+                <Laptop className="w-3.5 h-3.5 text-slate-500" />
                 <span>Buka Layar Presensi Siswa</span>
               </Link>
 
               <button
                 type="button"
                 onClick={() => setShowNewMeetingModal(true)}
-                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-heading font-bold px-4 py-2.5 rounded-2xl shadow-md shadow-purple-600/20 flex items-center gap-1.5 transition-all cursor-pointer"
+                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-3.5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Buat Sesi Pertemuan Baru</span>
@@ -1271,32 +1274,32 @@ export default function AdminDashboardClient({
           </div>
 
           {/* Banner Proteksi Anti-Titip Absen & Layar Proyektor Token */}
-          <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-4 sm:p-5 text-white shadow-lg shadow-orange-500/15 border border-amber-300/40 relative overflow-hidden">
+          <div className="bg-slate-900 rounded-xl p-4 sm:p-5 text-white shadow-sm border border-slate-800 relative overflow-hidden">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3 min-w-0">
-                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shrink-0 shadow-inner">
-                  <Key className="w-6 h-6 text-yellow-200" />
+                <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
+                  <Key className="w-5 h-5 text-amber-400" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-black/25 px-2.5 py-0.5 rounded-full border border-white/20">
+                    <span className="text-[11px] font-medium tracking-wide bg-slate-800 px-2.5 py-0.5 rounded-md border border-slate-700 text-slate-300">
                       Proteksi Anti-Titip Absen Lab
                     </span>
                     {activeMeeting && isAnyMeetingOpen ? (
-                      <span className="text-[10px] font-bold bg-emerald-400 text-emerald-950 px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-950 animate-pulse"></span>
+                      <span className="text-[11px] font-medium bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-md flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                         Sesi Aktif: {activeMeeting.gradeLevel ? `Kelas ${activeMeeting.gradeLevel}` : 'Semua Kelas'}
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full">
+                      <span className="text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded-md">
                         Tidak Ada Sesi Terbuka
                       </span>
                     )}
                   </div>
-                  <h3 className="font-heading font-bold text-base sm:text-lg mt-1 truncate">
+                  <h3 className="font-bold text-base mt-1.5 truncate text-white">
                     {activeMeeting ? activeMeeting.title : 'Token Sesi Pertemuan Harian'}
                   </h3>
-                  <p className="text-xs text-amber-100 mt-0.5">
+                  <p className="text-xs text-slate-400 mt-0.5">
                     {activeMeeting
                       ? 'Tampilkan kode 4 digit ini di layar proyektor / laptop pembina agar siswa di lab fisik bisa absen.'
                       : 'Buka sesi pertemuan di bawah untuk mengaktifkan kode token presensi.'}
@@ -1311,12 +1314,12 @@ export default function AdminDashboardClient({
                     <button
                       type="button"
                       onClick={() => handleOpenProjector(activeMeeting)}
-                      className="px-4 py-2.5 bg-white text-orange-700 hover:bg-orange-50 rounded-2xl text-xs font-heading font-black flex items-center gap-2 shadow-md transition-all cursor-pointer"
+                      className="px-3.5 py-2 bg-white text-slate-900 hover:bg-slate-100 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
                       title="Buka tampilan fullscreen proyektor kode token"
                     >
-                      <Tv className="w-4 h-4 text-orange-600" />
+                      <Tv className="w-4 h-4 text-slate-700" />
                       <span>Tampilkan Kode Token Hari Ini</span>
-                      <span className="bg-orange-100 text-orange-800 font-mono font-black text-xs px-2 py-0.5 rounded-lg border border-orange-200">
+                      <span className="bg-slate-100 text-slate-900 font-mono font-bold text-xs px-2 py-0.5 rounded border border-slate-300">
                         {activeMeeting.sessionToken || '....'}
                       </span>
                     </button>
@@ -1325,10 +1328,10 @@ export default function AdminDashboardClient({
                       type="button"
                       onClick={() => handleRotateToken(activeMeeting.id)}
                       disabled={rotatingTokenId === activeMeeting.id}
-                      className="p-2.5 bg-black/20 hover:bg-black/30 border border-white/30 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      className="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                       title="Acak ulang kode token baru jika bocor"
                     >
-                      <RefreshCw className={`w-4 h-4 ${rotatingTokenId === activeMeeting.id ? 'animate-spin' : ''}`} />
+                      <RefreshCw className={`w-3.5 h-3.5 ${rotatingTokenId === activeMeeting.id ? 'animate-spin' : ''}`} />
                       <span className="hidden sm:inline">Acak Ulang</span>
                     </button>
                   </>
@@ -1340,7 +1343,7 @@ export default function AdminDashboardClient({
                     type="button"
                     onClick={handleCloseAllSessions}
                     disabled={isClosingAllSessions || isPending}
-                    className="px-3.5 py-2.5 bg-rose-600/90 hover:bg-rose-700 text-white rounded-2xl text-xs font-heading font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+                    className="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
                     title="Tutup seketika semua sesi aktif (kunci request absen)"
                   >
                     <Lock className="w-3.5 h-3.5" />
@@ -1353,8 +1356,8 @@ export default function AdminDashboardClient({
 
           {/* List Sesi Pertemuan */}
           {filteredMeetings.length === 0 ? (
-            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
-              <Calendar className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+            <div className="bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-400">
+              <Calendar className="w-8 h-8 mx-auto text-slate-300 mb-2" />
               <p className="font-semibold text-slate-700 text-sm">
                 Belum ada sesi pertemuan untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {filterGrade !== 'all' ? `Kelas ${filterGrade}` : ''}.
               </p>
@@ -1365,7 +1368,7 @@ export default function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setFilterMeetingNumber('all')}
-                  className="mt-3 text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl border border-purple-200 transition-colors cursor-pointer"
+                  className="mt-3 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
                 >
                   Tampilkan Semua Minggu
                 </button>
@@ -1376,28 +1379,28 @@ export default function AdminDashboardClient({
               {filteredMeetings.map((m) => (
                 <div
                   key={m.id}
-                  className={`bg-white rounded-3xl p-4 sm:p-5 border-2 transition-all relative overflow-hidden ${m.isOpen
-                      ? 'border-emerald-300 bg-gradient-to-br from-white to-emerald-50/30 shadow-md shadow-emerald-500/10'
-                      : 'border-slate-200 shadow-xs opacity-95'
+                  className={`bg-white rounded-xl p-4 sm:p-5 border transition-colors relative overflow-hidden ${m.isOpen
+                      ? 'border-emerald-300 bg-emerald-50/20 shadow-xs'
+                      : 'border-slate-200 shadow-xs'
                     }`}
                 >
                   {/* Top row: Meeting number, Badges, and Action buttons */}
                   <div className="flex items-start justify-between gap-2 mb-2.5">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <span className="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 font-heading font-bold text-sm flex items-center justify-center shrink-0">
+                      <span className="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 font-bold text-sm flex items-center justify-center shrink-0">
                         {m.meetingNumber}
                       </span>
                       <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap shrink-0">
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 whitespace-nowrap shrink-0">
                           {m.gradeLevel ? `Kelas ${m.gradeLevel} SD` : 'Semua Kelas'}
                         </span>
                         {m.isOpen ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 whitespace-nowrap shrink-0">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 whitespace-nowrap shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                             Sesi Dibuka
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 whitespace-nowrap shrink-0">
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 whitespace-nowrap shrink-0">
                             Sesi Ditutup
                           </span>
                         )}
@@ -1409,7 +1412,7 @@ export default function AdminDashboardClient({
                       <button
                         type="button"
                         onClick={() => setEditMeetingModal({ isOpen: true, data: { ...m } })}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold transition-all border border-purple-200/80 shadow-xs cursor-pointer shrink-0"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors border border-slate-200 shadow-xs cursor-pointer shrink-0"
                         title="Edit Sesi Pertemuan Ini"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -1420,7 +1423,7 @@ export default function AdminDashboardClient({
                         type="button"
                         onClick={() => promptDeleteMeeting(m.id, m.title)}
                         disabled={isPending}
-                        className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-colors cursor-pointer shrink-0"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-colors cursor-pointer shrink-0"
                         title="Hapus Sesi Pertemuan Ini"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -1553,27 +1556,28 @@ export default function AdminDashboardClient({
           ======================================================== */}
       {activeTab === 'assignments' && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-amber-600" />
+                <h2 className="font-bold tracking-tight text-base sm:text-lg text-slate-900 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-slate-700" />
                   <span>Kelola Tugas & Praktik Siswa</span>
                 </h2>
                 {filterMeetingNumber !== 'all' ? (
-                  <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                  <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200 inline-flex items-center gap-1">
                     Minggu ke-{filterMeetingNumber} ({filteredAssignments.length} Tugas)
                     <button
                       type="button"
                       onClick={() => setFilterMeetingNumber('all')}
-                      className="text-amber-700 hover:text-amber-950 font-bold ml-1 cursor-pointer"
+                      className="text-slate-500 hover:text-slate-900 ml-1 cursor-pointer inline-flex items-center"
                       title="Lihat semua minggu"
+                      aria-label="Lihat semua minggu"
                     >
-                      ✕
+                      <X className="w-3 h-3" aria-hidden="true" />
                     </button>
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">
                     Semua Minggu ({filteredAssignments.length} Tugas)
                   </span>
                 )}
@@ -1586,7 +1590,7 @@ export default function AdminDashboardClient({
             <button
               type="button"
               onClick={() => setShowNewAssignmentModal(true)}
-              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-heading font-bold px-4 py-2.5 rounded-2xl shadow-md shadow-amber-600/20 flex items-center gap-1.5 transition-all cursor-pointer"
+              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-3.5 py-2 rounded-lg shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Buat Tugas Baru</span>
@@ -1594,8 +1598,8 @@ export default function AdminDashboardClient({
           </div>
 
           {filteredAssignments.length === 0 ? (
-            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
-              <FileText className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+            <div className="bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-400">
+              <FileText className="w-8 h-8 mx-auto text-slate-300 mb-2" />
               <p className="font-semibold text-slate-700 text-sm">
                 Belum ada tugas praktikum untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {filterGrade !== 'all' ? `Kelas ${filterGrade}` : ''}.
               </p>
@@ -1606,7 +1610,7 @@ export default function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setFilterMeetingNumber('all')}
-                  className="mt-3 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl border border-amber-200 transition-colors cursor-pointer"
+                  className="mt-3 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
                 >
                   Tampilkan Semua Minggu
                 </button>
@@ -1617,16 +1621,16 @@ export default function AdminDashboardClient({
               {filteredAssignments.map((ass) => (
                 <div
                   key={ass.id}
-                  className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col justify-between"
+                  className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                        <span className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                           <FileText className="w-4 h-4" />
                         </span>
                         <div className="min-w-0">
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-800">
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
                             {ass.meeting ? `Pertemuan ${ass.meeting.meetingNumber}` : 'Tugas Praktik'}
                           </span>
                           <div className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">
@@ -1696,26 +1700,27 @@ export default function AdminDashboardClient({
                           href={ass.gdriveUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 px-2.5 py-1.5 rounded-xl transition-colors font-bold shadow-xs"
+                          className="inline-flex items-center gap-1.5 text-xs text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-2.5 py-1.5 rounded-lg transition-colors font-medium shadow-xs"
                         >
-                          <ExternalLink className="w-3.5 h-3.5 text-emerald-700" />
-                          <span>Folder Google Drive Pengumpulan ↗</span>
+                          <ExternalLink className="w-3.5 h-3.5 text-slate-600" />
+                          <span>Folder Google Drive Pengumpulan</span>
                         </a>
                       </div>
                     )}
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-xl self-start sm:self-auto shrink-0">
+                    <span className="text-xs font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md self-start sm:self-auto shrink-0">
                       Batas: {ass.dueDate || 'Sesi Berlangsung'}
                     </span>
 
                     <button
                       type="button"
                       onClick={() => setActiveTab('submissions')}
-                      className="text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl transition-colors cursor-pointer w-full sm:w-auto text-center shrink-0"
+                      className="text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors cursor-pointer w-full sm:w-auto text-center shrink-0 flex items-center justify-center gap-1"
                     >
-                      {ass.submissionCount} Siswa Mengumpulkan →
+                      <span>{ass.submissionCount} Siswa Mengumpulkan</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-500" />
                     </button>
                   </div>
                 </div>
@@ -1730,27 +1735,28 @@ export default function AdminDashboardClient({
           ======================================================== */}
       {activeTab === 'submissions' && (
         <div className="space-y-4">
-          <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
-                  <Award className="w-5 h-5 text-emerald-600" />
+                <h2 className="font-bold tracking-tight text-base sm:text-lg text-slate-900 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-slate-700" />
                   <span>Daftar Pengumpulan Tugas & Penilaian Siswa</span>
                 </h2>
                 {filterMeetingNumber !== 'all' ? (
-                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                  <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200 inline-flex items-center gap-1">
                     Minggu ke-{filterMeetingNumber} ({filteredSubmissions.length} Dikumpulkan)
                     <button
                       type="button"
                       onClick={() => setFilterMeetingNumber('all')}
-                      className="text-emerald-700 hover:text-emerald-950 font-bold ml-1 cursor-pointer"
+                      className="text-slate-500 hover:text-slate-900 ml-1 cursor-pointer inline-flex items-center"
                       title="Lihat semua minggu"
+                      aria-label="Lihat semua minggu"
                     >
-                      ✕
+                      <X className="w-3 h-3" aria-hidden="true" />
                     </button>
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">
                     Semua Minggu ({filteredSubmissions.length} Dikumpulkan)
                   </span>
                 )}
@@ -1762,8 +1768,8 @@ export default function AdminDashboardClient({
           </div>
 
           {filteredSubmissions.length === 0 ? (
-            <div className="bg-white rounded-3xl p-10 text-center border border-slate-200 text-slate-400">
-              <Award className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+            <div className="bg-white rounded-xl p-8 text-center border border-slate-200 text-slate-400">
+              <Award className="w-8 h-8 mx-auto text-slate-300 mb-2" />
               <p className="font-semibold text-slate-700 text-sm">
                 Belum ada pengumpulan tugas siswa untuk {filterMeetingNumber !== 'all' ? `Minggu ke-${filterMeetingNumber}` : ''} {filterGrade !== 'all' ? `Kelas ${filterGrade}` : ''}.
               </p>
@@ -1774,7 +1780,7 @@ export default function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setFilterMeetingNumber('all')}
-                  className="mt-3 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors cursor-pointer"
+                  className="mt-3 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 transition-colors cursor-pointer"
                 >
                   Tampilkan Semua Minggu
                 </button>
@@ -1797,23 +1803,23 @@ export default function AdminDashboardClient({
                 return (
                   <div
                     key={sub.id}
-                    className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                    className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="font-heading font-bold text-base text-slate-900">
+                        <span className="font-bold text-base text-slate-900">
                           {sub.studentName}
                         </span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
                           Kelas {sub.gradeLevel || 4}
                         </span>
                         {sub.status === 'graded' ? (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 flex items-center gap-1">
                             <Check className="w-3 h-3 text-emerald-600" />
                             Dinilai: {sub.score}/100
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">
                             Menunggu Penilaian
                           </span>
                         )}
@@ -1926,13 +1932,13 @@ export default function AdminDashboardClient({
       {activeTab === 'rekap' && (
         <div className="space-y-5 animate-in fade-in duration-200">
           {/* Header Card */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs">
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-9 h-9 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center">
-                  <FileSpreadsheet className="w-5 h-5 text-teal-700" />
+                <span className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <FileSpreadsheet className="w-4 h-4 text-slate-700" />
                 </span>
-                <h2 className="font-heading font-bold text-lg text-slate-900">
+                <h2 className="font-bold tracking-tight text-base sm:text-lg text-slate-900">
                   Rekapitulasi Presensi & Ekspor Excel (.xlsx)
                 </h2>
               </div>
@@ -1945,22 +1951,22 @@ export default function AdminDashboardClient({
               type="button"
               onClick={() => loadRekap(rekapMeetingFilter, rekapGradeFilter)}
               disabled={loadingRekap}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
               title="Segarkan Data Rekap"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loadingRekap ? 'animate-spin text-teal-600' : 'text-slate-500'}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingRekap ? 'animate-spin text-slate-600' : 'text-slate-500'}`} />
               <span>{loadingRekap ? 'Memuat...' : 'Segarkan'}</span>
             </button>
           </div>
 
           {/* Banner Quick Link ke Matriks Presensi Centang */}
-          <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border border-emerald-200 p-4 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+          <div className="bg-white border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-3">
-              <span className="w-9 h-9 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
-                ✓
+              <span className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                <Check className="w-4 h-4" aria-hidden="true" />
               </span>
               <div>
-                <h4 className="font-heading font-bold text-sm text-slate-900">
+                <h4 className="font-semibold text-sm text-slate-900">
                   Tabel Matriks Presensi Centang (Format Tanggal Nyata)
                 </h4>
                 <p className="text-xs text-slate-600 mt-0.5">
@@ -1971,19 +1977,19 @@ export default function AdminDashboardClient({
             <button
               type="button"
               onClick={() => setActiveTab('matrix')}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm shrink-0 cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition-colors shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5"
             >
               <span>Buka Matriks Presensi</span>
-              <span>→</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {/* Kontrol Filter & Tombol Download */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Filter Sesi & Kelas */}
-            <div className="lg:col-span-7 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-              <h3 className="font-heading font-bold text-sm text-slate-900 flex items-center gap-2">
-                <Filter className="w-4 h-4 text-teal-600" />
+            <div className="lg:col-span-7 bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <Filter className="w-4 h-4 text-slate-700" />
                 <span>Pengaturan Filter Laporan</span>
               </h3>
 
@@ -1999,7 +2005,7 @@ export default function AdminDashboardClient({
                       setRekapMeetingFilter(val);
                       loadRekap(val, rekapGradeFilter);
                     }}
-                    className="w-full px-3 py-2.5 rounded-2xl border border-slate-300 text-xs font-semibold focus:border-teal-600 outline-none bg-white"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-medium focus:border-slate-900 focus:ring-1 focus:ring-slate-900 outline-none bg-white"
                   >
                     <option value="all">Semua Sesi Pertemuan ({meetingsList.length} Sesi)</option>
                     {meetingsList.map((m) => (
@@ -2021,7 +2027,7 @@ export default function AdminDashboardClient({
                       setRekapGradeFilter(val);
                       loadRekap(rekapMeetingFilter, val);
                     }}
-                    className="w-full px-3 py-2.5 rounded-2xl border border-slate-300 text-xs font-semibold focus:border-teal-600 outline-none bg-white"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-medium focus:border-slate-900 focus:ring-1 focus:ring-slate-900 outline-none bg-white"
                   >
                     <option value="all">Semua Kelas (Kelas 4, 5, 6)</option>
                     <option value="4">Kelas 4 SD (Kamis)</option>
@@ -2032,19 +2038,19 @@ export default function AdminDashboardClient({
               </div>
 
               {/* Opsi Penghemat Database Saat Download */}
-              <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3.5 flex items-start gap-3">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 flex items-start gap-3">
                 <input
                   type="checkbox"
                   id="cleanupCheck"
                   checked={cleanupAfterDownload}
                   onChange={(e) => setCleanupAfterDownload(e.target.checked)}
-                  className="w-4 h-4 text-teal-600 rounded mt-0.5 cursor-pointer accent-teal-600"
+                  className="w-4 h-4 text-slate-900 rounded mt-0.5 cursor-pointer accent-slate-900"
                 />
                 <label htmlFor="cleanupCheck" className="text-xs text-slate-700 cursor-pointer select-none">
-                  <strong className="text-amber-900 block font-heading font-bold">
+                  <strong className="text-slate-900 block font-semibold">
                     Kosongkan / Arsipkan data presensi setelah di-download
                   </strong>
-                  <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
+                  <span className="text-xs text-slate-500 leading-relaxed block mt-0.5">
                     Centang opsi ini agar data presensi yang sudah Anda simpan di Excel langsung dihapus dari Turso database, sehingga kuota penyimpanan cloud tetap hemat dan performa Vercel kencang.
                   </span>
                 </label>
@@ -2055,7 +2061,7 @@ export default function AdminDashboardClient({
                 type="button"
                 onClick={() => handleDownloadRekapExcel()}
                 disabled={isExportingExcel || loadingRekap || !rekapData || rekapData.records.length === 0}
-                className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-heading font-bold text-sm py-3 px-5 rounded-2xl shadow-lg shadow-teal-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs sm:text-sm py-2.5 px-4 rounded-lg shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-4 h-4" />
                 <span>{isExportingExcel ? 'Sedang Menyiapkan Excel...' : 'Unduh File Excel Berwarna (.xlsx)'}</span>
@@ -2068,17 +2074,17 @@ export default function AdminDashboardClient({
             </div>
 
             {/* Storage Optimizer Card (Hemat Kuota Turso & Vercel) */}
-            <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-3xl shadow-lg border border-slate-800 flex flex-col justify-between">
+            <div className="lg:col-span-5 bg-slate-900 text-white p-5 rounded-xl shadow-sm border border-slate-800 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold">
+                  <div className="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 flex items-center justify-center font-bold">
                     <Database className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-teal-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                       Turso Cloud Storage Optimizer
                     </span>
-                    <h4 className="font-heading font-bold text-sm text-white">
+                    <h4 className="font-bold text-sm text-white">
                       Penghemat Database Vercel
                     </h4>
                   </div>
@@ -2088,7 +2094,7 @@ export default function AdminDashboardClient({
                   Free tier Turso memiliki batasan baris database. Bersihkan data presensi lampau secara berkala setelah selesai direkap ke Excel.
                 </p>
 
-                <div className="bg-white/10 rounded-2xl p-3 mb-4 space-y-1.5 border border-white/5">
+                <div className="bg-slate-800/60 rounded-lg p-3 mb-4 space-y-1.5 border border-slate-700/50">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-300">Total Siswa Terdaftar:</span>
                     <strong className="text-white font-bold">{rekapData?.totalRecords ?? '...'} Siswa</strong>
@@ -2111,7 +2117,7 @@ export default function AdminDashboardClient({
                       {rekapData?.totalAbsent ?? 0} Siswa
                     </strong>
                   </div>
-                  <div className="pt-1.5 mt-1 border-t border-white/10 flex items-center justify-between text-xs">
+                  <div className="pt-1.5 mt-1 border-t border-slate-700/50 flex items-center justify-between text-xs">
                     <span className="text-slate-400">Data Lampau (&gt; 7 Hari):</span>
                     <span
                       className={`px-2 py-0.5 rounded-md font-bold text-xs ${(rekapData?.staleRecordsCount ?? 0) > 0
@@ -2130,7 +2136,7 @@ export default function AdminDashboardClient({
                   type="button"
                   onClick={handleCleanupStale}
                   disabled={isCleaningStale || (rekapData?.staleRecordsCount ?? 0) === 0}
-                  className="w-full bg-rose-600 hover:bg-rose-700 disabled:bg-slate-800 text-white disabled:text-slate-500 text-xs font-heading font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shadow-sm"
+                  className="w-full bg-rose-600 hover:bg-rose-700 disabled:bg-slate-800 text-white disabled:text-slate-500 text-xs font-medium py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shadow-xs"
                   title="Hapus data presensi yang berusia lebih dari 1 minggu"
                 >
                   <Archive className="w-3.5 h-3.5" />
@@ -2150,7 +2156,7 @@ export default function AdminDashboardClient({
           </div>
 
           {/* Tabel Pratinjau Rekap */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
             <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/50">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-teal-600" />
@@ -2179,17 +2185,19 @@ export default function AdminDashboardClient({
                       : 'text-emerald-700 hover:text-emerald-900'
                     }`}
                 >
-                  <span>✓ Hadir ({rekapData?.totalPresent ?? 0})</span>
+                  <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>Hadir ({rekapData?.totalPresent ?? 0})</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setRekapStatusTab('TIDAK HADIR')}
-                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${rekapStatusTab === 'TIDAK HADIR'
-                      ? 'bg-rose-600 text-white shadow-xs font-bold'
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${rekapStatusTab === 'TIDAK HADIR'
+                      ? 'bg-rose-600 text-white shadow-xs font-semibold'
                       : 'text-rose-700 hover:text-rose-900'
                     }`}
                 >
-                  <span>✗ Tidak Hadir ({rekapData?.totalAbsent ?? 0})</span>
+                  <X className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>Tidak Hadir ({rekapData?.totalAbsent ?? 0})</span>
                 </button>
               </div>
             </div>
@@ -2334,22 +2342,23 @@ export default function AdminDashboardClient({
           ======================================================== */}
       {showNewMeetingModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-lg border border-slate-200 animate-in fade-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
-                  <CalendarCheck className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <CalendarCheck className="w-4 h-4" />
                 </div>
-                <h3 className="font-heading font-bold text-lg text-slate-900">
+                <h3 className="font-bold text-lg text-slate-900">
                   Buat Sesi Pertemuan Baru
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowNewMeetingModal(false)}
-                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                aria-label="Tutup"
               >
-                ✕
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -2469,14 +2478,14 @@ export default function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setShowNewMeetingModal(false)}
-                  className="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-heading font-bold px-5 py-2.5 rounded-2xl shadow-md shadow-purple-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-4 py-2 rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{isPending ? 'Menyimpan...' : 'Simpan Sesi Pertemuan'}</span>
@@ -2492,22 +2501,23 @@ export default function AdminDashboardClient({
           ======================================================== */}
       {showNewAssignmentModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-lg border border-slate-200 animate-in fade-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
-                  <FileText className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <FileText className="w-4 h-4" />
                 </div>
-                <h3 className="font-heading font-bold text-lg text-slate-900">
+                <h3 className="font-bold text-lg text-slate-900">
                   Buat Tugas Praktikum Baru
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowNewAssignmentModal(false)}
-                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                aria-label="Tutup"
               >
-                ✕
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -2552,7 +2562,7 @@ export default function AdminDashboardClient({
                     onChange={(e) => setAssignmentForm({ ...assignmentForm, meetingId: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 text-sm focus:border-amber-600 outline-none bg-white font-medium"
                   >
-                    <option value="auto">✨ Sesi Otomatis (Sesuai Target Kelas)</option>
+                    <option value="auto">Sesi Otomatis (Sesuai Target Kelas)</option>
                     {meetingsList
                       .filter((m) => assignmentForm.gradeLevel === 'all' || m.gradeLevel === null || String(m.gradeLevel) === assignmentForm.gradeLevel)
                       .map((m) => (
@@ -2709,14 +2719,14 @@ export default function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setShowNewAssignmentModal(false)}
-                  className="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-heading font-bold px-5 py-2.5 rounded-2xl shadow-md shadow-amber-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-4 py-2 rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{isPending ? 'Menyimpan...' : 'Simpan Tugas'}</span>
@@ -2731,18 +2741,15 @@ export default function AdminDashboardClient({
           MODAL KONFIRMASI HAPUS ELEGAN (CUSTOM POP UP)
           ======================================================== */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-rose-100 text-center relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            {/* Decorative top background glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-20 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-lg border border-slate-200 text-center relative overflow-hidden animate-in fade-in duration-200">
             {/* Warning Icon Badge */}
-            <div className="w-16 h-16 rounded-3xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 shadow-sm border border-rose-200/60 relative z-10">
-              <Trash2 className="w-8 h-8" />
+            <div className="w-12 h-12 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3 border border-rose-200">
+              <Trash2 className="w-6 h-6" />
             </div>
 
             {/* Badge Category */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200/80 mb-2">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 mb-2">
               <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
               <span>
                 {deleteModal.type === 'meeting'
@@ -2752,33 +2759,33 @@ export default function AdminDashboardClient({
             </div>
 
             {/* Title */}
-            <h3 className="font-heading font-bold text-xl text-slate-900 mb-2">
+            <h3 className="font-bold text-lg text-slate-900 mb-2">
               Apakah Anda Yakin?
             </h3>
 
             {/* Target Item Callout */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 mb-3 text-left flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-3 text-left flex items-start gap-3">
+              <div className="w-8 h-8 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 text-xs">
                 {deleteModal.type === 'meeting' ? (
                   <CalendarCheck className="w-4 h-4" />
                 ) : (
-                  <FileText className="w-4 h-4 text-amber-600" />
+                  <FileText className="w-4 h-4" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[11px] font-semibold text-slate-400 uppercase">Item yang akan dihapus:</div>
-                <div className="font-heading font-bold text-slate-900 text-sm truncate">
+                <div className="text-[11px] font-medium text-slate-500 uppercase">Item yang akan dihapus:</div>
+                <div className="font-semibold text-slate-900 text-sm truncate">
                   {deleteModal.title}
                 </div>
               </div>
             </div>
 
             {/* Description */}
-            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+            <p className="text-xs text-slate-500 leading-relaxed mb-5">
               {deleteModal.details ||
                 'Data yang terhubung dengan item ini akan ikut terhapus secara permanen dari database.'}
               <br />
-              <span className="font-semibold text-rose-600 mt-1 inline-block">
+              <span className="font-medium text-rose-600 mt-1 inline-block">
                 Tindakan ini tidak dapat dibatalkan.
               </span>
             </p>
@@ -2789,7 +2796,7 @@ export default function AdminDashboardClient({
                 type="button"
                 onClick={() => setDeleteModal({ isOpen: false, type: 'meeting', id: '', title: '' })}
                 disabled={isPending}
-                className="px-4 py-3 rounded-2xl border border-slate-200 font-heading font-bold text-xs sm:text-sm text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+                className="px-3.5 py-2.5 rounded-lg border border-slate-200 font-medium text-xs sm:text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 Batal
               </button>
@@ -2798,7 +2805,7 @@ export default function AdminDashboardClient({
                 type="button"
                 onClick={handleConfirmDelete}
                 disabled={isPending}
-                className="px-4 py-3 rounded-2xl font-heading font-bold text-xs sm:text-sm text-white bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="px-3.5 py-2.5 rounded-lg font-medium text-xs sm:text-sm text-white bg-rose-600 hover:bg-rose-700 shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>{isPending ? 'Menghapus...' : 'Ya, Hapus'}</span>
@@ -2812,22 +2819,23 @@ export default function AdminDashboardClient({
           ======================================================== */}
       {editMeetingModal.isOpen && editMeetingModal.data && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-lg border border-slate-200 animate-in fade-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
-                  <Pencil className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <Pencil className="w-4 h-4" />
                 </div>
-                <h3 className="font-heading font-bold text-lg text-slate-900">
+                <h3 className="font-bold text-lg text-slate-900">
                   Edit Sesi Pertemuan
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setEditMeetingModal({ isOpen: false, data: null })}
-                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                aria-label="Tutup"
               >
-                ✕
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -2988,14 +2996,14 @@ export default function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setEditMeetingModal({ isOpen: false, data: null })}
-                  className="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-heading font-bold px-5 py-2.5 rounded-2xl shadow-md shadow-purple-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-4 py-2 rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Check className="w-4 h-4" />
                   <span>{isPending ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
@@ -3011,22 +3019,23 @@ export default function AdminDashboardClient({
           ======================================================== */}
       {editAssignmentModal.isOpen && editAssignmentModal.data && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-lg border border-slate-200 animate-in fade-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
-                  <Pencil className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <Pencil className="w-4 h-4" />
                 </div>
-                <h3 className="font-heading font-bold text-lg text-slate-900">
+                <h3 className="font-bold text-lg text-slate-900">
                   Edit Tugas Praktikum
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setEditAssignmentModal({ isOpen: false, data: null })}
-                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                aria-label="Tutup"
               >
-                ✕
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -3249,14 +3258,14 @@ export default function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setEditAssignmentModal({ isOpen: false, data: null })}
-                  className="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-heading font-bold px-5 py-2.5 rounded-2xl shadow-md shadow-amber-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium px-4 py-2 rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Check className="w-4 h-4" />
                   <span>{isPending ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
@@ -3271,15 +3280,15 @@ export default function AdminDashboardClient({
           MODAL: DAFTAR HADIR SISWA PER SESI (KELOLA PRESENSI)
           ======================================================== */}
       {attendanceListModal.isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-in zoom-in-95 max-h-[85vh] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-lg border border-slate-200 animate-in fade-in max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                  <Users className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <Users className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 leading-tight">
+                  <h3 className="font-bold text-base sm:text-lg text-slate-900 leading-tight">
                     Daftar Siswa Hadir
                   </h3>
                   <p className="text-xs text-slate-500 line-clamp-1">
@@ -3298,9 +3307,10 @@ export default function AdminDashboardClient({
                     loading: false,
                   })
                 }
-                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                aria-label="Tutup"
               >
-                ✕
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -3405,15 +3415,15 @@ export default function AdminDashboardClient({
           MODAL: TAMPILAN PROYEKTOR TOKEN SESI (LAYAR PEMBINA)
           ======================================================== */}
       {projectorModal.isOpen && projectorModal.meeting && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-400 animate-in zoom-in-95 relative overflow-hidden text-center">
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl max-w-xl w-full p-6 sm:p-8 shadow-lg border border-slate-200 animate-in fade-in relative overflow-hidden text-center">
             {/* Top decorative badge */}
-            <div className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-900 border border-amber-300 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
-              <Key className="w-4 h-4 text-amber-600" />
+            <div className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 border border-slate-200 px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wider mb-3">
+              <Key className="w-4 h-4 text-slate-600" />
               Kode Token Presensi Lab Komputer
             </div>
 
-            <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900 leading-tight">
+            <h2 className="font-bold text-xl sm:text-2xl text-slate-900 leading-tight">
               {projectorModal.meeting.title}
             </h2>
             <p className="text-xs text-slate-500 mt-1">
@@ -3422,28 +3432,28 @@ export default function AdminDashboardClient({
 
             {/* Huge 4-digit code cards */}
             <div className="my-6">
-              <div className="flex items-center justify-center gap-2.5 sm:gap-4">
+              <div className="flex items-center justify-center gap-2.5 sm:gap-3.5">
                 {(projectorModal.meeting.sessionToken || '1234')
                   .slice(0, 4)
                   .split('')
                   .map((digit, idx) => (
                     <div
                       key={idx}
-                      className="w-16 h-20 sm:w-24 sm:h-28 rounded-3xl bg-gradient-to-b from-purple-600 to-indigo-700 text-white font-heading font-black text-4xl sm:text-6xl flex items-center justify-center shadow-xl shadow-purple-600/30 border-2 border-white/40 tracking-tight"
+                      className="w-14 h-18 sm:w-20 sm:h-24 rounded-lg bg-slate-900 text-white font-mono font-bold text-3xl sm:text-5xl flex items-center justify-center shadow-xs border border-slate-800 tracking-tight"
                     >
                       {digit}
                     </div>
                   ))}
               </div>
-              <p className="text-xs sm:text-sm font-bold text-slate-700 mt-3">
+              <p className="text-xs text-slate-500 mt-3 font-medium">
                 Wajib dimasukkan oleh siswa di form presensi saat berada di lab fisik.
               </p>
             </div>
 
             {/* Proteksi Device Info Box */}
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-left text-xs text-slate-600 space-y-1 mb-6">
-              <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                <Laptop className="w-4 h-4 text-purple-600" />
+            <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 text-left text-xs text-slate-600 space-y-1 mb-6">
+              <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                <Laptop className="w-4 h-4 text-slate-600" />
                 <span>Aturan Perangkat Lab (Anti-Borongan):</span>
               </div>
               <p>• Maksimal <strong>2 siswa</strong> per laptop/browser dalam satu sesi.</p>
@@ -3455,7 +3465,7 @@ export default function AdminDashboardClient({
               <button
                 type="button"
                 onClick={() => handleCopyToken(projectorModal.meeting?.sessionToken || '')}
-                className="px-4 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-purple-200"
+                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-200"
               >
                 {projectorModal.copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 <span>{projectorModal.copied ? 'Tersalin!' : 'Salin Token'}</span>
@@ -3465,9 +3475,9 @@ export default function AdminDashboardClient({
                 type="button"
                 onClick={() => handleRotateToken(projectorModal.meeting!.id)}
                 disabled={rotatingTokenId === projectorModal.meeting!.id}
-                className="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-amber-300 disabled:opacity-50"
+                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-200 disabled:opacity-50"
               >
-                <RefreshCw className={`w-4 h-4 ${rotatingTokenId === projectorModal.meeting!.id ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${rotatingTokenId === projectorModal.meeting!.id ? 'animate-spin' : ''}`} />
                 <span>Acak Ulang Token</span>
               </button>
 
@@ -3477,8 +3487,8 @@ export default function AdminDashboardClient({
                   handleToggleMeetingStatus(projectorModal.meeting!.id, projectorModal.meeting!.isOpen);
                   setProjectorModal({ isOpen: false, meeting: null, copied: false });
                 }}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${projectorModal.meeting.isOpen
-                    ? 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                className={`px-3.5 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs ${projectorModal.meeting.isOpen
+                    ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
                     : 'bg-emerald-600 text-white hover:bg-emerald-700'
                   }`}
               >
@@ -3489,7 +3499,7 @@ export default function AdminDashboardClient({
               <button
                 type="button"
                 onClick={() => setProjectorModal({ isOpen: false, meeting: null, copied: false })}
-                className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
               >
                 Tutup Layar
               </button>
