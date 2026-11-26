@@ -229,12 +229,15 @@ export default function AttendanceChecklistGrid({
     });
   };
 
-  // 3. Filter siswa berdasarkan search input
+  // 3. Filter siswa berdasarkan search input & pastikan urut A-Z (aA - zZ)
   const filteredStudents = useMemo(() => {
     if (!matrixData) return [];
-    if (!searchQuery.trim()) return matrixData.students;
+    const sorted = [...matrixData.students].sort((a, b) =>
+      a.studentName.trim().localeCompare(b.studentName.trim(), 'id', { sensitivity: 'base' })
+    );
+    if (!searchQuery.trim()) return sorted;
     const q = searchQuery.toLowerCase().trim();
-    return matrixData.students.filter((s) => s.studentName.toLowerCase().includes(q));
+    return sorted.filter((s) => s.studentName.toLowerCase().includes(q));
   }, [matrixData, searchQuery]);
 
   const activeRombelMeta = AVAILABLE_ROMBELS.find((r) => r.code === selectedRombel) || AVAILABLE_ROMBELS[0];

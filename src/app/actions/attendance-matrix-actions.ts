@@ -111,6 +111,11 @@ export async function getAttendanceMatrixAction(
       orderBy: [asc(users.name)],
     });
 
+    // Pastikan urutan abjad A-Z (case-insensitive, aA - zZ)
+    studentsList.sort((a, b) =>
+      a.name.trim().localeCompare(b.name.trim(), 'id', { sensitivity: 'base' })
+    );
+
     // 2. Ambil semua sesi pertemuan dari database untuk tingkat kelas ini
     const dbMeetings = await db.query.meetings.findMany({
       where: or(
